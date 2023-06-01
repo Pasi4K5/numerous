@@ -8,6 +8,7 @@ var osuApi = new OsuApi();
 await osuApi.StartAsync();
 var commandHandler = new CommandHandler(client, db);
 var updateService = new UpdateService(client, db, osuApi);
+var eventHandler = new Events(client);
 
 client.Log += Log;
 
