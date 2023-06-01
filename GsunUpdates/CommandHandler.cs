@@ -21,22 +21,32 @@ public sealed class CommandHandler
 
     private async Task CreateCommand()
     {
-        var command = new SlashCommandBuilder()
-            .WithName("setchannel")
-            .WithDescription("Sets the channel to send Gsun updates to.")
-            .WithDMPermission(false)
-            .WithDefaultPermission(false)
-            .WithDefaultMemberPermissions(GuildPermission.Administrator)
-            .AddOption("channel", ApplicationCommandOptionType.Channel, "The channel to send Gsun updates to.", true)
-            .Build();
+        var commands = new[]
+        {
+            new SlashCommandBuilder()
+                .WithName("setchannel")
+                .WithDescription("Sets the channel to send Gsun updates to.")
+                .WithDMPermission(false)
+                .WithDefaultPermission(false)
+                .WithDefaultMemberPermissions(GuildPermission.Administrator)
+                .AddOption("channel", ApplicationCommandOptionType.Channel, "The channel to send Gsun updates to.", true),
+            new SlashCommandBuilder()
+                .WithName("source")
+                .WithDescription("Show the link to the bot's source code.")
+                .WithDMPermission(true)
+                .WithDefaultPermission(true)
+        };
 
-        try
+        foreach (var command in commands)
         {
-            await _client.CreateGlobalApplicationCommandAsync(command);
-        }
-        catch (HttpException e)
-        {
-            Console.WriteLine(string.Join('\n', e.Errors));
+            try
+            {
+                await _client.CreateGlobalApplicationCommandAsync(command.Build());
+            }
+            catch (HttpException e)
+            {
+                Console.WriteLine(string.Join('\n', e.Errors));
+            }
         }
     }
 
@@ -71,6 +81,10 @@ public sealed class CommandHandler
                 _db.Save(data);
 
                 await command.RespondAsync($"Set Gsun update channel to {channel.Mention()}.");
+
+                break;
+            case "source":
+                await command.RespondAsync("This bot is open source on GitHub: https://github.com/Pasi4K5/GsunUpdates");
 
                 break;
         }
