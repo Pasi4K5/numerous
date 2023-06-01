@@ -76,7 +76,7 @@ public sealed class UpdateService
     private async IAsyncEnumerable<SocketTextChannel> GetChannels()
     {
         var channelIds =
-            _db.Data["channels"]?.Select(channelId => channelId.Value<ulong>()) ?? Enumerable.Empty<ulong>();
+            _db.Data["channels"]?.Select(channelId => channelId.ToObject<ChannelInfo>()?.Id ?? 0) ?? Enumerable.Empty<ulong>();
 
         foreach (var channelId in channelIds)
         {

@@ -52,16 +52,23 @@ public sealed class CommandHandler
                     return;
                 }
 
-                var guildId = command.GuildId.ToString();
+                var data = _db.Data;
+                var channels = _db.Data["channels"]?.ToObject<List<ChannelInfo>>() ?? new();
 
-                if (guildId is not null)
+                var existingChannel = channels.FirstOrDefault(x => x.GuildId == channel.Guild.Id);
+
+                if (existingChannel is not null)
                 {
-                    var data = _db.Data;
-                    var channels = JArray.FromObject(_db.Data["channels"] ?? new JArray());
-                    channels.Add(channel.Id);
-                    data["channels"] = channels;
-                    _db.Save(data);
+                    channels.Remove(existingChannel);
                 }
+
+                channels.Add(new ChannelInfo
+                {
+                    Id = channel.Id,
+                    GuildId = channel.Guild.Id
+                });
+                data["channels"] = JArray.FromObject(channels);
+                _db.Save(data);
 
                 await command.RespondAsync($"Set Gsun update channel to {channel.Mention()}.");
 
