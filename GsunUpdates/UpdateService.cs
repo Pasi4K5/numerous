@@ -1,11 +1,13 @@
-﻿using Discord.WebSocket;
+﻿using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
+using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 
 namespace GsunUpdates;
 
 public sealed class UpdateService
 {
-    private const string Message = "**BREAKING NEWS!**\nGsun changed his me! section!\n\n**New text:**";
+    private const string Message = "**BREAKING NEWS!**\nGsun changed his me! section!\n\n**Here's what changed:**";
 
     private readonly TimeSpan _updateInterval = TimeSpan.FromSeconds(2);
 
@@ -40,14 +42,15 @@ public sealed class UpdateService
 
                 if (oldPageSection != pageSection)
                 {
-                    var messages = (pageSection?.ToDiscordMessageStrings() ?? Enumerable.Empty<string>()).ToList();
+                    var message = GetDiff(oldPageSection, pageSection);
+                    var messages = message.ToDiscordMessageStrings().ToList();
                     messages.Insert(0, Message);
 
                     await GetChannels().ForEachAwaitAsync(async channel =>
                     {
-                        foreach (var message in messages)
+                        foreach (var msg in messages)
                         {
-                            await channel.SendMessageAsync(message);
+                            await channel.SendMessageAsync(msg);
                         }
                     });
                 }
@@ -87,5 +90,31 @@ public sealed class UpdateService
                 yield return textChannel;
             }
         }
+    }
+
+    private static string GetDiff(string? oldText, string? newText)
+    {
+        oldText ??= "";
+        newText ??= "";
+
+        var diff = InlineDiffBuilder.Diff(oldText, newText);
+        var diffString = "";
+
+        foreach (var line in diff.Lines)
+        {
+            switch (line.Type)
+            {
+                case ChangeType.Inserted:
+                    diffString += "🟩 " + line.Text + "\n";
+
+                    break;
+                case ChangeType.Deleted:
+                    diffString += "🟥 " + line.Text + "\n";
+
+                    break;
+            }
+        }
+
+        return diffString;
     }
 }
