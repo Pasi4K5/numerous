@@ -3,37 +3,35 @@ using Discord.WebSocket;
 
 namespace GsunUpdates;
 
-public class Events
+public sealed class Events
 {
     private readonly DiscordSocketClient _client;
+    private readonly ChatBot _chatBot;
 
-    public Events(DiscordSocketClient client)
+    public Events(DiscordSocketClient client, ChatBot chatBot)
     {
         _client = client;
+        _chatBot = chatBot;
 
         _client.MessageReceived += HandleMessageReceived;
     }
 
-    private async Task HandleMessageReceived(SocketMessage message)
+    private Task HandleMessageReceived(SocketMessage message)
     {
-        if (!message.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id))
+        Task.Run(async () =>
         {
-            return;
-        }
+            if (!message.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id)
+                || message.Channel is IPrivateChannel)
+            {
+                return;
+            }
 
-        if (message.Author.Id == 417791382305112064 /* <- eri */)
-        {
-            await message.Channel.SendMessageAsync(
-                "fuck you :3",
-                messageReference: new MessageReference(message.Id)
-            );
-        }
-        else
-        {
-            await message.Channel.SendMessageAsync(
-                "GSUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUN!",
-                messageReference: new MessageReference(message.Id)
-            );
-        }
+            foreach (var discordMessage in (await _chatBot.GetResponse(message)).ToDiscordMessageStrings())
+            {
+                await message.Channel.SendMessageAsync(discordMessage);
+            }
+        });
+
+        return Task.CompletedTask;
     }
 }

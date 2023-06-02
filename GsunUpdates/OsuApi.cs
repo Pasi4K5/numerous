@@ -3,13 +3,13 @@ using Newtonsoft.Json.Linq;
 
 namespace GsunUpdates;
 
-public class OsuApi
+public sealed class OsuApi
 {
     private const string BaseUrl = "https://osu.ppy.sh/api/v2/";
     private const string TokenUrl = "https://osu.ppy.sh/oauth/token";
 
-    private uint ClientId => Config.Get().OsuClientId;
-    private string ClientSecret => Config.Get().OsuClientSecret;
+    private static uint ClientId => Config.Get().OsuClientId;
+    private static string ClientSecret => Config.Get().OsuClientSecret;
 
     private readonly HttpClient _client = new();
 
@@ -20,7 +20,7 @@ public class OsuApi
     {
         await GetTokenAsync();
 
-        var _ = Task.Run(async () =>
+        var _ = Task.Factory.StartNew(async () =>
         {
             while (true)
             {
@@ -30,7 +30,7 @@ public class OsuApi
 
                 await GetTokenAsync();
             }
-        });
+        }, TaskCreationOptions.LongRunning);
     }
 
     public async Task<JObject> RequestAsync(string endpoint)
