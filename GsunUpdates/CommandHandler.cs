@@ -9,11 +9,13 @@ public sealed class CommandHandler
 {
     private readonly DiscordSocketClient _client;
     private readonly JsonDb _db;
+    private readonly ChatBot _chatBot;
 
-    public CommandHandler(DiscordSocketClient client, JsonDb db)
+    public CommandHandler(DiscordSocketClient client, JsonDb db, ChatBot chatBot)
     {
         _client = client;
         _db = db;
+        _chatBot = chatBot;
 
         _client.Ready += CreateCommand;
         _client.SlashCommandExecuted += HandleSlashCommand;
@@ -34,6 +36,11 @@ public sealed class CommandHandler
                 .WithName("source")
                 .WithDescription("Show the link to the bot's source code.")
                 .WithDMPermission(true)
+                .WithDefaultPermission(true),
+            new SlashCommandBuilder()
+                .WithName("neuralize")
+                .WithDescription("Makes the bot forget the conversation")
+                .WithDMPermission(false)
                 .WithDefaultPermission(true)
         };
 
@@ -85,6 +92,12 @@ public sealed class CommandHandler
                 break;
             case "source":
                 await command.RespondAsync("This bot is open source on GitHub: https://github.com/Pasi4K5/GsunUpdates");
+
+                break;
+            case "neuralize":
+                _chatBot.RestartConversation();
+
+                await command.RespondAsync("I forgor 💀");
 
                 break;
         }

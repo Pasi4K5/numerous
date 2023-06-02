@@ -13,12 +13,26 @@ public sealed class ChatBot
     private readonly OpenAIAPI _api = new(Config.Get().OpenAiApiKey);
     private readonly string _instructions = Config.Get().GptInstructions;
     private IChatEndpoint Chat => _api.Chat;
-    private readonly Conversation _conversation;
+    private Conversation _conversation;
     private readonly OsuApi _osuApi;
 
     public ChatBot(OsuApi osuApi)
     {
+        _conversation = Chat.CreateConversation();
         _osuApi = osuApi;
+
+        RestartConversation();
+    }
+
+    public async Task<string> GetResponse(SocketMessage message)
+    {
+        _conversation.AppendUserInput($"{message.Author.Username}: {await InsertMetadataInto(message.CleanContent)}");
+
+        return await _conversation.GetResponseFromChatbotAsync();
+    }
+
+    public void RestartConversation()
+    {
         _conversation = Chat.CreateConversation(new ChatRequest
         {
             Model = Model.ChatGPTTurbo,
@@ -27,13 +41,6 @@ public sealed class ChatBot
         });
 
         _conversation.AppendSystemMessage(_instructions);
-    }
-
-    public async Task<string> GetResponse(SocketMessage message)
-    {
-        _conversation.AppendUserInput($"{message.Author.Username}: {await InsertMetadataInto(message.CleanContent)}");
-
-        return await _conversation.GetResponseFromChatbotAsync();
     }
 
     private async Task<string> InsertMetadataInto(string s)
