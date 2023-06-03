@@ -48,14 +48,9 @@ public sealed class ChatBot
         var urlRegex = new Regex("(?:osu\\.ppy\\.sh\\/beatmapsets\\/|osu\\.ppy\\.sh\\/s\\/)(\\d+)");
         var idRegex = new Regex("\\d+");
 
-        while (true)
+        foreach (Match match in urlRegex.Matches(s))
         {
-            if (!urlRegex.IsMatch(s))
-            {
-                break;
-            }
-
-            var url = urlRegex.Match(s).Value;
+            var url = match.Value;
             var id = idRegex.Match(url).Value;
 
             var mapData = await _osuApi.RequestAsync("beatmapsets/" + id);
