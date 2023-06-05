@@ -7,6 +7,12 @@ namespace GsunUpdates;
 
 public sealed class MessageCategorizer
 {
+    private readonly string[] _preFilter =
+    {
+        "osu", "map", "level", "roast", "review", "gsun", "bot", "update",
+        "news", "ai", "gpt", "model", "artificial", "intelligence", "auto"
+    };
+
     private readonly OpenAIAPI _api;
     private IChatEndpoint Chat => _api.Chat;
 
@@ -15,8 +21,13 @@ public sealed class MessageCategorizer
         _api = api;
     }
 
-    public async Task<bool> MessageIsDirectedAtBot(SocketMessage message)
+    public async ValueTask<bool> MessageIsDirectedAtBot(SocketMessage message)
     {
+        if (!_preFilter.Any(x => message.CleanContent.ToLower().Contains(x)))
+        {
+            return false;
+        }
+
         var conversation = Chat.CreateConversation(new ChatRequest
         {
             Model = Model.ChatGPTTurbo,
