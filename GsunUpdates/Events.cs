@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using OpenAI_API;
 
 namespace GsunUpdates;
 
@@ -7,9 +8,11 @@ public sealed class Events
 {
     private readonly DiscordSocketClient _client;
     private readonly ChatBot _chatBot;
+    private readonly MessageCategorizer _categorizer;
 
-    public Events(DiscordSocketClient client, ChatBot chatBot)
+    public Events(DiscordSocketClient client, ChatBot chatBot, OpenAIAPI openAiApi)
     {
+        _categorizer = new(openAiApi);
         _client = client;
         _chatBot = chatBot;
 
@@ -20,15 +23,38 @@ public sealed class Events
     {
         Task.Run(async () =>
         {
-            if (!message.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id)
-                || message.Channel is IPrivateChannel)
+            if (message.Channel is IPrivateChannel || message.Author.IsBot)
             {
                 return;
             }
 
-            foreach (var discordMessage in (await _chatBot.GetResponse(message)).ToDiscordMessageStrings())
+            var botWasMentioned = message.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id);
+
+            if (botWasMentioned)
             {
-                await message.Channel.SendMessageAsync(discordMessage);
+                await SendMessage();
+            }
+
+            if (message.CleanContent.Count(char.IsLetter) > 10 && await _categorizer.MessageIsDirectedAtBot(message))
+            {
+                await SendMessage();
+            }
+
+            async Task SendMessage()
+            {
+                using var _ = message.Channel.EnterTypingState();
+
+                var response = await _chatBot.GetResponse(message);
+
+                if (response[..18].Contains(": "))
+                {
+                    response = response.Split(": ")[1];
+                }
+
+                foreach (var discordMessage in response.ToDiscordMessageStrings())
+                {
+                    await message.Channel.SendMessageAsync(discordMessage, messageReference: new MessageReference(message.Id));
+                }
             }
         });
 

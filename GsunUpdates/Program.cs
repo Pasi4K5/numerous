@@ -1,15 +1,20 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using GsunUpdates;
+using OpenAI_API;
 
-var client = new DiscordSocketClient();
+var client = new DiscordSocketClient(new()
+{
+    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+});
 var db = new JsonDb();
 var osuApi = new OsuApi();
 await osuApi.StartAsync();
 var updateService = new UpdateService(client, db, osuApi);
-var chatBot = new ChatBot(osuApi);
+var openAiApi = new OpenAIAPI(Config.Get().OpenAiApiKey);
+var chatBot = new ChatBot(openAiApi, osuApi);
 var commandHandler = new CommandHandler(client, db, chatBot);
-var eventHandler = new Events(client, chatBot);
+var eventHandler = new Events(client, chatBot, openAiApi);
 
 client.Log += Log;
 

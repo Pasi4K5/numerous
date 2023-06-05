@@ -10,14 +10,18 @@ namespace GsunUpdates;
 
 public sealed class ChatBot
 {
-    private readonly OpenAIAPI _api = new(Config.Get().OpenAiApiKey);
+    private readonly OpenAIAPI _api;
     private readonly string _instructions = Config.Get().GptInstructions;
     private IChatEndpoint Chat => _api.Chat;
     private Conversation _conversation;
     private readonly OsuApi _osuApi;
 
-    public ChatBot(OsuApi osuApi)
+    private static readonly TimeSpan _restartAfter = TimeSpan.FromMinutes(10);
+    private DateTime _restartTime = DateTime.Now + _restartAfter;
+
+    public ChatBot(OpenAIAPI api, OsuApi osuApi)
     {
+        _api = api;
         _conversation = Chat.CreateConversation();
         _osuApi = osuApi;
 
@@ -26,9 +30,18 @@ public sealed class ChatBot
 
     public async Task<string> GetResponse(SocketMessage message)
     {
+        if (_restartTime < DateTime.Now)
+        {
+            RestartConversation();
+        }
+
         _conversation.AppendUserInput($"{message.Author.Username}: {await InsertMetadataInto(message.CleanContent)}");
 
-        return await _conversation.GetResponseFromChatbotAsync();
+        var response = await _conversation.GetResponseFromChatbotAsync();
+
+        _restartTime = DateTime.Now + _restartAfter;
+
+        return response;
     }
 
     public void RestartConversation()
@@ -36,11 +49,13 @@ public sealed class ChatBot
         _conversation = Chat.CreateConversation(new ChatRequest
         {
             Model = Model.ChatGPTTurbo,
-            Temperature = 0.5,
-            MaxTokens = 500
+            Temperature = 1,
+            MaxTokens = 1000
         });
 
         _conversation.AppendSystemMessage(_instructions);
+
+        _restartTime = DateTime.Now + _restartAfter;
     }
 
     private async Task<string> InsertMetadataInto(string s)
