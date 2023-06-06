@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -10,6 +11,8 @@ namespace GsunUpdates;
 
 public sealed class ChatBot
 {
+    public bool IsShutUp => _shutUpUntil > DateTime.Now;
+
     private readonly OpenAIAPI _api;
     private readonly string _instructions = Config.Get().GptInstructions;
     private IChatEndpoint Chat => _api.Chat;
@@ -18,6 +21,8 @@ public sealed class ChatBot
 
     private static readonly TimeSpan _restartAfter = TimeSpan.FromMinutes(10);
     private DateTime _restartTime = DateTime.Now + _restartAfter;
+    private DateTime _shutUpUntil = DateTime.MinValue;
+    private readonly Dictionary<ulong, ulong> _lastMessages = new();
 
     public ChatBot(OpenAIAPI api, OsuApi osuApi)
     {
@@ -57,6 +62,30 @@ public sealed class ChatBot
 
         _restartTime = DateTime.Now + _restartAfter;
     }
+
+    public async Task SendMessageAsync(IMessageChannel channel, string message, IMessage referenceMessage)
+    {
+        var sentMessage = await channel.SendMessageAsync(message, messageReference: new MessageReference(referenceMessage.Id));
+
+        _lastMessages[channel.Id] = sentMessage.Id;
+    }
+
+    public async Task ShutUpAsync(IMessageChannel channel, TimeSpan duration)
+    {
+        _shutUpUntil = DateTime.Now + duration;
+
+        var lastMessageId = _lastMessages.GetValueOrDefault(channel.Id);
+
+        if (lastMessageId == 0)
+        {
+            return;
+        }
+
+        var message = await channel.GetMessageAsync(lastMessageId);
+        await message.DeleteAsync();
+    }
+
+    public void Unsilence() => _shutUpUntil = DateTime.MinValue;
 
     private async Task<string> InsertMetadataInto(string s)
     {

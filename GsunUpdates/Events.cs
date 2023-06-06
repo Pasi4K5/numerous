@@ -24,35 +24,37 @@ public sealed class Events
         _client.MessageReceived += HandleMessageReceived;
     }
 
-    private Task HandleMessageReceived(SocketMessage message)
+    private async Task HandleMessageReceived(SocketMessage message)
     {
-        Task.Run(async () =>
+        if (message.Author.IsBot || message.Channel is IPrivateChannel || _chatBot.IsShutUp)
         {
-            if (message.Channel is IPrivateChannel || message.Author.IsBot)
+            return;
+        }
+
+        var botWasMentioned = message.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id);
+
+        if (botWasMentioned)
+        {
+            SendMessage();
+
+            return;
+        }
+
+        if (
+            _preFilter.Any(x => message.CleanContent.ToLower().Contains(x))
+            && message.CleanContent.Count(char.IsLetter) > 10
+            && await _categorizer.MessageIsDirectedAtBot(message)
+        )
+        {
+            SendMessage();
+        }
+
+        void SendMessage()
+        {
+            using var _ = message.Channel.EnterTypingState();
+
+            Task.Run(async () =>
             {
-                return;
-            }
-
-            var botWasMentioned = message.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id);
-
-            if (botWasMentioned)
-            {
-                await SendMessage();
-            }
-
-            if (
-                _preFilter.Any(x => message.CleanContent.ToLower().Contains(x))
-                && message.CleanContent.Count(char.IsLetter) > 10
-                && await _categorizer.MessageIsDirectedAtBot(message)
-            )
-            {
-                await SendMessage();
-            }
-
-            async Task SendMessage()
-            {
-                using var _ = message.Channel.EnterTypingState();
-
                 var response = await _chatBot.GetResponse(message);
 
                 if (response[..18].Contains(": "))
@@ -62,11 +64,9 @@ public sealed class Events
 
                 foreach (var discordMessage in response.ToDiscordMessageStrings())
                 {
-                    await message.Channel.SendMessageAsync(discordMessage, messageReference: new MessageReference(message.Id));
+                    await _chatBot.SendMessageAsync(message.Channel, discordMessage, message);
                 }
-            }
-        });
-
-        return Task.CompletedTask;
+            });
+        }
     }
 }

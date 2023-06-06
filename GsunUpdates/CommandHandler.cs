@@ -39,7 +39,18 @@ public sealed class CommandHandler
                 .WithDefaultPermission(true),
             new SlashCommandBuilder()
                 .WithName("neuralize")
-                .WithDescription("Makes the bot forget the conversation")
+                .WithDescription("Makes the bot forget the conversation.")
+                .WithDMPermission(false)
+                .WithDefaultPermission(true),
+            new SlashCommandBuilder()
+                .WithName("shutup")
+                .WithDescription("Makes the bot stop talking for the given duration and deletes its last message.")
+                .WithDMPermission(false)
+                .WithDefaultPermission(true)
+                .AddOption("duration", ApplicationCommandOptionType.Integer, "The duration in minutes to shut up for.", true),
+            new SlashCommandBuilder()
+                .WithName("talk")
+                .WithDescription("Makes the bot talk again.")
                 .WithDMPermission(false)
                 .WithDefaultPermission(true)
         };
@@ -66,7 +77,7 @@ public sealed class CommandHandler
                 {
                     await command.RespondAsync("No valid channel was provided.");
 
-                    return;
+                    break;
                 }
 
                 var data = _db.Data;
@@ -98,6 +109,39 @@ public sealed class CommandHandler
                 _chatBot.RestartConversation();
 
                 await command.RespondAsync("I forgor 💀");
+
+                break;
+            case "shutup":
+                if (_chatBot.IsShutUp)
+                {
+                    await command.RespondAsync("I'm already quiet. 🤐");
+
+                    break;
+                }
+
+                if (!ulong.TryParse(command.Data.Options.First().Value.ToString(), out var minutes) || minutes > 10)
+                {
+                    await command.RespondAsync("The duration must be between 0 and 10 minutes.");
+
+                    break;
+                }
+
+                await _chatBot.ShutUpAsync(command.Channel, TimeSpan.FromMinutes(minutes));
+
+                await command.RespondAsync($"See ya in {minutes} minute{(minutes == 1 ? "" : "s")}. 🤐");
+
+                break;
+            case "talk":
+                if (!_chatBot.IsShutUp)
+                {
+                    await command.RespondAsync("I'm not silenced. 🗣️");
+
+                    break;
+                }
+
+                _chatBot.Unsilence();
+
+                await command.RespondAsync($"I'm back. 🗣️");
 
                 break;
         }
