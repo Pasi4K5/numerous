@@ -10,11 +10,6 @@ public sealed class Events
     private readonly ChatBot _chatBot;
     private readonly MessageCategorizer _categorizer;
 
-    private readonly string[] _preFilter =
-    {
-        "map", "osu", "roast", "gsun", "bot", "update"
-    };
-
     public Events(DiscordSocketClient client, ChatBot chatBot, OpenAIAPI openAiApi)
     {
         _categorizer = new(openAiApi);
@@ -40,14 +35,10 @@ public sealed class Events
             return;
         }
 
-        if (
-            _preFilter.Any(x => message.CleanContent.ToLower().Contains(x))
-            && message.CleanContent.Count(char.IsLetter) > 10
-            && await _categorizer.MessageIsDirectedAtBot(message)
-        )
-        {
-            SendMessage();
-        }
+            if (message.CleanContent.Count(char.IsLetter) > 10 && await _categorizer.MessageIsDirectedAtBot(message))
+            {
+                SendMessage();
+            }
 
         void SendMessage()
         {
