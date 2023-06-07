@@ -128,7 +128,9 @@ public sealed class CommandHandler
 
                 await _chatBot.ShutUpAsync(command.Channel, TimeSpan.FromMinutes(minutes));
 
-                await command.RespondAsync($"See ya in {minutes} minute{(minutes == 1 ? "" : "s")}. 🤐");
+                await command.RespondAsync(
+                    minutes == 0 ? "🤐" : $"See ya in {minutes} minute{(minutes == 1 ? "" : "s")}. 🤐"
+                );
 
                 break;
             case "talk":
