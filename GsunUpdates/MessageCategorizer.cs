@@ -9,8 +9,7 @@ public sealed class MessageCategorizer
 {
     private readonly string[] _preFilter =
     {
-        "osu", "map", "level", "roast", "review", "gsun", "bot", "update",
-        "news", "ai", "gpt", "model", "artificial", "intelligence", "auto"
+        "map", "roast", "gsun", "bot", "update", "news"
     };
 
     private readonly OpenAIAPI _api;
