@@ -30,8 +30,7 @@ public sealed class MessageCategorizer
         var conversation = Chat.CreateConversation(new ChatRequest
         {
             Model = Model.ChatGPTTurbo,
-            Temperature = 0,
-            MaxTokens = 1
+            Temperature = 0
         });
 
         conversation.AppendSystemMessage(
