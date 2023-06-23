@@ -9,7 +9,7 @@ public sealed class UpdateService
 {
     private const string Message = "**BREAKING NEWS!**\nGsun changed his me! section!\n\n**Here's what changed:**";
 
-    private readonly TimeSpan _updateInterval = TimeSpan.FromSeconds(2);
+    private readonly TimeSpan _updateInterval = TimeSpan.FromSeconds(20);
 
     private readonly DiscordSocketClient _client;
     private readonly JsonDb _db;

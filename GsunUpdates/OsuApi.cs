@@ -13,30 +13,12 @@ public sealed class OsuApi
 
     private readonly HttpClient _client = new();
 
-    private string _token = "";
-    private DateTime _tokenExpiry = DateTime.MinValue;
-
-    public async Task StartAsync()
-    {
-        await GetTokenAsync();
-
-        var _ = Task.Factory.StartNew(async () =>
-        {
-            while (true)
-            {
-                var validFor = _tokenExpiry - DateTime.UtcNow - TimeSpan.FromSeconds(5);
-
-                await Task.Delay(validFor);
-
-                await GetTokenAsync();
-            }
-        }, TaskCreationOptions.LongRunning);
-    }
-
     public async Task<JObject> RequestAsync(string endpoint)
     {
+        var token = await GetTokenAsync();
+
         var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl + endpoint);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var response = await _client.SendAsync(request);
 
@@ -51,7 +33,7 @@ public sealed class OsuApi
         return responseJson;
     }
 
-    private async Task GetTokenAsync()
+    private async Task<string> GetTokenAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Post, TokenUrl)
         {
@@ -74,7 +56,6 @@ public sealed class OsuApi
         var responseText = await response.Content.ReadAsStringAsync();
         var responseJson = JObject.Parse(responseText);
 
-        _token = responseJson["access_token"]?.Value<string>() ?? "";
-        _tokenExpiry = DateTime.UtcNow + TimeSpan.FromSeconds(responseJson["expires_in"]?.Value<int>() ?? 0);
+        return responseJson["access_token"]?.Value<string>() ?? "";
     }
 }

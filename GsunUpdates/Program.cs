@@ -9,7 +9,6 @@ var client = new DiscordSocketClient(new()
 });
 var db = new JsonDb();
 var osuApi = new OsuApi();
-await osuApi.StartAsync();
 var updateService = new UpdateService(client, db, osuApi);
 var openAiApi = new OpenAIAPI(Config.Get().OpenAiApiKey);
 var chatBot = new ChatBot(openAiApi, osuApi);

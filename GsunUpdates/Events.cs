@@ -35,10 +35,10 @@ public sealed class Events
             return;
         }
 
-            if (message.CleanContent.Count(char.IsLetter) > 10 && await _categorizer.MessageIsDirectedAtBot(message))
-            {
-                SendMessage();
-            }
+        if (message.CleanContent.Count(char.IsLetter) > 10 && await _categorizer.MessageIsDirectedAtBot(message))
+        {
+            SendMessage();
+        }
 
         void SendMessage()
         {

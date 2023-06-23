@@ -7,7 +7,7 @@ namespace GsunUpdates;
 
 public sealed class MessageCategorizer
 {
-    private readonly string[] _preFilter =
+    private static readonly string[] _preFilter =
     {
         "map", "roast", "gsun", "bot", "update", "news"
     };
@@ -34,9 +34,10 @@ public sealed class MessageCategorizer
         });
 
         conversation.AppendSystemMessage(
-            "You are the unfriendly Discord bot \"Not Gsun Updates\" (also known as \"Gsun Updates\", \"Gsun bot\", or similar) who roast osu! maps/beatmaps. "
+            "You are the unfriendly Discord bot \"Gsun Updates\" (also known as \"Not Gsun Updates\", \"Gsun bot\", or similar) who roast osu! maps/beatmaps. "
             + "If the prompt's text has to do anything with you or roasting maps, you should respond with \"1\". "
             + "Otherwise, you should respond with \"0\"."
+            + "You may only ever reply with \"1\" or \"0\"."
         );
 
         conversation.AppendUserInput("what does this gsun bot do?");
