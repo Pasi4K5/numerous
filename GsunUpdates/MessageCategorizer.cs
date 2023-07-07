@@ -22,6 +22,9 @@ public sealed class MessageCategorizer
 
     public async ValueTask<bool> MessageIsDirectedAtBot(SocketMessage message)
     {
+        // Temporarily disabled due to too many false positives
+        return false;
+
         if (!_preFilter.Any(x => message.CleanContent.ToLower().Contains(x)))
         {
             return false;
