@@ -40,7 +40,14 @@ public sealed class ChatBot
             RestartConversation();
         }
 
-        _conversation.AppendUserInput($"{message.Author.Username}: {await InsertMetadataInto(message.CleanContent)}");
+        var content = message.CleanContent;
+
+        if (content.StartsWith("@Not Gsun Updates#4025"))
+        {
+            content = content.Substring(21).TrimStart();
+        }
+
+        _conversation.AppendUserInput($"{message.Author.Username}: {await InsertMetadataInto(content)}");
 
         var response = await _conversation.GetResponseFromChatbotAsync();
 
@@ -49,16 +56,16 @@ public sealed class ChatBot
         return response;
     }
 
-    public void RestartConversation()
+    public void RestartConversation(string? instructions = null, float temperature = 1f)
     {
         _conversation = Chat.CreateConversation(new ChatRequest
         {
             Model = Model.ChatGPTTurbo,
-            Temperature = 1,
+            Temperature = temperature,
             MaxTokens = 1000
         });
 
-        _conversation.AppendSystemMessage(_instructions);
+        _conversation.AppendSystemMessage(instructions ?? _instructions);
 
         _restartTime = DateTime.Now + _restartAfter;
     }
@@ -98,6 +105,12 @@ public sealed class ChatBot
             var id = idRegex.Match(url).Value;
 
             var mapData = await _osuApi.RequestAsync("beatmapsets/" + id);
+
+            if (mapData is null)
+            {
+                continue;
+            }
+
             var data = new JObject
             {
                 ["artist"] = mapData["artist"],

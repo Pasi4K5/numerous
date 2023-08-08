@@ -12,7 +12,8 @@ public sealed class JsonDb
     private readonly JObject _default = new()
     {
         ["channels"] = new JArray(),
-        ["pageSection"] = null
+        ["pageSection"] = null,
+        ["topScoreId"] = null
     };
 
     public JObject Data

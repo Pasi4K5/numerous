@@ -23,6 +23,7 @@ public sealed class CommandHandler
 
     private async Task CreateCommand()
     {
+        // TODO: This sucks, I need to make this better as soon as I add more commands
         var commands = new[]
         {
             new SlashCommandBuilder()
@@ -52,7 +53,14 @@ public sealed class CommandHandler
                 .WithName("talk")
                 .WithDescription("Makes the bot talk again.")
                 .WithDMPermission(false)
+                .WithDefaultPermission(true),
+            new SlashCommandBuilder()
+                .WithName("impersonate_fictional_character")
+                .WithDescription("The bot impersonates a fictional character. The character must be from 2021 or earlier.")
+                .WithDMPermission(false)
                 .WithDefaultPermission(true)
+                .AddOption("character", ApplicationCommandOptionType.String, "The character to impersonate.", true)
+                .AddOption("additional_instructions", ApplicationCommandOptionType.String, "Additional instructions for the bot.", false)
         };
 
         foreach (var command in commands)
@@ -144,6 +152,23 @@ public sealed class CommandHandler
                 _chatBot.Unsilence();
 
                 await command.RespondAsync($"I'm back. 🗣️");
+
+                break;
+            case "impersonate_fictional_character":
+                var character = command.Data.Options.First().Value.ToString();
+
+                var additionalInstructions = command.Data.Options.LastOrDefault()?.Value.ToString();
+
+                var instructions = "You are the character " + character + ". You will not only talk, but also perform actions by wrapping them in asterisks. You're not allowed to ever get out of character or mention that you are fictional.";
+
+                if (additionalInstructions is not null)
+                {
+                    instructions += "\n" + additionalInstructions;
+                }
+
+                _chatBot.RestartConversation(instructions, 1f);
+
+                await command.RespondAsync($"I'm now impersonating {character}.");
 
                 break;
         }

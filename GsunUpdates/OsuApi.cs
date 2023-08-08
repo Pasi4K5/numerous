@@ -13,28 +13,52 @@ public sealed class OsuApi
 
     private readonly HttpClient _client = new();
 
-    public async Task<JObject> RequestAsync(string endpoint)
+    private string _accessToken = "";
+
+    private DateTime _tokenExpiration = DateTime.MinValue;
+
+    public async Task<JToken?> RequestAsync(string endpoint, Dictionary<string, string>? parameters = null)
     {
+        parameters ??= new();
+
         var token = await GetTokenAsync();
 
         var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl + endpoint);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await _client.SendAsync(request);
-
-        if (!response.IsSuccessStatusCode)
+        foreach (var (key, value) in parameters)
         {
-            throw new Exception("Failed to request endpoint.");
+            request.Headers.Add(key, value);
         }
 
-        var responseText = await response.Content.ReadAsStringAsync();
-        var responseJson = JObject.Parse(responseText);
+        try
+        {
+            var response = await _client.SendAsync(request);
 
-        return responseJson;
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Failed to request endpoint.");
+            }
+
+            var responseText = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseText);
+            var responseJson = JToken.Parse(responseText);
+
+            return responseJson;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private async Task<string> GetTokenAsync()
     {
+        if (_tokenExpiration > DateTime.Now)
+        {
+            return _accessToken;
+        }
+
         var request = new HttpRequestMessage(HttpMethod.Post, TokenUrl)
         {
             Content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -56,6 +80,10 @@ public sealed class OsuApi
         var responseText = await response.Content.ReadAsStringAsync();
         var responseJson = JObject.Parse(responseText);
 
-        return responseJson["access_token"]?.Value<string>() ?? "";
+        _tokenExpiration = DateTime.Now + TimeSpan.FromSeconds((responseJson["expires_in"]?.Value<int>() ?? 0) - 10);
+
+        _accessToken = responseJson["access_token"]?.Value<string>() ?? "";
+
+        return _accessToken;
     }
 }
