@@ -41,7 +41,6 @@ public sealed class OsuApi
             }
 
             var responseText = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseText);
             var responseJson = JToken.Parse(responseText);
 
             return responseJson;

@@ -9,8 +9,8 @@
 	
 	<ItemGroup>
 	  <PackageReference Include="DiffPlex" Version="1.7.1" />
-	  <PackageReference Include="Discord.Net.Core" Version="3.10.0" />
-	  <PackageReference Include="Discord.Net.WebSocket" Version="3.10.0" />
+	  <PackageReference Include="Discord.Net.Core" Version="3.12.0" />
+	  <PackageReference Include="Discord.Net.WebSocket" Version="3.12.0" />
 	  <PackageReference Include="OpenAI" Version="1.7.2" />
 	</ItemGroup>
 

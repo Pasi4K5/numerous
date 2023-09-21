@@ -111,6 +111,27 @@ public sealed class ChatBot
                 continue;
             }
 
+            var difficulties = new JArray();
+
+            if (mapData["beatmaps"] is JArray beatmaps)
+            {
+                foreach (var diff in beatmaps)
+                {
+                    difficulties.Add(new JObject
+                    {
+                        ["name"] = diff["version"],
+                        ["stars"] = diff["difficulty_rating"],
+                        ["od"] = diff["accuracy"],
+                        ["cs"] = diff["circle_size"],
+                        ["ar"] = diff["ar"],
+                        ["hp"] = diff["drain"],
+                        ["bpm"] = diff["bpm"],
+                        ["length"] = diff["total_length"],
+                        ["drain_time"] = diff["hit_length"]
+                    });
+                }
+            }
+
             var data = new JObject
             {
                 ["artist"] = mapData["artist"],
@@ -118,7 +139,8 @@ public sealed class ChatBot
                 ["creator"] = mapData["creator"],
                 ["bpm"] = mapData["bpm"],
                 ["status"] = mapData["ranked"],
-                ["tags"] = mapData["tags"]
+                ["tags"] = mapData["tags"],
+                ["difficulties"] = difficulties
             };
 
             s = s.Insert(
