@@ -1,4 +1,5 @@
-﻿using DiffPlex.DiffBuilder;
+﻿using DiffPlex;
+using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
@@ -150,29 +151,73 @@ public sealed class UpdateService
         }
     }
 
+    // This method is kinda scuffed but who cares
     private static string GetDiff(string? oldText, string? newText)
     {
         oldText ??= "";
         newText ??= "";
 
-        var diff = InlineDiffBuilder.Diff(oldText, newText);
+        var diff = new SideBySideDiffBuilder(new Differ()).BuildDiffModel(oldText, newText);
+
         var diffString = "";
 
-        foreach (var line in diff.Lines)
+        foreach (var (oldLine, newLine) in diff.OldText.Lines.Zip(diff.NewText.Lines))
         {
-            switch (line.Type)
+            switch (newLine.Type)
             {
-                case ChangeType.Inserted:
-                    diffString += "🟩 " + line.Text + "\n";
+                case ChangeType.Imaginary:
+                    diffString += $"> 🟥 {oldLine.Text}\n";
 
-                    break;
-                case ChangeType.Deleted:
-                    diffString += "🟥 " + line.Text + "\n";
+                    continue;
+                case ChangeType.Inserted:
+                    diffString += $"> 🟩 {newLine.Text}\n";
+
+                    continue;
+                case ChangeType.Modified:
+                    var oldLineText = "";
+
+                    foreach (var oldPiece in oldLine.SubPieces)
+                    {
+                        if (oldPiece.Type == ChangeType.Unchanged)
+                        {
+                            oldLineText += oldPiece.Text;
+                        }
+                        else if (oldPiece.Type != ChangeType.Imaginary)
+                        {
+                            oldLineText += "[HLSTART]" + oldPiece.Text + "[HLEND]";
+                        }
+                    }
+
+                    diffString += $"> 🟥 {Decode(oldLineText)}\n";
+
+                    var newLineText = "";
+
+                    foreach (var newPiece in newLine.SubPieces)
+                    {
+                        if (newPiece.Type == ChangeType.Unchanged)
+                        {
+                            newLineText += newPiece.Text;
+                        }
+                        else if (newPiece.Type != ChangeType.Imaginary)
+                        {
+                            newLineText += "[HLSTART]" + newPiece.Text + "[HLEND]";
+                        }
+                    }
+
+                    diffString += $"> 🟩 {Decode(newLineText)}\n";
 
                     break;
             }
         }
 
         return diffString;
+
+        string Decode(string s)
+        {
+            return s
+                .Replace("[HLEND][HLSTART]", "")
+                .Replace("[HLSTART]", "***")
+                .Replace("[HLEND]", "***");
+        }
     }
 }
