@@ -159,14 +159,14 @@ public sealed class CommandHandler
 
                 var additionalInstructions = command.Data.Options.LastOrDefault()?.Value.ToString();
 
-                var instructions = "You are the character " + character + ". You will not only talk, but also perform actions by wrapping them in asterisks. You're not allowed to ever get out of character or mention that you are fictional.";
+                var instructions = "You are the character " + character + ". You will not only talk, but also perform actions by wrapping them in asterisks. You are not fictional and you are not allowed to say anything out-of-character.";
 
                 if (additionalInstructions is not null)
                 {
                     instructions += "\n" + additionalInstructions;
                 }
 
-                _chatBot.RestartConversation(instructions, 1f);
+                _chatBot.RestartConversation(instructions, 0.7f);
 
                 await command.RespondAsync($"I'm now impersonating {character}.");
 
