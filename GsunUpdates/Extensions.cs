@@ -10,7 +10,7 @@ public static class Extensions
 
     public static IEnumerable<string> ToDiscordMessageStrings(this string message)
     {
-        var remaining = message.Replace("*", "\\*");
+        var remaining = message;
         var messages = new List<string>();
 
         while (remaining.Length > 0)

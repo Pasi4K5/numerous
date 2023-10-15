@@ -5,11 +5,12 @@ using OpenAI_API;
 
 var client = new DiscordSocketClient(new()
 {
-    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
+    AlwaysDownloadUsers = true,
+    MessageCacheSize = 1000
 });
 var db = new JsonDb();
 var osuApi = new OsuApi();
-var updateService = new UpdateService(client, db, osuApi);
 var openAiApi = new OpenAIAPI(Config.Get().OpenAiApiKey);
 var chatBot = new ChatBot(openAiApi, osuApi);
 var commandHandler = new CommandHandler(client, db, chatBot);
