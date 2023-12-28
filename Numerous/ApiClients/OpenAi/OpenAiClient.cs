@@ -60,6 +60,38 @@ public sealed class OpenAiClient
                 },
             }
         ),
+        new Function(
+            "osuUserLookup",
+            "Search for osu! users.",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["query"] = new JsonObject
+                    {
+                        ["type"] = "string",
+                        ["description"] = "The query to search for on osu!.",
+                    },
+                },
+            }
+        ),
+        new Function(
+            "getOsuUser",
+            "Get the specified osu! user.",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["id"] = new JsonObject
+                    {
+                        ["type"] = "integer",
+                        ["description"] = "The ID of the user to get.",
+                    },
+                },
+            }
+        ),
     };
 
     public OpenAiClient(ConfigManager configManager, OsuApi osuApi)
@@ -161,6 +193,44 @@ public sealed class OpenAiClient
                     }
 
                     _conversation.Add(new(tool, article));
+                }
+
+                break;
+            }
+            case "osuUserLookup":
+            {
+                var args = JsonConvert.DeserializeObject<JObject>(func.Arguments.ToString());
+                var query = args?["query"]?.ToString();
+
+                if (query is not null)
+                {
+                    var result = await _osuApi.UserLookupAsync(query);
+
+                    if (result is null)
+                    {
+                        return false;
+                    }
+
+                    _conversation.Add(new(tool, result.ToString()));
+                }
+
+                break;
+            }
+            case "getOsuUser":
+            {
+                var args = JsonConvert.DeserializeObject<JObject>(func.Arguments.ToString());
+                var id = args?["id"]?.ToString();
+
+                if (id is not null)
+                {
+                    var result = await _osuApi.GetUserJsonAsync(id);
+
+                    if (result is null)
+                    {
+                        return false;
+                    }
+
+                    _conversation.Add(new(tool, result.ToString()));
                 }
 
                 break;

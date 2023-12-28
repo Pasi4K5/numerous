@@ -12,6 +12,14 @@ public partial class OsuApi
         return await RequestValAsync<OsuUser>($"users/{user}", ("key", prioritizeId ? "id" : "username"));
     }
 
+    /// <summary>
+    /// Prioritizes the user ID over the username.
+    /// </summary>
+    public async Task<JObject?> GetUserJsonAsync(string user)
+    {
+        return await RequestRefAsync<JObject>($"users/{user}", ("key", "id"));
+    }
+
     public async Task<Beatmapset?> GetBeatmapsetAsync(uint id)
     {
         return await RequestValAsync<Beatmapset>($"beatmapsets/{id}");
@@ -44,6 +52,22 @@ public partial class OsuApi
                 {
                     ["path"] = page["path"],
                     ["tags"] = page["tags"],
+                })),
+            };
+    }
+
+    public async Task<JObject?> UserLookupAsync(string query)
+    {
+        var result = await RequestRefAsync<JObject>("search", ("mode", "user"), ("query", query));
+
+        return result is null
+            ? null
+            : new JObject
+            {
+                ["users"] = new JArray(result["user"]!.ToObject<JObject>()!["data"]!.ToObject<JArray>()!.Select(user => new JObject
+                {
+                    ["id"] = user["id"],
+                    ["username"] = user["username"],
                 })),
             };
     }
