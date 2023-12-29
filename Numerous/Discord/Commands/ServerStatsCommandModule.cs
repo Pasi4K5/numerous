@@ -5,7 +5,7 @@ using MongoDB.Driver;
 using Numerous.Database;
 using ScottPlot;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
 [Group("serverstats", "Shows stats about the server.")]

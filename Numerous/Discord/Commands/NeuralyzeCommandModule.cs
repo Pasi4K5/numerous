@@ -2,7 +2,7 @@
 using JetBrains.Annotations;
 using Numerous.ApiClients.OpenAi;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 public sealed class NeuralyzeCommandModule(OpenAiClient ai) : CommandModule
 {

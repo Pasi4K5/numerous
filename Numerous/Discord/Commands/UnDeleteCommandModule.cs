@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Database;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
 public sealed class UnDeleteCommandModule(DbManager db) : CommandModule

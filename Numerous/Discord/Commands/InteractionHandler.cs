@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Numerous.Configuration;
 using Numerous.DependencyInjection;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 [HostedService]
 public sealed class InteractionHandler(

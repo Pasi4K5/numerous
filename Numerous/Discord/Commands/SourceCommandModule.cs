@@ -1,7 +1,7 @@
 ﻿using Discord.Interactions;
 using JetBrains.Annotations;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 public sealed class SourceCommandModule : CommandModule
 {

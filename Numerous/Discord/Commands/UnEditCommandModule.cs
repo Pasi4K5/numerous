@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Database;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 public sealed class UnEditCommandModule(DbManager db, DiscordSocketClient client) : CommandModule
 {

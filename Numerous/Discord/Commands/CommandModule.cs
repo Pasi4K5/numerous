@@ -1,5 +1,5 @@
 ﻿using Discord.Interactions;
 
-namespace Numerous.Discord.Command;
+namespace Numerous.Discord.Commands;
 
 public abstract class CommandModule : InteractionModuleBase<SocketInteractionContext>;
