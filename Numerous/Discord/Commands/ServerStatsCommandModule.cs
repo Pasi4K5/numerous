@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Database;
 using ScottPlot;
+using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Numerous.Discord.Commands;
 
@@ -117,21 +118,9 @@ public sealed class ServerStatsCommandModule(DbManager db) : CommandModule
             }
         }
 
-        if (!Directory.Exists("./temp"))
-        {
-            Directory.CreateDirectory("./temp");
-        }
-
-        var path = $"./temp/{Context.Guild.Id}.png";
-
-        path = plt.SaveFig(path);
-
-        using (var file = new FileAttachment(path))
-        {
-            await FollowupWithFileAsync(file);
-        }
-
-        File.Delete(path);
+        var stream = new MemoryStream();
+        plt.GetBitmap().Save(stream, ImageFormat.Png);
+        await FollowupWithFileAsync(stream, "chart.png");
     }
 
     private static TimeSpan GetTimeSpan(uint timeframe, TimeUnit timeUnit)
