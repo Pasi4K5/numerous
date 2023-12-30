@@ -3,7 +3,6 @@ using Numerous.DependencyInjection;
 
 namespace Numerous.Configuration;
 
-[SingletonService]
 public sealed class ConfigManager
 {
     private const string Path = "./config.json";

@@ -47,7 +47,34 @@ public sealed class Startup(
 
     private static Task Log(LogMessage msg)
     {
-        Console.WriteLine(msg.ToString());
+        Action<Exception?, string> exLog = msg.Severity switch
+        {
+            LogSeverity.Critical => Serilog.Log.Fatal,
+            LogSeverity.Error => Serilog.Log.Error,
+            LogSeverity.Warning => Serilog.Log.Warning,
+            LogSeverity.Info => Serilog.Log.Information,
+            LogSeverity.Verbose => Serilog.Log.Verbose,
+            LogSeverity.Debug => Serilog.Log.Debug,
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        Action<string, string> msgLog = msg.Severity switch
+        {
+            LogSeverity.Critical => Serilog.Log.Fatal,
+            LogSeverity.Error => Serilog.Log.Error,
+            LogSeverity.Warning => Serilog.Log.Warning,
+            LogSeverity.Info => Serilog.Log.Information,
+            LogSeverity.Verbose => Serilog.Log.Verbose,
+            LogSeverity.Debug => Serilog.Log.Debug,
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        msgLog(msg.Message, "");
+
+        if (msg.Exception is not null)
+        {
+            exLog(msg.Exception, "Exception");
+        }
 
         return Task.CompletedTask;
     }
