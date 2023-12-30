@@ -3,7 +3,9 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Database;
+using Numerous.Util;
 using ScottPlot;
+using Color = System.Drawing.Color;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Numerous.Discord.Commands;
@@ -58,7 +60,15 @@ public sealed class ServerStatsCommandModule(DbManager db) : CommandModule
                 && (startTime == null || m.Timestamps.First() >= startTime)
                 && channelNames.Keys.Any(x => x == m.ChannelId));
 
-        var plt = new Plot(1200);
+        var plt = new Plot(1280, 720);
+        plt.Style(
+            Color.FromArgb(0x313338).Opaque(),
+            Color.FromArgb(0x2b2d31).Opaque(),
+            Color.FromArgb(0x7a7e88).Opaque(),
+            Color.FromArgb(0x7a7e88).Opaque(),
+            Color.White,
+            Color.White
+        );
         var legend = plt.Legend();
 
         switch (type)

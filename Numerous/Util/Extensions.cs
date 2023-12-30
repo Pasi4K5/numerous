@@ -1,4 +1,6 @@
-﻿namespace Numerous.Util;
+﻿using System.Drawing;
+
+namespace Numerous.Util;
 
 public static class Extensions
 {
@@ -18,5 +20,10 @@ public static class Extensions
         }
 
         return messages;
+    }
+
+    public static Color Opaque(this Color color)
+    {
+        return Color.FromArgb(255, color);
     }
 }
