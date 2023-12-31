@@ -4,6 +4,16 @@ namespace Numerous.Util;
 
 public static class Extensions
 {
+    public static string RemoveAll(this string s, string oldChars)
+    {
+        foreach (var oldChar in oldChars)
+        {
+            s = s.Replace(oldChar.ToString(), "");
+        }
+
+        return s;
+    }
+
     public static IEnumerable<string> ToDiscordMessageStrings(this string message)
     {
         var remaining = message;
