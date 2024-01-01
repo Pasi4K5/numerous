@@ -16,7 +16,6 @@ namespace Numerous.Discord.Events;
 public sealed partial class DiscordEventHandler : IHostedService
 {
     private readonly DiscordSocketClient _client;
-    private readonly OpenAiClient _openAiClient;
     private readonly DbManager _db;
 
     public DiscordEventHandler(
@@ -25,7 +24,6 @@ public sealed partial class DiscordEventHandler : IHostedService
         DbManager db)
     {
         _client = client;
-        _openAiClient = openAiClient;
         _db = db;
 
         this.Init();

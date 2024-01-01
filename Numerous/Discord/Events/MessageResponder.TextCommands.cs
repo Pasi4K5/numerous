@@ -121,12 +121,12 @@ public partial class MessageResponder
                     }
 
                     var character = embed?.Author is not null
-                        ? await FindCharacter(ExtractCharName(embed.Author.Value.Name), media)
+                        ? await FindCharacter(ExtractCharName(embed.Author.Value.Name), media.Value)
                         : null;
 
                     await msg.ReplyAsync(
-                        $"https://anilist.co/{media.Type.ToLower()}/{media.Id}"
-                        + (character is null ? "" : $"\nhttps://anilist.co/character/{character.Id}")
+                        $"https://anilist.co/{media.Value.Type.ToLower()}/{media.Value.Id}"
+                        + (character is null ? "" : $"\nhttps://anilist.co/character/{character.Value.Id}")
                     );
                 }
                 catch (GraphQLHttpRequestException)
@@ -193,10 +193,10 @@ public partial class MessageResponder
     {
         var characters = media.Characters.Nodes;
 
-        var bestMatch = characters.MaxBy(c => GetCharacterMatchScore(charName, c));
+        Character? bestMatch = characters.Any() ? characters.MaxBy(c => GetCharacterMatchScore(charName, c)) : null;
 
         bestMatch = bestMatch is not null
-            ? GetCharacterMatchScore(charName, bestMatch) > 0 ? bestMatch : null
+            ? GetCharacterMatchScore(charName, bestMatch.Value) > 0 ? bestMatch : null
             : null;
 
         if (bestMatch is not null)
@@ -243,7 +243,7 @@ public partial class MessageResponder
         _anilistClient.Dispose();
     }
 
-    public sealed record Title
+    public record struct Title
     {
         [JsonProperty("native")]
         public required string Native { get; init; }
@@ -255,7 +255,7 @@ public partial class MessageResponder
         public required string English { get; init; }
     }
 
-    public sealed record Media
+    public record struct Media
     {
         [JsonProperty("id")]
         public required int Id { get; init; }
@@ -270,13 +270,13 @@ public partial class MessageResponder
         public required NodeCollection<Character> Characters { get; init; }
     }
 
-    public sealed record NodeCollection<T>
+    public record struct NodeCollection<T>
     {
         [JsonProperty("nodes")]
         public required T[] Nodes { get; init; }
     }
 
-    public sealed record Character
+    public record struct Character
     {
         [JsonProperty("id")]
         public required int Id { get; init; }
@@ -285,7 +285,7 @@ public partial class MessageResponder
         public required CharacterName Name { get; init; }
     }
 
-    public sealed record CharacterName
+    public record struct CharacterName
     {
         [JsonProperty("full")]
         public required string Full { get; init; }
