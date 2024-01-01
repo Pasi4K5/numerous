@@ -6,7 +6,7 @@ using Numerous.Util;
 
 namespace Numerous.Discord.Events;
 
-public partial class DiscordEventHandler
+public partial class MessageResponder
 {
     private static readonly string[] _banPhrases =
     {
@@ -14,25 +14,9 @@ public partial class DiscordEventHandler
         "chat impregnate {user}",
     };
 
-    [Init]
-    private void MessageResponder_Init()
+    private async Task<bool> RespondToBanMessageAsync(SocketMessage msg)
     {
-        _client.MessageReceived += async msg => await MessageResponder_RespondAsync(msg);
-    }
-
-    private async Task MessageResponder_RespondAsync(SocketMessage msg)
-    {
-        if (await MessageResponder_RespondToBanMessageAsync(msg))
-        {
-            return;
-        }
-
-        await MessageResponder_RespondWithChatBotAsync(msg);
-    }
-
-    private async Task<bool> MessageResponder_RespondToBanMessageAsync(SocketMessage msg)
-    {
-        var idToBan = MessageResponder_GetUserIdToBan(msg.Content);
+        var idToBan = GetUserIdToBan(msg.Content);
 
         if (idToBan is null || msg.Channel is not IGuildChannel channel)
         {
@@ -50,7 +34,7 @@ public partial class DiscordEventHandler
         var senderRolePositions = sender.RoleIds.Select(x => channel.Guild.GetRole(x).Position).Concat(new[] { -1 });
         var targetRolePositions = target.RoleIds.Select(x => channel.Guild.GetRole(x).Position).Concat(new[] { -1 });
 
-        if (target.Id == _client.CurrentUser.Id
+        if (target.Id == client.CurrentUser.Id
             || target.Id == sender.Id
             || (channel.Guild.OwnerId != sender.Id
                 && (sender.GuildPermissions.BanMembers != true || senderRolePositions.Max() <= targetRolePositions.Max())
@@ -83,7 +67,7 @@ public partial class DiscordEventHandler
         return true;
     }
 
-    private static ulong? MessageResponder_GetUserIdToBan(string msg)
+    private static ulong? GetUserIdToBan(string msg)
     {
         var userMentionRegex = new Regex("<@.*?>");
 
@@ -101,34 +85,5 @@ public partial class DiscordEventHandler
         }
 
         return id;
-    }
-
-    private async Task MessageResponder_RespondWithChatBotAsync(SocketMessage msg)
-    {
-        if (msg.Author.IsBot || msg.Channel is IPrivateChannel)
-        {
-            return;
-        }
-
-        var botWasMentioned = msg.MentionedUsers.Select(x => x.Id).Contains(_client.CurrentUser.Id);
-
-        if (!botWasMentioned)
-        {
-            return;
-        }
-
-        using var _ = msg.Channel.EnterTypingState();
-
-        var (shouldRespond, response) = await _openAiClient.GetResponseAsync(msg);
-
-        if (!shouldRespond)
-        {
-            return;
-        }
-
-        foreach (var discordMessage in response.ToDiscordMessageStrings())
-        {
-            await msg.ReplyAsync(discordMessage);
-        }
     }
 }
