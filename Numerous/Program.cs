@@ -21,6 +21,8 @@ const string copyrightNotice =
     See <https://www.gnu.org/licenses/gpl-3.0> for details.
     """;
 
+var loggersInitialized = false;
+
 try
 {
     var cm = new ConfigManager();
@@ -48,6 +50,8 @@ try
     }
 
     Log.Logger = logCfg.CreateLogger();
+
+    loggersInitialized = true;
 
     Log.Logger.Information(copyrightNotice);
 
@@ -101,7 +105,14 @@ try
 }
 catch (Exception e)
 {
-    Log.Error(e, "An unhandled exception occurred");
+    if (loggersInitialized)
+    {
+        Log.Error(e, "An unhandled exception occurred");
+    }
+    else
+    {
+        Console.WriteLine(e);
+    }
 }
 finally
 {
