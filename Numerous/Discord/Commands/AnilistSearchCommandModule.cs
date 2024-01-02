@@ -3,6 +3,7 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Discord;
 using Discord.Interactions;
@@ -12,6 +13,8 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Numerous.ApiClients;
+using Numerous.Util;
+using Color = Discord.Color;
 
 namespace Numerous.Discord.Commands;
 
@@ -22,23 +25,54 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         """
         query($mediaTitle: String) {
             Media(search: $mediaTitle) {
-                id,
-                type,
+                isAdult,
                 title {
                     romaji,
                     english,
                     native,
                 },
+                description(asHtml: false),
+                coverImage {
+                    medium,
+                    color,
+                },
+                format,
+                status(version: 1),
+                startDate {
+                    year,
+                    month,
+                    day,
+                },
+                averageScore,
+                meanScore,
+                popularity,
+                trending,
+                favourites,
+                genres,
+                tags {
+                    name,
+                    rank,
+                    isGeneralSpoiler,
+                    isMediaSpoiler,
+                }
                 characters {
                     nodes {
-                        id,
                         name {
                             full,
                             alternative,
                             alternativeSpoiler,
                         },
+                        image: image {
+                            medium,
+                        },
+                        description(asHtml: false),
+                        gender,
+                        age,
+                        favourites,
+                        siteUrl,
                     },
                 },
+                siteUrl,
             },
         }
         """;
@@ -56,6 +90,10 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
             },
         }
         """;
+
+    private const ushort MaxFieldLength = 1024;
+
+    private static readonly Color _embedDefaultColor = new(0, 171, 255);
 
     private const string EmojiRegexString = "<:.*?:.*?>";
 
@@ -108,16 +146,193 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
                 ? await FindCharacter(ExtractCharName(embed.Author.Value.Name), media.Value)
                 : null;
 
+            if (media.Value.IsAdult)
+            {
+                await FollowupAsync(
+                    msg.GetLink()
+                    + "\n**WARNING: This media contains adult content."
+                    + "\nIf you are sure that you want to proceed, click the hidden links below.**"
+                    + $"\nMedia: ||<{media.Value.SiteUrl}>||"
+                    + (character is null ? "" : $"\nCharacter: ||<{character.Value.SiteUrl}>||")
+                );
+
+                return;
+            }
+
             await FollowupAsync(
-                msg.GetLink()
-                + $"\nhttps://anilist.co/{media.Value.Type.ToLower()}/{media.Value.Id}"
-                + (character is null ? "" : $"\nhttps://anilist.co/character/{character.Value.Id}")
+                msg.GetLink(),
+                BuildEmbeds(media.Value, character)
             );
         }
         catch (GraphQLHttpRequestException)
         {
             await FollowupAsync("Character not found.");
         }
+    }
+
+    private static Embed[] BuildEmbeds(Media media, Character? character)
+    {
+        var embeds = new List<Embed> { BuildMediaEmbed(media) };
+
+        var characterEmbed = character is null
+            ? null
+            : BuildCharacterEmbed(character.Value);
+
+        if (characterEmbed is not null)
+        {
+            embeds.Add(characterEmbed);
+        }
+
+        return embeds.ToArray();
+    }
+
+    private static Embed BuildMediaEmbed(Media media)
+    {
+        var builder = new EmbedBuilder()
+            .WithColor(
+                media.CoverImage?.Color is not null
+                    ? new Color(uint.Parse(media.CoverImage.Value.Color[1..], NumberStyles.HexNumber))
+                    : _embedDefaultColor
+            )
+            .WithTitle(media.Title.Romaji)
+            .WithDescription($"Click [here]({media.SiteUrl}) to go to Anilist.");
+
+        if (media.CoverImage is not null)
+        {
+            builder.WithThumbnailUrl(media.CoverImage.Value.Medium);
+        }
+
+        if (media.Description is not null)
+        {
+            builder.AddField("Description", ReplaceHtml(media.Description).LimitLength(MaxFieldLength));
+        }
+
+        if (media.Format is not null)
+        {
+            builder.AddField("Format", MakeReadable(media.Format), true);
+        }
+
+        if (media.StartDate is not null)
+        {
+            builder.AddField("Release Date", media.StartDate.ToString(), true);
+        }
+
+        if (media.Status is not null)
+        {
+            builder.AddField("Status", ToTitleCase(media.Status), true);
+        }
+
+        if (media.AverageScore > 0)
+        {
+            builder.AddField("Average Score", $"{media.AverageScore}%", true);
+        }
+
+        if (media.MeanScore > 0)
+        {
+            builder.AddField("Mean Score", $"{media.MeanScore}%", true);
+        }
+
+        if (media.Popularity > 0)
+        {
+            builder.AddField("Popularity", $"#{media.Popularity}", true);
+        }
+
+        if (media.Trending > 0)
+        {
+            builder.AddField("Trending", $"#{media.Trending}", true);
+        }
+
+        if (media.Favourites > 0)
+        {
+            builder.AddField("Favourites", $"{media.Favourites}", true);
+        }
+
+        if (media.Genres?.Length > 0)
+        {
+            builder.AddField("Genres", string.Join('\n', media.Genres.Select(x => $"• {x}")), true);
+        }
+
+        if (media.NonSpoilerTags.Any())
+        {
+            builder.AddField(
+                "Tags",
+                string.Join('\n', media.NonSpoilerTags.Select(tag => $"• *{tag.Rank}%* - {tag.Name}".LimitLength(MaxFieldLength))),
+                true
+            );
+        }
+
+        return builder.Build();
+    }
+
+    private static Embed BuildCharacterEmbed(Character character)
+    {
+        var builder = new EmbedBuilder()
+            .WithColor(_embedDefaultColor)
+            .WithTitle(character.Name.Full)
+            .WithDescription($"Click [here]({character.SiteUrl}) to go to Anilist.");
+
+        if (character.Image is not null)
+        {
+            builder.WithThumbnailUrl(character.Image.Value.Medium);
+        }
+
+        if (character.Description is not null)
+        {
+            builder.AddField("Description", ReplaceHtml(character.Description)
+                .LimitLength(MaxFieldLength)
+                // Remove spoilers
+                .Split("\n~").First()
+            );
+        }
+
+        if (character.Gender is not null)
+        {
+            builder.AddField("Gender", character.Gender, true);
+        }
+
+        if (character.Age is not null)
+        {
+            builder.AddField("Age", character.Age, true);
+        }
+
+        if (character.Favourites > 0)
+        {
+            builder.AddField("Favouries", character.Favourites, true);
+        }
+
+        return builder.Build();
+    }
+
+    private static string ReplaceHtml(string s)
+    {
+        return s
+            .Replace("<br>", "")
+            .Replace("<i>", "*")
+            .Replace("</i>", "*")
+            .Replace("<b>", "**")
+            .Replace("</b>", "**")
+            .Replace("<u>", "__")
+            .Replace("</u>", "__")
+            .Replace("<s>", "~~")
+            .Replace("</s>", "~~");
+    }
+
+    private static string MakeReadable(string? s)
+    {
+        return s switch
+        {
+            "TV_SHORT" => "TV Short",
+            "NOVEL" => "Light Novel",
+            "OVA" => "OVA",
+            "ONA" => "ONA",
+            null => "Unknown",
+            _ => ToTitleCase(s),
+        };
+    }
+
+    private static string ToTitleCase(string s)
+    {
+        return new CultureInfo("en-US").TextInfo.ToTitleCase(s.ToLower().Replace('_', ' '));
     }
 
     private static string ExtractCharName(string charName)
@@ -220,62 +435,153 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         );
     }
 
-    public void Dispose()
+    public record struct Media
     {
-        // _anilistClient.Dispose();
+        [JsonProperty("isAdult")]
+        public bool IsAdult { get; init; }
+
+        [JsonProperty("title")]
+        public Title Title { get; init; }
+
+        [JsonProperty("description")]
+        public string? Description { get; init; }
+
+        [JsonProperty("format")]
+        public string? Format { get; init; }
+
+        [JsonProperty("coverImage")]
+        public MediaCoverImage? CoverImage { get; init; }
+
+        [JsonProperty("startDate")]
+        public FuzzyDate? StartDate { get; init; }
+
+        [JsonProperty("averageScore")]
+        public int? AverageScore { get; init; }
+
+        [JsonProperty("meanScore")]
+        public int? MeanScore { get; init; }
+
+        [JsonProperty("popularity")]
+        public int? Popularity { get; init; }
+
+        [JsonProperty("trending")]
+        public int? Trending { get; init; }
+
+        [JsonProperty("favourites")]
+        public int? Favourites { get; init; }
+
+        [JsonProperty("genres")]
+        public string[]? Genres { get; init; }
+
+        [JsonProperty("tags")]
+        public Tag[]? Tags { get; init; }
+
+        [JsonIgnore]
+        public readonly IEnumerable<Tag> NonSpoilerTags =>
+            Tags?.Where(tag => tag is { IsGeneralSpoiler: false, IsMediaSpoiler: false }) ?? Enumerable.Empty<Tag>();
+
+        [JsonProperty("status")]
+        public string? Status { get; init; }
+
+        [JsonProperty("characters")]
+        public NodeCollection<Character> Characters { get; init; }
+
+        [JsonProperty("siteUrl")]
+        public string? SiteUrl { get; init; }
     }
 
     public record struct Title
     {
         [JsonProperty("native")]
-        public required string Native { get; init; }
+        public string Native { get; init; }
 
         [JsonProperty("romaji")]
-        public required string Romaji { get; init; }
+        public string Romaji { get; init; }
 
         [JsonProperty("english")]
-        public required string English { get; init; }
+        public string English { get; init; }
     }
 
-    public record struct Media
+    public readonly record struct FuzzyDate
     {
-        [JsonProperty("id")]
-        public required int Id { get; init; }
+        [JsonProperty("year")]
+        public int? Year { get; init; }
 
-        [JsonProperty("type")]
-        public required string Type { get; init; }
+        [JsonProperty("month")]
+        public int? Month { get; init; }
 
-        [JsonProperty("title")]
-        public required Title Title { get; init; }
+        [JsonProperty("day")]
+        public int? Day { get; init; }
 
-        [JsonProperty("characters")]
-        public required NodeCollection<Character> Characters { get; init; }
+        public override string ToString()
+        {
+            return $"{Year}/{Month}/{Day}";
+        }
+    }
+
+    public readonly record struct Tag
+    {
+        [JsonProperty("name")]
+        public string Name { get; init; }
+
+        [JsonProperty("rank")]
+        public int Rank { get; init; }
+
+        [JsonProperty("isGeneralSpoiler")]
+        public bool IsGeneralSpoiler { get; init; }
+
+        [JsonProperty("isMediaSpoiler")]
+        public bool IsMediaSpoiler { get; init; }
     }
 
     public record struct NodeCollection<T>
     {
         [JsonProperty("nodes")]
-        public required T[] Nodes { get; init; }
+        public T[] Nodes { get; init; }
     }
 
     public record struct Character
     {
-        [JsonProperty("id")]
-        public required int Id { get; init; }
-
         [JsonProperty("name")]
-        public required CharacterName Name { get; init; }
+        public CharacterName Name { get; init; }
+
+        [JsonProperty("image")]
+        public MediaCoverImage? Image { get; init; }
+
+        [JsonProperty("description")]
+        public string? Description { get; init; }
+
+        [JsonProperty("gender")]
+        public string? Gender { get; init; }
+
+        [JsonProperty("age")]
+        public string? Age { get; init; }
+
+        [JsonProperty("favourites")]
+        public int? Favourites { get; init; }
+
+        [JsonProperty("siteUrl")]
+        public string? SiteUrl { get; init; }
     }
 
     public record struct CharacterName
     {
         [JsonProperty("full")]
-        public required string Full { get; init; }
+        public string Full { get; init; }
 
         [JsonProperty("alternative")]
-        public required string[] Alternative { get; init; }
+        public string[] Alternative { get; init; }
 
         [JsonProperty("alternativeSpoiler")]
-        public required string[] AlternativeSpoiler { get; init; }
+        public string[] AlternativeSpoiler { get; init; }
+    }
+
+    public record struct MediaCoverImage
+    {
+        [JsonProperty("medium")]
+        public string? Medium { get; init; }
+
+        [JsonProperty("color")]
+        public string? Color { get; init; }
     }
 }

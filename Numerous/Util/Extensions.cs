@@ -9,6 +9,11 @@ namespace Numerous.Util;
 
 public static class Extensions
 {
+    public static string LimitLength(this string s, int maxLength)
+    {
+        return s.Length > maxLength ? s[..(maxLength - 1)] + "…" : s;
+    }
+
     public static string RemoveAll(this string s, string oldChars)
     {
         foreach (var oldChar in oldChars)
