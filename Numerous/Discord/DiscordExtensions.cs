@@ -24,6 +24,11 @@ public static class DiscordExtensions
 
     public static string ToLogString(this IReadOnlyCollection<SocketSlashCommandDataOption> options)
     {
+        if (options.Count == 0)
+        {
+            return "[]";
+        }
+
         var s = "";
 
         foreach (var option in options)
