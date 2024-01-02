@@ -21,8 +21,25 @@ namespace Numerous.Discord.Commands;
 [UsedImplicitly]
 public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : CommandModule
 {
-    private const string MediaQuery =
+    private const string CharFields =
         """
+        name {
+            full,
+            alternative,
+            alternativeSpoiler,
+        },
+        image: image {
+            medium,
+        },
+        description(asHtml: false),
+        gender,
+        age,
+        favourites,
+        siteUrl,
+        """;
+
+    private const string MediaQuery =
+        $$"""
         query($mediaTitle: String) {
             Media(search: $mediaTitle) {
                 isAdult,
@@ -57,19 +74,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
                 }
                 characters {
                     nodes {
-                        name {
-                            full,
-                            alternative,
-                            alternativeSpoiler,
-                        },
-                        image: image {
-                            medium,
-                        },
-                        description(asHtml: false),
-                        gender,
-                        age,
-                        favourites,
-                        siteUrl,
+                        {{CharFields}}
                     },
                 },
                 siteUrl,
@@ -78,15 +83,10 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         """;
 
     private const string CharQuery =
-        """
+        $$"""
         query($charName: String) {
             Character(search: $charName) {
-                id,
-                name {
-                    full,
-                    alternative,
-                    alternativeSpoiler,
-                },
+                {{CharFields}}
             },
         }
         """;
