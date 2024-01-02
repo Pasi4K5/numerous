@@ -15,6 +15,7 @@ public partial class DiscordEventHandler
     private void Logger_Init()
     {
         _client.SlashCommandExecuted += LogSlashCommand;
+        _client.InteractionCreated += LogInteraction;
     }
 
     private async Task LogSlashCommand(SocketSlashCommand cmd)
@@ -27,11 +28,26 @@ public partial class DiscordEventHandler
             """User "{User}" (ID: {Uid}) executed slash command "{Cmd}" with args {Args} in channel "{Channel}" (ID: {ChannelId}) in guild "{Guild}" (ID: {GuildId})""",
             cmd.User.Username,
             cmd.User.Id,
-            cmd.Data.Name,
+            cmd.CommandName,
             cmd.Data.Options.ToLogString(),
             cmd.Channel,
             cmd.ChannelId,
             guild?.Name ?? "null",
             cmd.GuildId);
+    }
+
+    private Task LogInteraction(SocketInteraction interaction)
+    {
+        if (interaction is SocketMessageCommand msgCmd)
+        {
+            Log.Information(
+                """User "{User}" (ID: {Uid}) executed message command "{Cmd}" on message <{Msg}>.""",
+                msgCmd.User.Username,
+                msgCmd.User.Id,
+                msgCmd.CommandName,
+                msgCmd.Data.Message.GetLink());
+        }
+
+        return Task.CompletedTask;
     }
 }
