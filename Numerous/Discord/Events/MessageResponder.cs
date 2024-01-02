@@ -14,7 +14,7 @@ namespace Numerous.Discord.Events;
 public sealed partial class MessageResponder(
     DiscordSocketClient client,
     OpenAiClient openAi
-) : IHostedService, IDisposable
+) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -34,7 +34,7 @@ public sealed partial class MessageResponder(
         {
             Task.Run(async () =>
             {
-                if (await RespondToCommandAsync(msg) || await RespondToBanMessageAsync(msg))
+                if (await RespondToBanMessageAsync(msg))
                 {
                     return;
                 }

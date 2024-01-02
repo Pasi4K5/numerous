@@ -5,20 +5,19 @@
 
 using System.Text.RegularExpressions;
 using Discord;
-using Discord.WebSocket;
+using Discord.Interactions;
+using F23.StringSimilarity;
 using GraphQL.Client.Http;
-using GraphQL.Client.Serializer.Newtonsoft;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Numerous.ApiClients;
 
-namespace Numerous.Discord.Events;
+namespace Numerous.Discord.Commands;
 
-public partial class MessageResponder
+[UsedImplicitly]
+public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : CommandModule
 {
-    private const string AnilistEndpoint = "https://graphql.anilist.co";
-
-    private readonly GraphQLHttpClient _anilistClient = new(AnilistEndpoint, new NewtonsoftJsonSerializer());
-
     private const string MediaQuery =
         """
         query($mediaTitle: String) {
@@ -69,75 +68,56 @@ public partial class MessageResponder
     [GeneratedRegex(@"\([^)]*\)")]
     private static partial Regex CharacterPostfixRegex();
 
-    private async Task<bool> RespondToCommandAsync(SocketMessage msg)
+    [UsedImplicitly]
+    [MessageCommand("Search on Anilist")]
+    public async Task RespondToCommandAsync(IMessage msg)
     {
-        var content = msg.CleanContent;
+        var embed = msg.Embeds.FirstOrDefault();
+        var mediaTitle = ExtractMediaTitle(embed?.Description);
 
-        if (!content.StartsWith('%')
-            || content.Length != 2
-            || msg.Channel is not IGuildChannel)
+        if (mediaTitle is null)
         {
-            return false;
+            await RespondAsync("This command can only be used on certain Mudae messages.");
+
+            return;
         }
 
-        switch (content[1])
+        await DeferAsync();
+
+        var req = new GraphQLHttpRequest
         {
-            case 'i':
-                if (msg.Reference is null)
-                {
-                    await msg.ReplyAsync("You must reply to a message to use this command.");
+            Query = MediaQuery,
+            Variables = new
+            {
+                mediaTitle,
+            },
+        };
 
-                    return true;
-                }
+        try
+        {
+            var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media>();
 
-                var embed = (await msg.Channel.GetMessageAsync(msg.Reference.MessageId.Value)).Embeds.FirstOrDefault();
-                var mediaTitle = ExtractMediaTitle(embed?.Description);
+            if (media is null)
+            {
+                await FollowupAsync("Media not found.");
 
-                if (mediaTitle is null)
-                {
-                    await msg.ReplyAsync("You must reply to a valid Mudae message to use this command.");
+                return;
+            }
 
-                    return true;
-                }
+            var character = embed?.Author is not null
+                ? await FindCharacter(ExtractCharName(embed.Author.Value.Name), media.Value)
+                : null;
 
-                var req = new GraphQLHttpRequest
-                {
-                    Query = MediaQuery,
-                    Variables = new
-                    {
-                        mediaTitle,
-                    },
-                };
-
-                try
-                {
-                    var media = (await _anilistClient.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media>();
-
-                    if (media is null)
-                    {
-                        await msg.ReplyAsync("Media not found.");
-
-                        return true;
-                    }
-
-                    var character = embed?.Author is not null
-                        ? await FindCharacter(ExtractCharName(embed.Author.Value.Name), media.Value)
-                        : null;
-
-                    await msg.ReplyAsync(
-                        $"https://anilist.co/{media.Value.Type.ToLower()}/{media.Value.Id}"
-                        + (character is null ? "" : $"\nhttps://anilist.co/character/{character.Value.Id}")
-                    );
-                }
-                catch (GraphQLHttpRequestException)
-                {
-                    await msg.ReplyAsync("Character not found.");
-                }
-
-                break;
+            await FollowupAsync(
+                msg.GetLink()
+                + $"\nhttps://anilist.co/{media.Value.Type.ToLower()}/{media.Value.Id}"
+                + (character is null ? "" : $"\nhttps://anilist.co/character/{character.Value.Id}")
+            );
         }
-
-        return true;
+        catch (GraphQLHttpRequestException)
+        {
+            await FollowupAsync("Character not found.");
+        }
     }
 
     private static string ExtractCharName(string charName)
@@ -206,7 +186,7 @@ public partial class MessageResponder
 
         try
         {
-            var response = await _anilistClient.SendQueryAsync<JObject>(new GraphQLHttpRequest
+            var response = await anilist.Client.SendQueryAsync<JObject>(new GraphQLHttpRequest
             {
                 Query = CharQuery,
                 Variables = new
@@ -231,16 +211,18 @@ public partial class MessageResponder
         var queryWords = query.Split(' ').Distinct();
         var nameWords = fullName.Split(' ').Concat(altNames).Distinct().ToArray();
 
+        Levenshtein lev = new();
+
         return queryWords.Sum(queryWord =>
             nameWords.Count(nameWord =>
-                queryWord.Equals(nameWord, StringComparison.OrdinalIgnoreCase)
+                lev.Distance(nameWord.ToLower(), queryWord.ToLower()) <= (float)Math.Min(nameWord.Length, queryWord.Length) / 3
             )
         );
     }
 
     public void Dispose()
     {
-        _anilistClient.Dispose();
+        // _anilistClient.Dispose();
     }
 
     public record struct Title
