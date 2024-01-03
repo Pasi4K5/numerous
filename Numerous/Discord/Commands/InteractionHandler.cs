@@ -27,7 +27,15 @@ public sealed class InteractionHandler(
 
         client.Ready += cfg.DevMode
             ? async () => await interactions.RegisterCommandsToGuildAsync(cfg.DevGuildId)
-            : async () => await interactions.RegisterCommandsGloballyAsync();
+            : async () =>
+            {
+                foreach (var guild in await client.Rest.GetGuildsAsync())
+                {
+                    await guild.DeleteSlashCommandsAsync();
+                }
+
+                await interactions.RegisterCommandsGloballyAsync();
+            };
         client.InteractionCreated += OnInteractionCreatedAsync;
 
         await interactions.AddModulesAsync(Assembly.GetExecutingAssembly(), services);
