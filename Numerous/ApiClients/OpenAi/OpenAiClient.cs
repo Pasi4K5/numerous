@@ -29,7 +29,7 @@ public sealed class OpenAiClient
     private static readonly TimeSpan _restartAfter = TimeSpan.FromMinutes(10);
     private DateTime _restartTime = DateTime.Now + _restartAfter;
 
-    private const string ChatModel = "gpt-4-1106-preview";
+    private const string ChatModel = "gpt-3.5-turbo-1106";
 
     private readonly IEnumerable<Tool> _tools = new Tool[]
     {
