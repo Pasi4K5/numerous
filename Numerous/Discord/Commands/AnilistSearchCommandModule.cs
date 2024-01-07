@@ -20,6 +20,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
     private const ushort MaxFieldLength = 1024;
 
     private static readonly Color _embedDefaultColor = new(0, 171, 255);
+    private static readonly Levenshtein _levenshtein = new();
 
     [UsedImplicitly]
     [MessageCommand("Search on Anilist")]
@@ -37,18 +38,9 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
 
         await DeferAsync();
 
-        var req = new GraphQLHttpRequest
-        {
-            Query = MediaQuery,
-            Variables = new
-            {
-                mediaTitle,
-            },
-        };
-
         try
         {
-            var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media>();
+            var media = await FindMediaAsync(mediaTitle);
 
             if (media is null)
             {
@@ -58,7 +50,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
             }
 
             var character = embed?.Author is not null
-                ? await FindCharacter(ExtractCharName(embed.Author.Value.Name), media.Value)
+                ? await FindCharacterAsync(ExtractCharName(embed.Author.Value.Name), media.Value)
                 : null;
 
             if (media.Value.IsAdult)
@@ -85,7 +77,35 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         }
     }
 
-    private async ValueTask<Character?> FindCharacter(string charName, Media media)
+    private async Task<Media?> FindMediaAsync(string mediaTitle)
+    {
+        var req = new GraphQLHttpRequest
+        {
+            Query = MediaQuery,
+            Variables = new
+            {
+                mediaTitle,
+            },
+        };
+
+        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media>();
+
+        if (media is null)
+        {
+            return media;
+        }
+
+        string[] titles =
+        [
+            media.Value.Title.Romaji,
+            media.Value.Title.English,
+            media.Value.Title.Native,
+        ];
+
+        return titles.Any(t => RoughlyEqual(t, mediaTitle)) ? media : null;
+    }
+
+    private async ValueTask<Character?> FindCharacterAsync(string charName, Media media)
     {
         var characters = media.Characters.Nodes;
 
@@ -127,12 +147,15 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         var queryWords = query.Split(' ').Distinct();
         var nameWords = fullName.Split(' ').Concat(altNames).Distinct().ToArray();
 
-        Levenshtein lev = new();
-
         return queryWords.Sum(queryWord =>
             nameWords.Count(nameWord =>
-                lev.Distance(nameWord.ToLower(), queryWord.ToLower()) <= (float)Math.Min(nameWord.Length, queryWord.Length) / 3
-            )
+                RoughlyEqual(nameWord, queryWord))
         );
+    }
+
+    private static bool RoughlyEqual(string s1, string s2)
+    {
+        return _levenshtein.Distance(s1.ToLower(), s2.ToLower())
+               <= (float)Math.Min(s1.Length, s2.Length) / 3;
     }
 }
