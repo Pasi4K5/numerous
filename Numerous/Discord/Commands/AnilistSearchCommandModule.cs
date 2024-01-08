@@ -95,14 +95,14 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
             return media;
         }
 
-        string[] titles =
+        string?[] titles =
         [
             media.Value.Title.Romaji,
             media.Value.Title.English,
             media.Value.Title.Native,
         ];
 
-        return titles.Any(t => RoughlyEqual(t, mediaTitle)) ? media : null;
+        return titles.Any(t => t is not null && RoughlyEqual(t, mediaTitle, 3)) ? media : null;
     }
 
     private async ValueTask<Character?> FindCharacterAsync(string charName, Media media)
@@ -153,9 +153,9 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         );
     }
 
-    private static bool RoughlyEqual(string s1, string s2)
+    private static bool RoughlyEqual(string s1, string s2, float threshold = 1f)
     {
         return _levenshtein.Distance(s1.ToLower(), s2.ToLower())
-               <= (float)Math.Min(s1.Length, s2.Length) / 3;
+               <= (float)Math.Min(s1.Length, s2.Length) / 3 * threshold;
     }
 }

@@ -9,7 +9,7 @@ namespace Numerous.Discord.Commands;
 
 public partial class AnilistSearchCommandModule
 {
-    public record struct Media
+    public readonly record struct Media
     {
         [JsonProperty("isAdult")]
         public bool IsAdult { get; init; }
@@ -67,13 +67,13 @@ public partial class AnilistSearchCommandModule
     public record struct Title
     {
         [JsonProperty("native")]
-        public string Native { get; init; }
+        public string? Native { get; init; }
 
         [JsonProperty("romaji")]
-        public string Romaji { get; init; }
+        public string? Romaji { get; init; }
 
         [JsonProperty("english")]
-        public string English { get; init; }
+        public string? English { get; init; }
     }
 
     public readonly record struct FuzzyDate
