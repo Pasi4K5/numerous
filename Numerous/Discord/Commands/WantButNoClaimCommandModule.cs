@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 
 namespace Numerous.Discord.Commands;
 
-public class WantButNoClaimCommandModule : CommandModule
+public sealed class WantButNoClaimCommandModule : CommandModule
 {
     private const ulong MudaeUserId = 432610292342587392;
     private const ulong PingTargetUserId = 345885199386804235;
