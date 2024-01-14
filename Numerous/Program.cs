@@ -79,7 +79,7 @@ try
                                 IsGenericMethodDefinition: true,
                             }
                         ).MakeGenericMethod(serviceTuple.impl)
-                        .Invoke(s, new object[] { s });
+                        .Invoke(s, [s]);
 
                     break;
                 default:

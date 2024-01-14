@@ -7,14 +7,29 @@ namespace Numerous.Discord.Commands;
 
 public partial class AnilistSearchCommandModule
 {
-    private const string CharFields =
+    private const string MediaTitleFields =
         """
+        title {
+            romaji,
+            english,
+            native,
+        },
+        synonyms,
+        """;
+
+    private const string CharFields =
+        $$"""
         name {
             full,
             alternative,
             alternativeSpoiler,
         },
-        image: image {
+        media {
+            nodes {
+                {{MediaTitleFields}}
+            },
+        },
+        image {
             medium,
         },
         description(asHtml: false),
@@ -29,11 +44,7 @@ public partial class AnilistSearchCommandModule
         query($mediaTitle: String) {
             Media(search: $mediaTitle) {
                 isAdult,
-                title {
-                    romaji,
-                    english,
-                    native,
-                },
+                {{MediaTitleFields}}
                 description(asHtml: false),
                 coverImage {
                     medium,

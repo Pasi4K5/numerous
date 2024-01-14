@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Globalization;
+using System.Text;
 using Discord;
 using Numerous.Util;
 
@@ -17,7 +18,7 @@ public partial class AnilistSearchCommandModule
 
         var characterEmbed = character is null
             ? null
-            : BuildCharacterEmbed(character.Value);
+            : BuildCharacterEmbed(character);
 
         if (characterEmbed is not null)
         {
@@ -29,14 +30,26 @@ public partial class AnilistSearchCommandModule
 
     private static Embed BuildMediaEmbed(Media media)
     {
+        var desc = new StringBuilder();
+
+        if (media.Title is { Native: not null, Romaji: not null })
+        {
+            desc.Append($"**Romaji:** {media.Title?.Romaji}\n");
+        }
+
+        if ((media.Title?.Native is not null || media.Title?.Romaji is not null) && media.Title?.English is not null)
+        {
+            desc.Append($"**English:** {media.Title?.English}\n");
+        }
+
         var builder = new EmbedBuilder()
             .WithColor(
                 media.CoverImage?.Color is not null
                     ? new Color(uint.Parse(media.CoverImage.Value.Color[1..], NumberStyles.HexNumber))
                     : _embedDefaultColor
             )
-            .WithTitle(media.Title.Romaji)
-            .WithDescription($"Click [here]({media.SiteUrl}) to go to Anilist.");
+            .WithTitle(media.Title?.Native ?? media.Title?.Romaji ?? media.Title?.English ?? "Unknown")
+            .WithDescription($"{desc}\nClick [here]({media.SiteUrl}) to go to Anilist.");
 
         if (media.CoverImage is not null)
         {
@@ -53,9 +66,11 @@ public partial class AnilistSearchCommandModule
             builder.AddField("Format", MakeReadable(media.Format), true);
         }
 
-        if (media.StartDate is not null)
+        var date = media.StartDate?.ToString();
+
+        if (date is not null)
         {
-            builder.AddField("Release Date", media.StartDate.ToString(), true);
+            builder.AddField("Release Date", date, true);
         }
 
         if (media.Status is not null)
@@ -109,7 +124,7 @@ public partial class AnilistSearchCommandModule
     {
         var builder = new EmbedBuilder()
             .WithColor(_embedDefaultColor)
-            .WithTitle(character.Name.Full)
+            .WithTitle(character.Name?.Full ?? "Unknown")
             .WithDescription($"Click [here]({character.SiteUrl}) to go to Anilist.");
 
         if (character.Image is not null)

@@ -44,23 +44,23 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
 
             if (media is null)
             {
-                await FollowupAsync("Media not found.");
+                await FollowupAsync(msg.GetLink() + "\nMedia not found.");
 
                 return;
             }
 
             var character = embed?.Author is not null
-                ? await FindCharacterAsync(ExtractCharName(embed.Author.Value.Name), media.Value)
+                ? await FindCharacterAsync(ExtractCharName(embed.Author.Value.Name), media)
                 : null;
 
-            if (media.Value.IsAdult)
+            if (media.IsAdult == true)
             {
                 await FollowupAsync(
                     msg.GetLink()
                     + "\n**WARNING: This media contains adult content."
                     + "\nIf you are sure that you want to proceed, click the hidden links below.**"
-                    + $"\nMedia: ||<{media.Value.SiteUrl}>||"
-                    + (character is null ? "" : $"\nCharacter: ||<{character.Value.SiteUrl}>||")
+                    + $"\nMedia: ||<{media.SiteUrl}>||"
+                    + (character is null ? "" : $"\nCharacter: ||<{character.SiteUrl}>||")
                 );
 
                 return;
@@ -68,7 +68,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
 
             await FollowupAsync(
                 msg.GetLink(),
-                BuildEmbeds(media.Value, character)
+                BuildEmbeds(media, character)
             );
         }
         catch (GraphQLHttpRequestException)
@@ -88,31 +88,26 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
             },
         };
 
-        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media>();
+        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media?>();
 
         if (media is null)
         {
             return media;
         }
 
-        string?[] titles =
-        [
-            media.Value.Title.Romaji,
-            media.Value.Title.English,
-            media.Value.Title.Native,
-        ];
+        var titles = media.Titles.Concat(media.Synonyms ?? Array.Empty<string>()).ToArray();
 
-        return titles.Any(t => t is not null && RoughlyEqual(t, mediaTitle, 3)) ? media : null;
+        return titles.Any(t => RoughlyEqual(t, mediaTitle, 3)) ? media : null;
     }
 
     private async ValueTask<Character?> FindCharacterAsync(string charName, Media media)
     {
-        var characters = media.Characters.Nodes;
+        var characters = media.Characters?.Nodes;
 
-        Character? bestMatch = characters.Any() ? characters.MaxBy(c => GetCharacterMatchScore(charName, c)) : null;
+        var bestMatch = characters?.Length > 0 ? characters.MaxBy(c => GetCharacterMatchScore(charName, c)) : null;
 
         bestMatch = bestMatch is not null
-            ? GetCharacterMatchScore(charName, bestMatch.Value) > 0 ? bestMatch : null
+            ? GetCharacterMatchScore(charName, bestMatch) > 0 ? bestMatch : null
             : null;
 
         if (bestMatch is not null)
@@ -131,7 +126,19 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
                 },
             });
 
-            return response.Data["Character"]?.ToObject<Character>();
+            var character = response.Data["Character"]?.ToObject<Character>();
+
+            if (character is null)
+            {
+                return null;
+            }
+
+            if (character.ConnectedMedia?.Nodes.Any(m => m.Titles.Any(t1 => media.Titles.Any(t2 => RoughlyEqual(t1, t2)))) != true)
+            {
+                return null;
+            }
+
+            return GetCharacterMatchScore(charName, character) > 0 ? character : null;
         }
         catch (GraphQLHttpRequestException)
         {
@@ -141,11 +148,9 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
 
     private static int GetCharacterMatchScore(string query, Character character)
     {
-        var fullName = character.Name.Full;
-        var altNames = character.Name.Alternative
-            .Concat(character.Name.AlternativeSpoiler);
+        var names = character.Name?.All;
         var queryWords = query.Split(' ').Distinct();
-        var nameWords = fullName.Split(' ').Concat(altNames).Distinct().ToArray();
+        var nameWords = names?.SelectMany(n => n.Split(' ')).Distinct().ToArray() ?? Array.Empty<string>();
 
         return queryWords.Sum(queryWord =>
             nameWords.Count(nameWord =>
@@ -153,9 +158,9 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         );
     }
 
-    private static bool RoughlyEqual(string s1, string s2, float threshold = 1f)
+    private static bool RoughlyEqual(string s1, string s2, float leniency = 1f)
     {
         return _levenshtein.Distance(s1.ToLower(), s2.ToLower())
-               <= (float)Math.Min(s1.Length, s2.Length) / 3 * threshold;
+               <= (float)Math.Min(s1.Length, s2.Length) / 3 * leniency;
     }
 }

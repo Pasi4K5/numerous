@@ -3,19 +3,28 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Numerous.Discord.Commands;
 
 public partial class AnilistSearchCommandModule
 {
-    public readonly record struct Media
+    public sealed record Media
     {
         [JsonProperty("isAdult")]
-        public bool IsAdult { get; init; }
+        public bool? IsAdult { get; init; }
 
         [JsonProperty("title")]
-        public Title Title { get; init; }
+        public MediaTitle? Title { get; init; }
+
+        [JsonIgnore]
+        public IEnumerable<string> Titles => Title is not null
+            ? new[] { Title?.Native, Title?.Romaji, Title?.English }.Where(x => x is not null).Cast<string>()
+            : Enumerable.Empty<string>();
+
+        [JsonProperty("synonyms")]
+        public string[]? Synonyms { get; init; }
 
         [JsonProperty("description")]
         public string? Description { get; init; }
@@ -48,23 +57,23 @@ public partial class AnilistSearchCommandModule
         public string[]? Genres { get; init; }
 
         [JsonProperty("tags")]
-        public Tag[]? Tags { get; init; }
+        public MediaTag[]? Tags { get; init; }
 
         [JsonIgnore]
-        public readonly IEnumerable<Tag> NonSpoilerTags =>
-            Tags?.Where(tag => tag is { IsGeneralSpoiler: false, IsMediaSpoiler: false }) ?? Enumerable.Empty<Tag>();
+        public IEnumerable<MediaTag> NonSpoilerTags =>
+            Tags?.Where(tag => tag is { IsGeneralSpoiler: false, IsMediaSpoiler: false }) ?? Enumerable.Empty<MediaTag>();
 
         [JsonProperty("status")]
         public string? Status { get; init; }
 
         [JsonProperty("characters")]
-        public NodeCollection<Character> Characters { get; init; }
+        public NodeCollection<Character>? Characters { get; init; }
 
         [JsonProperty("siteUrl")]
         public string? SiteUrl { get; init; }
     }
 
-    public record struct Title
+    public readonly record struct MediaTitle
     {
         [JsonProperty("native")]
         public string? Native { get; init; }
@@ -87,37 +96,64 @@ public partial class AnilistSearchCommandModule
         [JsonProperty("day")]
         public int? Day { get; init; }
 
-        public override string ToString()
+        public override string? ToString()
         {
-            return $"{Year}/{Month}/{Day}";
+            if (Year is null && Month is null && Day is null)
+            {
+                return null;
+            }
+
+            var sb = new StringBuilder();
+
+            if (Year is not null)
+            {
+                sb.Append(Year);
+            }
+
+            if (Month is not null)
+            {
+                sb.Append('-');
+                sb.Append(Month);
+            }
+
+            if (Day is not null)
+            {
+                sb.Append('-');
+                sb.Append(Day);
+            }
+
+            return sb.ToString();
         }
     }
 
-    public readonly record struct Tag
+    public readonly record struct MediaTag
     {
         [JsonProperty("name")]
         public string Name { get; init; }
 
         [JsonProperty("rank")]
-        public int Rank { get; init; }
+        public int? Rank { get; init; }
 
         [JsonProperty("isGeneralSpoiler")]
-        public bool IsGeneralSpoiler { get; init; }
+        public bool? IsGeneralSpoiler { get; init; }
 
         [JsonProperty("isMediaSpoiler")]
-        public bool IsMediaSpoiler { get; init; }
+        public bool? IsMediaSpoiler { get; init; }
     }
 
-    public record struct NodeCollection<T>
+    public sealed class NodeCollection<T>
     {
         [JsonProperty("nodes")]
-        public T[] Nodes { get; init; }
+        public required T[] Nodes { get; init; }
     }
 
-    public record struct Character
+    public sealed record Character
     {
         [JsonProperty("name")]
-        public CharacterName Name { get; init; }
+        public CharacterName? Name { get; init; }
+
+        [JsonProperty("media")]
+        public NodeCollection<Media>? ConnectedMedia { get; init; }
 
         [JsonProperty("image")]
         public MediaCoverImage? Image { get; init; }
@@ -138,19 +174,27 @@ public partial class AnilistSearchCommandModule
         public string? SiteUrl { get; init; }
     }
 
-    public record struct CharacterName
+    public readonly record struct CharacterName
     {
         [JsonProperty("full")]
-        public string Full { get; init; }
+        public string? Full { get; init; }
 
         [JsonProperty("alternative")]
-        public string[] Alternative { get; init; }
+        public string[]? Alternative { get; init; }
 
         [JsonProperty("alternativeSpoiler")]
-        public string[] AlternativeSpoiler { get; init; }
+        public string[]? AlternativeSpoiler { get; init; }
+
+        [JsonIgnore]
+        public IEnumerable<string> All => new[]
+        {
+            Full is not null ? [Full] : Array.Empty<string>(),
+            Alternative ?? Array.Empty<string>(),
+            AlternativeSpoiler ?? Array.Empty<string>(),
+        }.SelectMany(x => x);
     }
 
-    public record struct MediaCoverImage
+    public readonly record struct MediaCoverImage
     {
         [JsonProperty("medium")]
         public string? Medium { get; init; }

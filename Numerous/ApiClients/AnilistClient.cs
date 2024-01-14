@@ -10,7 +10,7 @@ using Numerous.DependencyInjection;
 namespace Numerous.ApiClients;
 
 [SingletonService]
-public class AnilistClient : IDisposable
+public sealed class AnilistClient : IDisposable
 {
     private const string AnilistEndpoint = "https://graphql.anilist.co";
 
