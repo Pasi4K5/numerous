@@ -25,8 +25,14 @@ public sealed class InteractionHandler(
     {
         var cfg = configManager.Get();
 
-        client.Ready += cfg.DevMode
-            ? async () => await interactions.RegisterCommandsToGuildAsync(cfg.DevGuildId)
+        client.Ready += cfg.GuildMode
+            ? async () =>
+            {
+                foreach (var guildId in cfg.GuildIds)
+                {
+                    await interactions.RegisterCommandsToGuildAsync(guildId);
+                }
+            }
             : async () =>
             {
                 foreach (var guild in await client.Rest.GetGuildsAsync())
@@ -38,7 +44,7 @@ public sealed class InteractionHandler(
             };
         client.InteractionCreated += OnInteractionCreatedAsync;
 
-        await interactions.AddModulesAsync(Assembly.GetExecutingAssembly(), services);
+        await interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

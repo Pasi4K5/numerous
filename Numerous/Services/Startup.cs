@@ -11,6 +11,7 @@ using Numerous.Configuration;
 using Numerous.Database;
 using Numerous.Database.Entities;
 using Numerous.DependencyInjection;
+using Numerous.Discord;
 
 namespace Numerous.Services;
 
@@ -18,7 +19,8 @@ namespace Numerous.Services;
 public sealed class Startup(
     DiscordSocketClient discordClient,
     ConfigManager cfgManager,
-    DbManager dbManager
+    DbManager dbManager,
+    ReminderService reminderService
 ) : IHostedService
 {
     private Config Cfg => cfgManager.Get();
@@ -42,6 +44,8 @@ public sealed class Startup(
                 }, cancellationToken: cancellationToken);
             }
         }
+
+        await reminderService.StartAsync(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

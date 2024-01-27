@@ -3,19 +3,6 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
+namespace Numerous.Database.Entities;
 
-namespace Numerous.Configuration;
-
-[JsonObject(MemberSerialization.OptOut)]
-public record struct Config(
-    string BotToken,
-    string MongoConnectionString,
-    string MongoDatabaseName,
-    uint OsuClientId,
-    string OsuClientSecret,
-    string OpenAiApiKey,
-    string GptInstructionsPath,
-    bool GuildMode,
-    ulong[] GuildIds
-);
+public sealed record Reminder(ulong UserId, ulong ChannelId, DateTimeOffset Timestamp, string? Message) : DbEntity;

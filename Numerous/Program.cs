@@ -38,16 +38,8 @@ try
             retainedFileTimeLimit: null,
             fileSizeLimitBytes: null,
             buffered: true
-        ).Enrich.WithExceptionDetails();
-
-    if (cm.Get().DevMode)
-    {
-        logCfg.MinimumLevel.Debug();
-    }
-    else
-    {
-        logCfg.MinimumLevel.Information();
-    }
+        ).Enrich.WithExceptionDetails()
+        .MinimumLevel.Debug();
 
     Log.Logger = logCfg.CreateLogger();
 

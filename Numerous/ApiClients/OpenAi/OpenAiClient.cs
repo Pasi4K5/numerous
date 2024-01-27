@@ -152,7 +152,7 @@ public sealed class OpenAiClient
                 _tools,
                 "auto",
                 ChatModel,
-                temperature: 0.3f
+                temperature: 0.4f
             ));
         }
     }

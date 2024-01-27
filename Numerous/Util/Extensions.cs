@@ -9,6 +9,16 @@ namespace Numerous.Util;
 
 public static class Extensions
 {
+    public static IEnumerable<(TSource element, int index)> WithIndexes<TSource>(this IEnumerable<TSource> enumerable)
+    {
+        var i = 0;
+
+        foreach (var item in enumerable)
+        {
+            yield return (item, i++);
+        }
+    }
+
     public static string LimitLength(this string s, int maxLength)
     {
         return s.Length > maxLength ? s[..(maxLength - 1)] + "…" : s;
