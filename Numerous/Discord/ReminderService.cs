@@ -50,10 +50,8 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
 
             var embed = new EmbedBuilder()
                 .WithColor(Color.Gold)
-                .WithDescription(
-                    ":alarm_clock: Reminder! :alarm_clock:"
-                    + (reminder.Message is not null ? $"\n{reminder.Message}" : "")
-                )
+                .WithTitle(":alarm_clock: Reminder! :alarm_clock:")
+                .WithDescription(reminder.Message ?? "")
                 .WithTimestamp(reminder.Timestamp)
                 .Build();
 
