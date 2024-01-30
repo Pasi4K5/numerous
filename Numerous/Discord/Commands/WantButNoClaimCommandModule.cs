@@ -11,14 +11,13 @@ namespace Numerous.Discord.Commands;
 
 public sealed class WantButNoClaimCommandModule : CommandModule
 {
-    private const ulong MudaeUserId = 432610292342587392;
     private const ulong PingTargetUserId = 345885199386804235;
 
     [UsedImplicitly]
     [MessageCommand("I want this but I have no claim")]
     public async Task WantButNoClaimCommand(IMessage msg)
     {
-        if (msg.Author.Id != MudaeUserId || !msg.Author.IsBot)
+        if (msg.Author.Id != Constants.MudaeUserId || !msg.Author.IsBot)
         {
             await RespondAsync("You cannot use this command on this message.");
 
