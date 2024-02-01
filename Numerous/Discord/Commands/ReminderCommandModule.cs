@@ -18,59 +18,213 @@ namespace Numerous.Discord.Commands;
 public sealed class ReminderCommandModule(ReminderService reminderService, DbManager db) : CommandModule
 {
     [UsedImplicitly]
-    [SlashCommand("set", "Sets a reminder.")]
-    public async Task SetCommand(
-        [Summary("hours")] int? hours = null,
-        [Summary("minutes")] int? minutes = null,
-        [Summary("seconds")] int? seconds = null,
-        [Summary("about")] string? message = null
-    )
+    [Group("set", "Sets a reminder.")]
+    public sealed class Set(ReminderService reminderService, DbManager db) : CommandModule
     {
-        if (hours is null && minutes is null && seconds is null)
+        [UsedImplicitly]
+        [SlashCommand("in", "Sets a reminder after the specified time.")]
+        public async Task InCommand(
+            [Summary("hours")] int? hours = null,
+            [Summary("minutes")] int? minutes = null,
+            [Summary("seconds")] int? seconds = null,
+            [Summary("about")] string? message = null
+        )
         {
-            await RespondAsync("Please specify a time.");
+            if (hours is null && minutes is null && seconds is null)
+            {
+                await RespondWithEmbedAsync("Please specify a time.", ResponseType.Error);
 
-            return;
+                return;
+            }
+
+            var timestamp = Context.Interaction.CreatedAt;
+
+            if (hours is not null)
+            {
+                timestamp = timestamp.AddHours(hours.Value);
+            }
+
+            if (minutes is not null)
+            {
+                timestamp = timestamp.AddMinutes(minutes.Value);
+            }
+
+            if (seconds is not null)
+            {
+                timestamp = timestamp.AddSeconds(seconds.Value);
+            }
+
+            if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
+            {
+                await RespondAsync("The specified time must be at least 10 seconds in the future.");
+
+                return;
+            }
+
+            await DeferAsync();
+
+            await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id, timestamp, message));
+
+            await FollowupAsync(embed:
+                new EmbedBuilder()
+                    .WithColor(Color.Green)
+                    .WithTitle("Reminder Set")
+                    .WithDescription(
+                        (message is not null ? $"{message}\n" : "")
+                        + $"{timestamp.ToDiscordTimestampDateTime()} ({timestamp.ToDiscordTimestampRel()})"
+                    )
+                    .Build()
+            );
         }
 
-        var timestamp = Context.Interaction.CreatedAt;
-
-        if (hours is not null)
+        [UsedImplicitly]
+        [SlashCommand("at", "Sets a reminder at the specified time.")]
+        public async Task AtCommand(
+            [Summary("year")] int? year = null,
+            [Summary("month")] int? month = null,
+            [Summary("day")] int? day = null,
+            [Summary("hour")] int? hour = null,
+            [Summary("minute")] int? minute = null,
+            [Summary("second")] int? second = null,
+            [Summary("about")] string? message = null
+        )
         {
-            timestamp = timestamp.AddHours(hours.Value);
+            if (year is null && month is null && day is null && hour is null && minute is null && second is null)
+            {
+                await RespondWithEmbedAsync("Please specify a time.", ResponseType.Error);
+
+                return;
+            }
+
+            await DeferAsync();
+
+            var timeZoneId = (await db.GetUserAsync(Context.User.Id)).TimeZone;
+
+            if (timeZoneId is null)
+            {
+                await FollowupWithEmbedAsync(
+                    "To use this command, please set your time zone with `/settimezone` first.",
+                    ResponseType.Error
+                );
+
+                return;
+            }
+
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var timestamp = GetTimestamp(year, month, day, hour, minute, second, Context.Interaction.CreatedAt, timeZone);
+
+            if (timestamp is null)
+            {
+                await FollowupWithEmbedAsync(
+                    "The specified time must be at least 10 seconds in the future.",
+                    ResponseType.Error
+                );
+
+                return;
+            }
+
+            await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id, timestamp.Value, message));
+
+            await FollowupAsync(embed:
+                new EmbedBuilder()
+                    .WithColor(Color.Green)
+                    .WithTitle("Reminder Set")
+                    .WithDescription(
+                        (message is not null ? $"{message}\n" : "")
+                        + $"{timestamp.Value.ToDiscordTimestampDateTime()} ({timestamp.Value.ToDiscordTimestampRel()})"
+                    )
+                    .Build()
+            );
         }
 
-        if (minutes is not null)
+        private static DateTimeOffset? GetTimestamp(int? year, int? month, int? day, int? hour, int? minute, int? second, DateTimeOffset now, TimeZoneInfo tz)
         {
-            timestamp = timestamp.AddMinutes(minutes.Value);
+            if (!CorrectParameters(ref year, ref month, ref day, ref hour, ref minute, second, now, tz))
+            {
+                return null;
+            }
+
+            var userNow = TimeZoneInfo.ConvertTime(now, tz);
+
+            var timestamp = new DateTimeOffset(
+                year ?? 0,
+                month ?? 1,
+                day ?? 1,
+                hour ?? 0,
+                minute ?? 0,
+                second ?? 0,
+                tz.GetUtcOffset(userNow)
+            );
+
+            if (timestamp < now.AddSeconds(10))
+            {
+                return null;
+            }
+
+            return timestamp;
         }
 
-        if (seconds is not null)
+        // I hate this but what am I supposed to do?
+        private static bool CorrectParameters(ref int? year, ref int? month, ref int? day, ref int? hour, ref int? minute, int? second, DateTimeOffset now, TimeZoneInfo tz)
         {
-            timestamp = timestamp.AddSeconds(seconds.Value);
+            var userNow = TimeZoneInfo.ConvertTime(now, tz);
+
+            if (year is null)
+            {
+                year ??= userNow.Year;
+
+                if (month is null)
+                {
+                    month ??= userNow.Month;
+
+                    if (day is null)
+                    {
+                        day ??= userNow.Day;
+
+                        if (hour is null)
+                        {
+                            hour ??= userNow.Hour;
+
+                            if (minute is null)
+                            {
+                                minute ??= userNow.Minute;
+
+                                if (userNow.Second > second)
+                                {
+                                    minute++;
+                                }
+                            }
+
+                            if (userNow.Minute > minute)
+                            {
+                                hour++;
+                            }
+                        }
+
+                        if (userNow.Hour > hour)
+                        {
+                            day++;
+                        }
+                    }
+
+                    if (userNow.Day > day)
+                    {
+                        month++;
+                    }
+                }
+
+                if (userNow.Month > month)
+                {
+                    year++;
+                }
+            }
+            else if (userNow.Year > year)
+            {
+                return false;
+            }
+
+            return true;
         }
-
-        if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
-        {
-            await RespondAsync("The specified time must be at least 10 seconds in the future.");
-
-            return;
-        }
-
-        await DeferAsync();
-
-        await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id, timestamp, message));
-
-        await FollowupAsync(embed:
-            new EmbedBuilder()
-                .WithColor(Color.Green)
-                .WithTitle("Reminder Set")
-                .WithDescription(
-                    (message is not null ? $"{message}\n" : "")
-                    + $"{timestamp.ToDiscordTimestampDateTime()} ({timestamp.ToDiscordTimestampRel()})"
-                )
-                .Build()
-        );
     }
 
     [UsedImplicitly]
@@ -105,8 +259,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
     }
 
     [UsedImplicitly]
-    [SlashCommand("remove", "Removes a reminder.")]
-    public async Task RemoveCommand(
+    [SlashCommand("delete", "Removes a reminder.")]
+    public async Task DeleteCommand(
         [Summary("index", "The index of the reminder to remove.")]
         int index
     )
@@ -117,12 +271,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
 
         if (index < 1 || index > reminders.Count)
         {
-            await FollowupAsync(embed:
-                new EmbedBuilder()
-                    .WithColor(Color.DarkRed)
-                    .WithDescription("There is no reminder with that index.")
-                    .Build()
-            );
+            await FollowupWithEmbedAsync("There is no reminder with that index.", ResponseType.Error);
 
             return;
         }

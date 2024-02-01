@@ -36,7 +36,7 @@ public partial class DiscordEventHandler
             cmd.GuildId);
     }
 
-    private Task LogInteraction(SocketInteraction interaction)
+    private static Task LogInteraction(SocketInteraction interaction)
     {
         if (interaction is SocketMessageCommand msgCmd)
         {

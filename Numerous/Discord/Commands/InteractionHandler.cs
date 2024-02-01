@@ -59,12 +59,7 @@ public sealed class InteractionHandler(
         try
         {
             var context = new SocketInteractionContext(client, interaction);
-            var result = await interactions.ExecuteCommandAsync(context, services);
-
-            if (!result.IsSuccess)
-            {
-                await context.Channel.SendMessageAsync(result.ToString());
-            }
+            await interactions.ExecuteCommandAsync(context, services);
         }
         catch
         {

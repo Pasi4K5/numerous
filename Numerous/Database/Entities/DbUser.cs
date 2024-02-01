@@ -7,5 +7,8 @@ namespace Numerous.Database.Entities;
 
 public sealed record DbUser : DbEntity<ulong>
 {
-    public DbOsuUser? OsuUser { get; init; }
+    // For future osu!-related features
+    // public DbOsuUser? OsuUser { get; init; }
+
+    public string? TimeZone { get; set; }
 }

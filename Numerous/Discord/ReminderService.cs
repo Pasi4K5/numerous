@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using Numerous.Database;
 using Numerous.Database.Entities;
 using Numerous.DependencyInjection;
+using Timer = System.Timers.Timer;
 
 namespace Numerous.Discord;
 
@@ -39,7 +40,15 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
 
     public async Task AddReminderAsync(Reminder reminder, bool insertIntoDb = true)
     {
-        _timers[reminder.Id] = new Timer(async _ =>
+        var timer = new Timer
+        {
+            AutoReset = false,
+            Interval = (reminder.Timestamp - DateTimeOffset.Now).TotalMilliseconds,
+        };
+
+        _timers[reminder.Id] = timer;
+
+        timer.Elapsed += async (_, _) =>
         {
             var channel = client.GetChannel(reminder.ChannelId) as IMessageChannel;
 
@@ -60,7 +69,9 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
             await db.Reminders.DeleteOneAsync(x => x.Id == reminder.Id);
 
             _timers.Remove(reminder.Id);
-        }, null, reminder.Timestamp - DateTimeOffset.Now, Timeout.InfiniteTimeSpan);
+        };
+
+        timer.Start();
 
         if (insertIntoDb)
         {
@@ -72,7 +83,8 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
     {
         if (_timers.TryGetValue(reminder.Id, out var timer))
         {
-            await timer.DisposeAsync();
+            timer.Stop();
+            timer.Dispose();
         }
 
         await db.Reminders.DeleteOneAsync(x => x.Id == reminder.Id);

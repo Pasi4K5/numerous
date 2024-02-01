@@ -39,4 +39,21 @@ public sealed class DbManager
             throw new Exception($"Failed to get database {dbName}.");
         }
     }
+
+    public async Task<DbUser> GetUserAsync(ulong id)
+    {
+        var user = await Users.Find(x => x.Id == id).FirstOrDefaultAsync();
+
+        if (user is null)
+        {
+            user = new DbUser
+            {
+                Id = id,
+            };
+
+            await Users.InsertOneAsync(user);
+        }
+
+        return user;
+    }
 }

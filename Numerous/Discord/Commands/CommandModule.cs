@@ -3,8 +3,46 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Discord;
 using Discord.Interactions;
 
 namespace Numerous.Discord.Commands;
 
-public abstract class CommandModule : InteractionModuleBase<SocketInteractionContext>;
+public abstract class CommandModule : InteractionModuleBase<SocketInteractionContext>
+{
+    private static Color GetTypeColor(ResponseType type)
+    {
+        return type switch
+        {
+            ResponseType.Info => Color.Blue,
+            ResponseType.Success => Color.Green,
+            ResponseType.Error => Color.DarkRed,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+        };
+    }
+
+    protected async Task RespondWithEmbedAsync(string message, ResponseType type = ResponseType.Info)
+    {
+        await RespondAsync(embed: new EmbedBuilder()
+            .WithColor(GetTypeColor(type))
+            .WithDescription(message)
+            .Build()
+        );
+    }
+
+    protected async Task FollowupWithEmbedAsync(string message, ResponseType type = ResponseType.Info)
+    {
+        await FollowupAsync(embed: new EmbedBuilder()
+            .WithColor(GetTypeColor(type))
+            .WithDescription(message)
+            .Build()
+        );
+    }
+
+    protected enum ResponseType
+    {
+        Info,
+        Success,
+        Error,
+    }
+}
