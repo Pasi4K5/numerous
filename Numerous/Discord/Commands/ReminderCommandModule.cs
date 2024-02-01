@@ -111,30 +111,40 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
             }
 
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-            var timestamp = GetTimestamp(year, month, day, hour, minute, second, Context.Interaction.CreatedAt, timeZone);
 
-            if (timestamp is null)
+            try
             {
-                await FollowupWithEmbedAsync(
-                    "The specified time must be at least 10 seconds in the future.",
-                    ResponseType.Error
+                var timestamp = GetTimestamp(year, month, day, hour, minute, second, Context.Interaction.CreatedAt,
+                    timeZone);
+
+                if (timestamp is null)
+                {
+                    await FollowupWithEmbedAsync(
+                        "The specified time must be at least 10 seconds in the future.",
+                        ResponseType.Error
+                    );
+
+                    return;
+                }
+
+                await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id,
+                    timestamp.Value, message));
+
+                await FollowupAsync(embed:
+                    new EmbedBuilder()
+                        .WithColor(Color.Green)
+                        .WithTitle("Reminder Set")
+                        .WithDescription(
+                            (message is not null ? $"{message}\n" : "")
+                            + $"{timestamp.Value.ToDiscordTimestampDateTime()} ({timestamp.Value.ToDiscordTimestampRel()})"
+                        )
+                        .Build()
                 );
-
-                return;
             }
-
-            await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id, timestamp.Value, message));
-
-            await FollowupAsync(embed:
-                new EmbedBuilder()
-                    .WithColor(Color.Green)
-                    .WithTitle("Reminder Set")
-                    .WithDescription(
-                        (message is not null ? $"{message}\n" : "")
-                        + $"{timestamp.Value.ToDiscordTimestampDateTime()} ({timestamp.Value.ToDiscordTimestampRel()})"
-                    )
-                    .Build()
-            );
+            catch (ArgumentOutOfRangeException)
+            {
+                await FollowupWithEmbedAsync("The specified time is invalid.", ResponseType.Error);
+            }
         }
 
         private static DateTimeOffset? GetTimestamp(int? year, int? month, int? day, int? hour, int? minute, int? second, DateTimeOffset now, TimeZoneInfo tz)
