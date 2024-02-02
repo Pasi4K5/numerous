@@ -26,4 +26,4 @@ jobs:
       - name: JetBrains Inspect Code
         run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --swea --output=inspectcode.xml Numerous.sln
       - name: Inspection Report
-        run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --debug --treatwarningsaserrors
+        run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --debug --verbosity WARN --treatwarningsaserrors
