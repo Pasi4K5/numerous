@@ -27,7 +27,7 @@ jobs:
 #        run: dotnet test --no-build --verbosity normal
   inspect:
     needs: build
-    name: Code Quality
+    name: Code Inspection
     runs-on: ubuntu-latest
     steps:
       - name: .NET Setup
