@@ -14,13 +14,14 @@ resharper_braces_redundant = true
 resharper_csharp_indent_invocation_pars = inside
 resharper_csharp_keep_blank_lines_in_code = 1
 resharper_csharp_keep_blank_lines_in_declarations = 1
-resharper_csharp_max_line_length = 120
+resharper_csharp_max_line_length = 200
 resharper_csharp_wrap_arguments_style = wrap_if_long
 resharper_wrap_arguments_style = wrap_if_long
 resharper_csharp_wrap_before_binary_opsign = true
 resharper_indent_invocation_pars = inside
 resharper_wrap_before_declaration_rpar = false
 resharper_wrap_chained_binary_expressions = chop_if_long
+resharper_use_heuristics_for_body_style = true
 
 # Microsoft .NET properties
 csharp_prefer_braces = true:none
