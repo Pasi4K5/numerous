@@ -24,6 +24,6 @@ jobs:
         shell: bash
         run: dotnet build
       - name: JetBrains Inspect Code
-        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --swea --output=inspectcode.xml Numerous.sln
+        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --verbosity=TRACE --swea --output=inspectcode.xml Numerous.sln
       - name: Inspection Report
-        run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --debug --verbosity=TRACE --treatwarningsaserrors
+        run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --debug --treatwarningsaserrors
