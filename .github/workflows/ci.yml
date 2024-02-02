@@ -1,0 +1,40 @@
+name: Continuous Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: .NET Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: .NET Build
+        uses: pasi4k5/numerous/dotnet-build@main
+#  test:
+#    needs: build
+#    name: .NET Test
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: .NET Build
+#        uses: pasi4k5/numerous/dotnet-build@main
+#      - name: Test
+#        run: dotnet test --no-build --verbosity normal
+  inspect:
+    needs: build
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: .NET Setup
+        uses: pasi4k5/numerous/dotnet-setup@main
+      - name: .NET Code Analysis
+        run: dotnet build -warnaserror -p:EnforceCodeStyleInBuild=true
+      - name: JetBrains Inspect Code
+        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --swea --output=inspectcode.xml Numerous.sln
+      - name: Inspection Report
+        run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --debug --treatwarningsaserrors
