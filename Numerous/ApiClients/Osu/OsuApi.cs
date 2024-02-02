@@ -43,10 +43,10 @@ public sealed partial class OsuApi(ConfigManager config)
         return !await RequestAsync(endpoint, result, parameters) ? null : result.Data;
     }
 
-    private async Task<ICollection<T>> RequestCollectionAsync<T>(string endpoint, params (string key, string value)[] parameters)
-    {
-        return await RequestRefAsync<ICollection<T>>(endpoint, parameters) ?? Array.Empty<T>();
-    }
+    // private async Task<ICollection<T>> RequestCollectionAsync<T>(string endpoint, params (string key, string value)[] parameters)
+    // {
+    //     return await RequestRefAsync<ICollection<T>>(endpoint, parameters) ?? Array.Empty<T>();
+    // }
 
     private async Task<bool> RequestAsync<T>(string endpoint, Wrapper<T?> result, params (string key, string value)[] parameters)
     {
