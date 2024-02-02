@@ -1,0 +1,10 @@
+name: .NET Build
+
+runs:
+  using: composite
+  steps:
+    - name: .NET Setup
+      uses: pasi4k5/numerous/dotnet-setup@main
+    - name: .NET Build
+      shell: bash
+      run: dotnet build
