@@ -10,12 +10,12 @@ namespace Numerous.ApiClients.Osu;
 
 public partial class OsuApi
 {
-    private readonly string[] _modes = { "osu", "taiko", "fruits", "mania" };
+    // private readonly string[] _modes = { "osu", "taiko", "fruits", "mania" };
 
-    public async Task<OsuUser?> GetUserAsync(string user, bool prioritizeId = false)
-    {
-        return await RequestValAsync<OsuUser>($"users/{user}", ("key", prioritizeId ? "id" : "username"));
-    }
+    // public async Task<OsuUser?> GetUserAsync(string user, bool prioritizeId = false)
+    // {
+    //     return await RequestValAsync<OsuUser>($"users/{user}", ("key", prioritizeId ? "id" : "username"));
+    // }
 
     /// <summary>
     /// Prioritizes the user ID over the username.
@@ -30,20 +30,20 @@ public partial class OsuApi
         return await RequestValAsync<Beatmapset>($"beatmapsets/{id}");
     }
 
-    public async IAsyncEnumerable<OsuScore> GetRecentScoresAsync(uint userId)
-    {
-        var tasks = _modes.Select(m => RequestCollectionAsync<OsuScore>($"users/{userId}/scores/recent", ("mode", m)));
-
-        foreach (var task in tasks)
-        {
-            var results = await task;
-
-            foreach (var result in results)
-            {
-                yield return result;
-            }
-        }
-    }
+    // public async IAsyncEnumerable<OsuScore> GetRecentScoresAsync(uint userId)
+    // {
+    //     var tasks = _modes.Select(m => RequestCollectionAsync<OsuScore>($"users/{userId}/scores/recent", ("mode", m)));
+    //
+    //     foreach (var task in tasks)
+    //     {
+    //         var results = await task;
+    //
+    //         foreach (var result in results)
+    //         {
+    //             yield return result;
+    //         }
+    //     }
+    // }
 
     public async Task<JObject?> WikiLookupAsync(string query)
     {
