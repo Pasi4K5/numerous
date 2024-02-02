@@ -30,10 +30,8 @@ jobs:
     name: Code Inspection
     runs-on: ubuntu-latest
     steps:
-      - name: .NET Setup
-        uses: pasi4k5/numerous/dotnet-setup@main
-      - name: .NET Code Analysis
-        run: dotnet build -warnaserror -p:EnforceCodeStyleInBuild=true
+      - name: .NET Build
+        uses: pasi4k5/numerous/dotnet-build@main
       - name: JetBrains Inspect Code
         run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --swea --output=inspectcode.xml Numerous.sln
       - name: Inspection Report
