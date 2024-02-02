@@ -10,28 +10,19 @@ on:
       - main
 
 jobs:
-  build:
-    name: .NET Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: .NET Build
-        uses: pasi4k5/numerous/dotnet-build@main
-#  test:
-#    needs: build
-#    name: .NET Test
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: .NET Build
-#        uses: pasi4k5/numerous/dotnet-build@main
-#      - name: Test
-#        run: dotnet test --no-build --verbosity normal
   inspect:
-    needs: build
-    name: Code Inspection
+    name: Build and Inspect
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: .NET Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
       - name: .NET Build
-        uses: pasi4k5/numerous/dotnet-build@main
+        shell: bash
+        run: dotnet build
       - name: JetBrains Inspect Code
         run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --swea --output=inspectcode.xml Numerous.sln
       - name: Inspection Report
