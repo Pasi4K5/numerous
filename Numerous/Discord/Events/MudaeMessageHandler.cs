@@ -14,9 +14,12 @@ namespace Numerous.Discord.Events;
 public class MudaeMessageHandler(DiscordSocketClient client) : IHostedService
 {
     private readonly TimeSpan _claimTimeSpan = TimeSpan.FromSeconds(45);
+    private readonly TimeSpan _timeBetweenRollGroups = TimeSpan.FromSeconds(10);
 
-    private Dictionary<ulong, DateTimeOffset> _firstClaimTimeouts = new();
-    private Dictionary<ulong, DateTimeOffset> _lastClaimTimeouts = new();
+    private readonly Dictionary<ulong, DateTimeOffset> _firstClaimTimeouts = new();
+    private readonly Dictionary<ulong, string> _firstClaimMessageLinks = new();
+    private readonly Dictionary<ulong, DateTimeOffset> _lastClaimTimeouts = new();
+    private readonly Dictionary<ulong, DateTimeOffset> _lastRollTimes = new();
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -44,20 +47,26 @@ public class MudaeMessageHandler(DiscordSocketClient client) : IHostedService
         var currentTimeout = msg.Timestamp + _claimTimeSpan;
 
         _firstClaimTimeouts.TryAdd(channelId, currentTimeout);
+        _firstClaimMessageLinks.TryAdd(channelId, msg.GetLink());
         _lastClaimTimeouts.TryAdd(channelId, currentTimeout);
+        _lastRollTimes.TryAdd(channelId, msg.Timestamp);
 
-        if (_lastClaimTimeouts[channelId] < msg.Timestamp)
+        if (msg.Timestamp > _lastRollTimes[channelId] + _timeBetweenRollGroups)
         {
             _firstClaimTimeouts[channelId] = currentTimeout;
+            _firstClaimMessageLinks[channelId] = msg.GetLink();
         }
 
+        _lastRollTimes[channelId] = msg.Timestamp;
         _lastClaimTimeouts[channelId] = currentTimeout;
 
         await msg.ReplyAsync(
             $"Claim timeout: {currentTimeout.ToDiscordTimestampRel()}"
             + (
                 currentTimeout != _firstClaimTimeouts[channelId]
-                    ? $"\n**First roll timeout: {_firstClaimTimeouts[channelId].ToDiscordTimestampRel()}**"
+                    ? $"\n**First roll timeout: "
+                      + $"{_firstClaimTimeouts[channelId].ToDiscordTimestampRel()}** "
+                      + $"{_firstClaimMessageLinks[channelId]}"
                     : ""
             )
         );
