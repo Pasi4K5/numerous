@@ -3,9 +3,12 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using JetBrains.Annotations;
+
 namespace Numerous.Database.Entities;
 
 public sealed record GuildStats(GuildStats.Entry<int>[] MemberCounts) : DbEntity<ulong>
 {
-    public sealed record Entry<T>(DateTimeOffset Timestamp, T Value);
+    // TODO: Remove [UsedImplicitly] as soon as these props are used
+    public sealed record Entry<T>([UsedImplicitly] DateTimeOffset Timestamp, T Value);
 }
