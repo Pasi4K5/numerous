@@ -27,6 +27,9 @@ public sealed class DbManager
     public IMongoCollection<Reminder> Reminders =>
         _db.GetCollection<Reminder>("reminders");
 
+    public IMongoCollection<GuildStats> GuildStats =>
+        _db.GetCollection<GuildStats>("guildStats");
+
     public DbManager(ConfigManager configManager)
     {
         var config = configManager.Get();

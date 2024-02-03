@@ -5,18 +5,7 @@
 
 namespace Numerous.Database.Entities;
 
-// TODO: Remove comment
-// ReSharper disable UnusedMember.Global
-public sealed record GuildOptions : DbEntity<ulong>
+public sealed record GuildStats(GuildStats.Entry<int>[] MemberCounts) : DbEntity<ulong>
 {
-    public bool TrackMessages { get; init; }
-    public bool TrackMemberCount { get; init; }
-
-    public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();
-
-    public record struct TrackingOptions
-    {
-        public ulong DiscordId { get; init; }
-        public bool TrackPlayer { get; init; }
-    }
+    public sealed record Entry<T>(DateTimeOffset Timestamp, T Value);
 }
