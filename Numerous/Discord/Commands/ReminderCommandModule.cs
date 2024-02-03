@@ -71,7 +71,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                     .WithTitle("Reminder Set")
                     .WithDescription(
                         (message is not null ? $"{message}\n" : "")
-                        + $"{timestamp.ToDiscordTimestampDateTime()} ({timestamp.ToDiscordTimestampRel()})"
+                        + $"{timestamp.ToDiscordTimestampLong()} ({timestamp.ToDiscordTimestampRel()})"
                     )
                     .Build()
             );
@@ -261,7 +261,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
             embed.AddField(
                 $"Reminder {index + 1} in <#{reminder.ChannelId}>",
                 (reminder.Message is not null ? $"{reminder.Message}\n" : "")
-                + $"{reminder.Timestamp.ToDiscordTimestampDateTime()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
+                + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
             );
         }
 
@@ -296,7 +296,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                 .WithTitle("Reminder Removed")
                 .WithDescription(
                     (reminder.Message is not null ? $"{reminder.Message}\n" : "")
-                    + $"{reminder.Timestamp.ToDiscordTimestampDateTime()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
+                    + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
                 )
                 .Build()
         );

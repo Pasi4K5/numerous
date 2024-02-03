@@ -57,4 +57,9 @@ public static class DiscordExtensions
     {
         return $"<t:{timestamp.ToUnixTimeSeconds()}:f>";
     }
+
+    public static string ToDiscordTimestampLong(this DateTimeOffset timestamp)
+    {
+        return $"<t:{timestamp.ToUnixTimeSeconds()}:D> <t:{timestamp.ToUnixTimeSeconds()}:T>";
+    }
 }
