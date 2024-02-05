@@ -51,7 +51,7 @@ public sealed class SetTimeZoneCommandModule(DbManager db) : CommandModule
                     new ActionRowBuilder()
                         .WithButton("\u25c0\u25c0", FirstButtonId, disabled: CurrentState.Page <= 0)
                         .WithButton("\u25c0", PrevButtonId, disabled: CurrentState.Page <= 0)
-                        .WithButton($"Page {CurrentState.Page + 1}/{TopPage + 1}", PageButtonId, disabled: true)
+                        .WithButton($"Page {CurrentState.Page + 1}/{TopPage + 1}", PageButtonId, ButtonStyle.Secondary, disabled: true)
                         .WithButton("\u25b6", NextButtonId, disabled: CurrentState.Page >= TopPage)
                         .WithButton("\u25b6\u25b6", LastButtonId, disabled: CurrentState.Page >= TopPage),
                     new ActionRowBuilder()
