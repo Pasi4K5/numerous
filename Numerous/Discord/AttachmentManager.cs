@@ -23,7 +23,7 @@ public sealed class AttachmentManager(ConfigManager cm)
         return Path.Join(imgDirPath, $"{msgId}_{attachments.IndexOf(attachment)}_{fileName}");
     }
 
-    public IEnumerable<FileAttachment> GetFileAttachments(ulong msgId)
+    public IEnumerable<FileAttachment> GetFileAttachments(ulong msgId, bool considerFileSizeLimit = true)
     {
         var imgDirPath = Config.ImageDirectory;
 
@@ -33,6 +33,7 @@ public sealed class AttachmentManager(ConfigManager cm)
         }
 
         return Directory.GetFiles(imgDirPath, $"{msgId}_*")
+            .Where(filePath => !considerFileSizeLimit || new FileInfo(filePath).Length <= 8 * 1024 * 1024)
             .Select(filePath => new FileAttachment(filePath, string.Join('_', Path.GetFileName(filePath).Split('_')[2..])));
     }
 }
