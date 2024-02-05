@@ -14,7 +14,7 @@ using Numerous.Util;
 namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
-public sealed class UnDeleteCommandModule(DbManager db) : CommandModule
+public sealed class UnDeleteCommandModule(DbManager db, AttachmentManager attachmentManager) : CommandModule
 {
     private const string PreviousButtonId = "cmd:undelete:previous";
     private const string NextButtonId = "cmd:undelete:next";
@@ -104,6 +104,7 @@ public sealed class UnDeleteCommandModule(DbManager db) : CommandModule
             m.Content = "";
             m.Components = buttons;
             m.Embed = embed;
+            m.Attachments = attachmentManager.GetFileAttachments(msg.Id).ToArray();
         });
     }
 

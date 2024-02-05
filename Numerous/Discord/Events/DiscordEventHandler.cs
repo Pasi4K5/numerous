@@ -6,6 +6,7 @@
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.ApiClients.OpenAi;
+using Numerous.Configuration;
 using Numerous.Database;
 using Numerous.DependencyInjection;
 using Numerous.Util;
@@ -13,24 +14,17 @@ using Numerous.Util;
 namespace Numerous.Discord.Events;
 
 [HostedService]
-public sealed partial class DiscordEventHandler : IHostedService
+public sealed partial class DiscordEventHandler(
+    ConfigManager cm,
+    DiscordSocketClient client,
+    DbManager db,
+    AttachmentManager attachmentManager
+) : IHostedService
 {
-    private readonly DiscordSocketClient _client;
-    private readonly DbManager _db;
-
-    public DiscordEventHandler(
-        DiscordSocketClient client,
-        OpenAiClient openAiClient,
-        DbManager db)
-    {
-        _client = client;
-        _db = db;
-
-        this.Init();
-    }
-
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        this.Init();
+
         return Task.CompletedTask;
     }
 

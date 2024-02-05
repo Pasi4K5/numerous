@@ -14,14 +14,14 @@ public partial class DiscordEventHandler
     [Init]
     private void Logger_Init()
     {
-        _client.SlashCommandExecuted += LogSlashCommand;
-        _client.InteractionCreated += LogInteraction;
+        client.SlashCommandExecuted += LogSlashCommand;
+        client.InteractionCreated += LogInteraction;
     }
 
     private async Task LogSlashCommand(SocketSlashCommand cmd)
     {
         var guild = cmd.GuildId is not null
-            ? await _client.Rest.GetGuildAsync(cmd.GuildId.Value)
+            ? await client.Rest.GetGuildAsync(cmd.GuildId.Value)
             : null;
 
         Log.Information(

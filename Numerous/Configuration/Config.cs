@@ -8,14 +8,16 @@ using Newtonsoft.Json;
 namespace Numerous.Configuration;
 
 [JsonObject(MemberSerialization.OptOut)]
-public record struct Config(
-    string BotToken,
-    string MongoConnectionString,
-    string MongoDatabaseName,
-    uint OsuClientId,
-    string OsuClientSecret,
-    string OpenAiApiKey,
-    string GptInstructionsPath,
-    bool GuildMode,
-    ulong[] GuildIds
-);
+public record struct Config()
+{
+    public string BotToken { get; init; } = "";
+    public string MongoConnectionString { get; init; } = "";
+    public string MongoDatabaseName { get; init; } = "";
+    public uint OsuClientId { get; init; } = 0;
+    public string OsuClientSecret { get; init; } = "";
+    public string OpenAiApiKey { get; init; } = "";
+    public string GptInstructionsPath { get; init; } = "./instructions.txt";
+    public bool GuildMode { get; init; } = true;
+    public ulong[] GuildIds { get; init; } = [];
+    public string ImageDirectory { get; init; } = "./img/";
+}

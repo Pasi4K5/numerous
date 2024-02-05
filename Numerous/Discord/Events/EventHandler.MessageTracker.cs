@@ -15,23 +15,50 @@ public partial class DiscordEventHandler
     [Init]
     private void MessageTracker_Init()
     {
-        _client.MessageReceived += async msg => await MessageTracker_StoreAsync(msg);
-        _client.MessageDeleted += (message, _) => MessageTracker_DeleteAsync(message.Id);
-        _client.MessageUpdated += (_, after, _) => MessageTracker_UpdateAsync(after);
+        client.MessageReceived += MessageTracker_StoreAsync;
+        client.MessageDeleted += (message, _) => MessageTracker_DeleteAsync(message.Id);
+        client.MessageUpdated += (_, after, _) => MessageTracker_UpdateAsync(after);
     }
 
-    private async Task MessageTracker_StoreAsync(IMessage msg)
+    private Task MessageTracker_StoreAsync(IMessage msg)
     {
-        if (msg.Channel is not IGuildChannel channel || !(await _db.GuildOptions.Find(x => x.Id == channel.GuildId).FirstOrDefaultAsync())?.TrackMessages == true)
+        Task.Run(async () =>
         {
-            return;
-        }
+            if (msg.Channel is not IGuildChannel channel
+                || !(await db.GuildOptions.Find(x => x.Id == channel.GuildId).FirstOrDefaultAsync())?.TrackMessages == true)
+            {
+                return;
+            }
 
-        await _db.DiscordMessages.InsertOneAsync(new DiscordMessage(msg)
-        {
-            Id = msg.Id,
-            GuildId = channel.GuildId,
+            var insertTask = db.DiscordMessages.InsertOneAsync(new DiscordMessage(msg)
+            {
+                Id = msg.Id,
+                GuildId = channel.GuildId,
+            });
+
+            var imgDirPath = cm.Get().ImageDirectory;
+
+            if (!Directory.Exists(imgDirPath))
+            {
+                Directory.CreateDirectory(imgDirPath);
+            }
+
+            var httpClient = new HttpClient();
+            var attachments = msg.Attachments.ToList();
+
+            var storeAttachmentsTask = Task.WhenAll(attachments.Select(async attachment =>
+            {
+                var response = await httpClient.GetAsync(attachment.Url);
+                var filePath = attachmentManager.GetTargetPath(msg.Id, attachments, attachment);
+
+                await using var fs = new FileStream(filePath, FileMode.CreateNew);
+                await response.Content.CopyToAsync(fs);
+            }));
+
+            await Task.WhenAll(insertTask, storeAttachmentsTask);
         });
+
+        return Task.CompletedTask;
     }
 
     private async Task MessageTracker_DeleteAsync(ulong msgId)
@@ -41,7 +68,7 @@ public partial class DiscordEventHandler
             return;
         }
 
-        await _db.DiscordMessages.UpdateOneAsync(
+        await db.DiscordMessages.UpdateOneAsync(
             m => m.Id == msgId,
             Builders<DiscordMessage>.Update.Set(m => m.DeletedAt, DateTime.UtcNow)
         );
@@ -54,7 +81,7 @@ public partial class DiscordEventHandler
             return;
         }
 
-        await _db.DiscordMessages.UpdateOneAsync(
+        await db.DiscordMessages.UpdateOneAsync(
             x => x.Id == newMsg.Id,
             Builders<DiscordMessage>.Update
                 .AddToSet(m => m.Timestamps, DateTime.UtcNow)
@@ -65,18 +92,18 @@ public partial class DiscordEventHandler
 
     private async Task<bool> ShouldUpdateMessagesAsync(ulong msgId)
     {
-        if (!await (await _db.DiscordMessages.FindAsync(m => m.Id == msgId)).AnyAsync())
+        if (!await (await db.DiscordMessages.FindAsync(m => m.Id == msgId)).AnyAsync())
         {
             return false;
         }
 
-        var guildId = (await (await _db.DiscordMessages.FindAsync(m => m.Id == msgId)).FirstOrDefaultAsync())?.GuildId;
+        var guildId = (await (await db.DiscordMessages.FindAsync(m => m.Id == msgId)).FirstOrDefaultAsync())?.GuildId;
 
         if (guildId is null)
         {
             return false;
         }
 
-        return (await _db.GuildOptions.Find(x => x.Id == guildId).FirstOrDefaultAsync())?.TrackMessages == true;
+        return (await db.GuildOptions.Find(x => x.Id == guildId).FirstOrDefaultAsync())?.TrackMessages == true;
     }
 }
