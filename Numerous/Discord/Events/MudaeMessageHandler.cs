@@ -7,6 +7,7 @@ using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.DependencyInjection;
+using Numerous.Util;
 
 namespace Numerous.Discord.Events;
 
@@ -63,12 +64,10 @@ public class MudaeMessageHandler(DiscordSocketClient client) : IHostedService
         await msg.ReplyAsync(
             $"Claim timeout: {currentTimeout.ToDiscordTimestampRel()}"
             + (
-                currentTimeout != _firstClaimTimeouts[channelId]
-                    ? $"\n**First roll timeout: "
-                      + $"{_firstClaimTimeouts[channelId].ToDiscordTimestampRel()}** "
-                      + $"{_firstClaimMessageLinks[channelId]}"
-                    : ""
-            )
+                $"\n**First roll timeout: "
+                + $"{_firstClaimTimeouts[channelId].ToDiscordTimestampRel()}** "
+                + $"{_firstClaimMessageLinks[channelId]}"
+            ).OnlyIf(currentTimeout != _firstClaimTimeouts[channelId])
         );
     }
 }

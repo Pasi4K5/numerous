@@ -52,7 +52,7 @@ public sealed class ServerStatsCommandModule(DbManager db) : CommandModule
             ? null
             : DateTime.UtcNow - GetTimeSpan(timeframe.Value, timeUnit!.Value);
 
-        var titlePostfix = startTime is null ? "" : $" since {startTime.Value:yyyy-MM-dd HH:mm:ss}";
+        var titlePostfix = $" since {startTime:yyyy-MM-dd HH:mm:ss}".OnlyIf(startTime is not null);
 
         var channelNames = Context.Guild.Channels
             .Where(c => c is ITextChannel and not IThreadChannel)

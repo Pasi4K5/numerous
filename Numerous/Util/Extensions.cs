@@ -19,6 +19,11 @@ public static class Extensions
         }
     }
 
+    public static string OnlyIf(this string s, bool condition)
+    {
+        return condition ? s : "";
+    }
+
     public static string LimitLength(this string s, int maxLength)
     {
         return s.Length > maxLength ? s[..(maxLength - 1)] + "…" : s;

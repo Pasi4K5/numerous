@@ -10,6 +10,7 @@ using GraphQL.Client.Http;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using Numerous.ApiClients;
+using Numerous.Util;
 using Color = Discord.Color;
 
 namespace Numerous.Discord.Commands;
@@ -60,7 +61,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
                     + "\n**WARNING: This media contains adult content."
                     + "\nIf you are sure that you want to proceed, click the hidden links below.**"
                     + $"\nMedia: ||<{media.SiteUrl}>||"
-                    + (character is null ? "" : $"\nCharacter: ||<{character.SiteUrl}>||")
+                    + $"\nCharacter: ||<{character?.SiteUrl}>||".OnlyIf(character is not null)
                 );
 
                 return;

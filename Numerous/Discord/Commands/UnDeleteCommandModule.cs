@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Database;
 using Numerous.Database.Entities;
+using Numerous.Util;
 
 namespace Numerous.Discord.Commands;
 
@@ -61,7 +62,11 @@ public sealed class UnDeleteCommandModule(DbManager db) : CommandModule
             .WithFields(
                 new EmbedFieldBuilder()
                     .WithName("Message text")
-                    .WithValue(string.IsNullOrEmpty(msgContent) ? "*(No message content)*" : msgContent),
+                    .WithValue(
+                        string.IsNullOrEmpty(msgContent)
+                            ? "*(No message content)*"
+                            : msgContent + "\n*(edited)*".OnlyIf(msg.Contents.Count > 1)
+                    ),
                 new EmbedFieldBuilder()
                     .WithName("Sent")
                     .WithValue($"<t:{msg.Timestamps.First().ToUnixTimeSeconds()}:R>")

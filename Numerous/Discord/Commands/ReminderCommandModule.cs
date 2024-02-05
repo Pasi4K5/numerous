@@ -70,7 +70,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                     .WithColor(Color.Green)
                     .WithTitle("Reminder Set")
                     .WithDescription(
-                        (message is not null ? $"{message}\n" : "")
+                        $"{message}\n".OnlyIf(message is not null)
                         + $"{timestamp.ToDiscordTimestampLong()} ({timestamp.ToDiscordTimestampRel()})"
                     )
                     .Build()
@@ -135,7 +135,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                         .WithColor(Color.Green)
                         .WithTitle("Reminder Set")
                         .WithDescription(
-                            (message is not null ? $"{message}\n" : "")
+                            $"{message}\n".OnlyIf(message is not null)
                             + $"{timestamp.Value.ToDiscordTimestampDateTime()} ({timestamp.Value.ToDiscordTimestampRel()})"
                         )
                         .Build()
@@ -260,7 +260,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
         {
             embed.AddField(
                 $"Reminder {index + 1} in <#{reminder.ChannelId}>",
-                (reminder.Message is not null ? $"{reminder.Message}\n" : "")
+                $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
                 + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
             );
         }
@@ -295,7 +295,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                 .WithColor(Color.Red)
                 .WithTitle("Reminder Removed")
                 .WithDescription(
-                    (reminder.Message is not null ? $"{reminder.Message}\n" : "")
+                    $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
                     + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
                 )
                 .Build()
