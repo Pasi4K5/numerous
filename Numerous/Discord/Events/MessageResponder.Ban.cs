@@ -44,6 +44,7 @@ public partial class MessageResponder
             || (channel.Guild.OwnerId != sender.Id
                 && (sender.GuildPermissions.BanMembers != true || senderRolePositions.Max() <= targetRolePositions.Max())
             )
+            || sender.IsBot
            )
         {
             await msg.ReplyAsync("fuck u");
