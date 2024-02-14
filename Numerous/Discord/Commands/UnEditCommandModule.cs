@@ -15,19 +15,26 @@ namespace Numerous.Discord.Commands;
 public sealed class UnEditCommandModule(DbManager db, DiscordSocketClient client) : CommandModule
 {
     [UsedImplicitly]
+    [MessageCommand("Unedit")]
+    public async Task UnEdit(IMessage msg)
+    {
+        await UnEdit(msg.Id.ToString());
+    }
+
+    [UsedImplicitly]
     [SlashCommand("unedit", "Reveals all versions of the given message.")]
     public async Task UnEdit(
         [Summary("message", "The message to reveal. Can be a message ID or a link.")]
-        string message
+        string msg
     )
     {
         await DeferAsync();
 
-        ulong? messageId = message switch
+        ulong? messageId = msg switch
         {
-            _ when ulong.TryParse(message, out var id) => id,
-            _ when message.StartsWith("https://discord.com/channels/", StringComparison.Ordinal) => ulong.Parse(
-                message.Split('/').Last()),
+            _ when ulong.TryParse(msg, out var id) => id,
+            _ when msg.StartsWith("https://discord.com/channels/", StringComparison.Ordinal) => ulong.Parse(
+                msg.Split('/').Last()),
             _ => null,
         };
 
@@ -58,8 +65,7 @@ public sealed class UnEditCommandModule(DbManager db, DiscordSocketClient client
                     .Select((x, i) => new EmbedFieldBuilder()
                         .WithName($"Version {i + 1}")
                         .WithValue(x.First + $"\n<t:{x.Second.ToUnixTimeSeconds()}:R>"))
-            )
-            .Build();
+            ).Build();
 
         await FollowupAsync(embed: embed);
     }
