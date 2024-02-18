@@ -5,7 +5,6 @@
 
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.ApiClients.OpenAi;
 using Numerous.Configuration;
 using Numerous.Database;
 using Numerous.DependencyInjection;
