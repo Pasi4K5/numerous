@@ -65,4 +65,6 @@ public sealed record DiscordMessage : DbEntity<ulong>
     public ulong? ReferenceMessageId { get; init; }
 
     public DateTimeOffset? DeletedAt { get; init; }
+
+    public bool IsHidden { get; init; } = false;
 }

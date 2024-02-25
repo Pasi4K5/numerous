@@ -45,7 +45,7 @@ public sealed class UnEditCommandModule(DbManager db, DiscordSocketClient client
             return;
         }
 
-        var discordMessage = await db.DiscordMessages.Find(m => m.Id == messageId).FirstOrDefaultAsync();
+        var discordMessage = await db.DiscordMessages.Find(m => m.Id == messageId && !m.IsHidden).FirstOrDefaultAsync();
 
         if (discordMessage is null)
         {

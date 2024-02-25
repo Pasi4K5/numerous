@@ -28,7 +28,7 @@ public sealed class UnDeleteCommandModule(DbManager db, AttachmentManager attach
         await DeferAsync();
 
         var messages = await db.DiscordMessages
-            .Find(m => m.ChannelId == Context.Channel.Id && m.DeletedAt != null)
+            .Find(m => m.ChannelId == Context.Channel.Id && m.DeletedAt != null && !m.IsHidden)
             .SortByDescending(m => m.DeletedAt)
             .ToListAsync();
 
