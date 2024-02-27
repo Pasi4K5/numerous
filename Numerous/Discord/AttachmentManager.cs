@@ -33,7 +33,7 @@ public sealed class AttachmentManager(ConfigManager cm)
         }
 
         return Directory.GetFiles(imgDirPath, $"{msgId}_*")
-            .Where(filePath => !considerFileSizeLimit || new FileInfo(filePath).Length <= 8 * 1024 * 1024)
+            .Where(filePath => !considerFileSizeLimit)
             .Select(filePath => new FileAttachment(filePath, string.Join('_', Path.GetFileName(filePath).Split('_')[2..])));
     }
 }

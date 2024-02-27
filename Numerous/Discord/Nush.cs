@@ -68,6 +68,7 @@ public class Nush(DiscordSocketClient client, DbManager db) : IHostedService
 
     private async Task HandleCommandAsync(string cmd, string[] args, SocketMessage msg)
     {
+        // TODO: Implement a proper command handler.
         switch (cmd)
         {
             case "echo":
@@ -118,6 +119,40 @@ public class Nush(DiscordSocketClient client, DbManager db) : IHostedService
                     {
                         await msg.ReplyAsync("`Success`");
                     }
+                }
+
+                break;
+            case "rpasswd":
+                if (args.Length < 3
+                    || args[0] != "-d"
+                    || !ulong.TryParse(args[1], out var userId)
+                    || !ulong.TryParse(args[2], out var roleId)
+                   )
+                {
+                    await msg.ReplyAsync("`Invalid arguments.`");
+
+                    return;
+                }
+
+                var user = (msg.Channel as SocketGuildChannel)?.Guild.GetUser(userId);
+                var role = (msg.Channel as SocketGuildChannel)?.Guild.GetRole(roleId);
+
+                if (user is null || role is null)
+                {
+                    await msg.ReplyAsync("`User or role not found.`");
+
+                    return;
+                }
+
+                if (user.Roles.Any(x => x.Id == roleId))
+                {
+                    await user.RemoveRoleAsync(role);
+
+                    await msg.ReplyAsync("`Role removed.`");
+                }
+                else
+                {
+                    await msg.ReplyAsync("User does not have the role.");
                 }
 
                 break;
