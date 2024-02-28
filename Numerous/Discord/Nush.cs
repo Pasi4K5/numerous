@@ -117,7 +117,14 @@ public class Nush(DiscordSocketClient client, DbManager db) : IHostedService
 
                     if (discordMsgTasks.Length > 0 || found)
                     {
-                        await msg.ReplyAsync("`Success`");
+                        if (args.Contains("-s"))
+                        {
+                            await msg.DeleteAsync();
+                        }
+                        else
+                        {
+                            await msg.ReplyAsync("`Success`");
+                        }
                     }
                 }
 
