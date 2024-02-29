@@ -16,7 +16,7 @@ public sealed class AttachmentManager(ConfigManager cm)
 
     public string GetTargetPath(ulong msgId, IList<IAttachment> attachments, IAttachment attachment)
     {
-        var imgDirPath = Config.ImageDirectory;
+        var imgDirPath = Config.AttachmentDirectory;
         var uri = new Uri(attachment.Url);
         var fileName = uri.Segments.Last();
 
@@ -25,7 +25,7 @@ public sealed class AttachmentManager(ConfigManager cm)
 
     public IEnumerable<FileAttachment> GetFileAttachments(ulong msgId)
     {
-        var imgDirPath = Config.ImageDirectory;
+        var imgDirPath = Config.AttachmentDirectory;
 
         if (!Directory.Exists(imgDirPath))
         {

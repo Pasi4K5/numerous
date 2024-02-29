@@ -19,5 +19,5 @@ public record struct Config()
     public string GptInstructionsPath { get; init; } = "./instructions.txt";
     public bool GuildMode { get; init; } = true;
     public ulong[] GuildIds { get; init; } = [];
-    public string ImageDirectory { get; init; } = "./img/";
+    public string AttachmentDirectory { get; init; } = "./attachments/";
 }

@@ -36,7 +36,7 @@ public partial class DiscordEventHandler
                 GuildId = channel.GuildId,
             });
 
-            var imgDirPath = cm.Get().ImageDirectory;
+            var imgDirPath = cm.Get().AttachmentDirectory;
 
             if (!Directory.Exists(imgDirPath))
             {
