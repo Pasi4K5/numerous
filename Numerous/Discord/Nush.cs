@@ -9,6 +9,7 @@ using MongoDB.Driver;
 using Numerous.Database;
 using Numerous.Database.Entities;
 using Numerous.DependencyInjection;
+using Numerous.Util;
 
 namespace Numerous.Discord;
 
@@ -161,6 +162,33 @@ public class Nush(DiscordSocketClient client, DbManager db) : IHostedService
                 {
                     await msg.ReplyAsync("User does not have the role.");
                 }
+
+                break;
+            case "isadmin":
+                var guild = (msg.Channel as SocketGuildChannel)?.Guild;
+
+                if (args.Length > 0)
+                {
+                    if (!ulong.TryParse(args[0], out var guildId))
+                    {
+                        await msg.ReplyAsync("`Invalid guild ID.`");
+
+                        return;
+                    }
+
+                    guild = client.GetGuild(guildId);
+
+                    if (guild is null)
+                    {
+                        await msg.ReplyAsync("`Guild not found.`");
+
+                        return;
+                    }
+                }
+
+                var isAdmin = guild?.CurrentUser.GuildPermissions.Administrator ?? false;
+
+                await msg.ReplyAsync($"`I am {"not ".OnlyIf(!isAdmin)}an admin on this server.`");
 
                 break;
             default:
