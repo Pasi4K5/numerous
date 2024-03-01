@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Drawing;
+using Newtonsoft.Json;
 
 namespace Numerous.Util;
 
@@ -55,6 +56,13 @@ public static class Extensions
         }
 
         return messages;
+    }
+
+    public static async Task<T?> ToObjectAsync<T>(this Task<HttpResponseMessage> response)
+    {
+        var responseText = await (await response).Content.ReadAsStringAsync();
+
+        return JsonConvert.DeserializeObject<T>(responseText);
     }
 
     public static Color Opaque(this Color color)

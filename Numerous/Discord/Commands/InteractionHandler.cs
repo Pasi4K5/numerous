@@ -28,6 +28,11 @@ public sealed class InteractionHandler(
         client.Ready += cfg.GuildMode
             ? async () =>
             {
+                foreach (var cmd in await client.GetGlobalApplicationCommandsAsync())
+                {
+                    await cmd.DeleteAsync();
+                }
+
                 foreach (var guildId in cfg.GuildIds)
                 {
                     await interactions.RegisterCommandsToGuildAsync(guildId);

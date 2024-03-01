@@ -80,14 +80,15 @@ try
             }
         }
 
-        var client = new DiscordSocketClient(new()
+        var discordClient = new DiscordSocketClient(new()
         {
             GatewayIntents = GatewayIntents.All,
         });
 
-        s.AddSingleton(client);
+        s.AddSingleton(discordClient);
         s.AddSingleton(cm);
         s.AddSingleton<InteractionService>();
+        s.AddSingleton(new HttpClient());
         s.AddScheduler();
     });
 
