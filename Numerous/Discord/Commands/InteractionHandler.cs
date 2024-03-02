@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Configuration;
 using Numerous.DependencyInjection;
+using Serilog;
 
 namespace Numerous.Discord.Commands;
 
@@ -24,6 +25,20 @@ public sealed class InteractionHandler(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var cfg = configManager.Get();
+
+        interactions.SlashCommandExecuted += (info, _, result) =>
+        {
+            if (result is ExecuteResult exRes)
+            {
+                Log.Error(
+                    "Error executing command {CommandName}: {Error}",
+                    info.Name,
+                    exRes.Exception.ToString()
+                );
+            }
+
+            return Task.CompletedTask;
+        };
 
         client.Ready += cfg.GuildMode
             ? async () =>
