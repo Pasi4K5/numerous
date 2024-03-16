@@ -3,13 +3,17 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Text.RegularExpressions;
 using Discord;
 using Discord.WebSocket;
 
 namespace Numerous.Discord;
 
-public static class DiscordExtensions
+public static partial class DiscordExtensions
 {
+    [GeneratedRegex(@"discord\.com/channels/\d+/(\d+)/(\d+)")]
+    private static partial Regex MessageLinkRegex();
+
     public static async Task ReplyAsync(this IMessage message, string text)
     {
         await message.Channel.SendMessageAsync(text, messageReference: new(message.Id));
@@ -20,6 +24,20 @@ public static class DiscordExtensions
         var guildId = msg.Channel is IGuildChannel channel ? channel.Guild.Id.ToString() : "@me";
 
         return $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
+    }
+
+    public static ulong? ParseMessageId(this string linkOrId)
+    {
+        if (ulong.TryParse(linkOrId, out var id))
+        {
+            return id;
+        }
+
+        var match = MessageLinkRegex().Match(linkOrId);
+
+        return match.Success
+            ? ulong.Parse(match.Groups[2].Value)
+            : null;
     }
 
     public static string ToLogString(this IReadOnlyCollection<SocketSlashCommandDataOption> options)
