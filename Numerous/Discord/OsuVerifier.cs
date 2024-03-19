@@ -21,27 +21,29 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 {
     public Task StartAsync()
     {
-        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(async () =>
-        {
-            foreach (var guild in discord.Guilds)
-            {
-                var dbUsers = await db.Users.FindAsync(x => x.OsuId != null);
-
-                await dbUsers.ForEachAsync(async dbUser =>
-                {
-                    var guildUser = guild.GetUser(dbUser.Id);
-
-                    if (guildUser is null)
-                    {
-                        return;
-                    }
-
-                    await AssignRolesAsync(guildUser);
-                });
-            }
-        }).EveryFiveSeconds());
+        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync).EveryFiveSeconds());
 
         return Task.CompletedTask;
+    }
+
+    public async Task AssignAllRolesAsync()
+    {
+        foreach (var guild in discord.Guilds)
+        {
+            var dbUsers = await db.Users.FindAsync(x => x.OsuId != null);
+
+            await dbUsers.ForEachAsync(async dbUser =>
+            {
+                var guildUser = guild.GetUser(dbUser.Id);
+
+                if (guildUser is null)
+                {
+                    return;
+                }
+
+                await AssignRolesAsync(guildUser);
+            });
+        }
     }
 
     public async Task<bool> UserIsVerifiedAsync(IGuildUser guildUser)
@@ -68,7 +70,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         await AssignRolesAsync(guildUser);
     }
 
-    public async Task SetRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
+    public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
     {
         var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).SingleAsync();
 

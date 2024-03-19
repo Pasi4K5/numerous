@@ -10,6 +10,7 @@ using Numerous.ApiClients.Osu;
 
 namespace Numerous.Discord.Commands;
 
+[UsedImplicitly]
 [Group("config", "Configuration commands")]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
 public sealed class ConfigCommandModule : CommandModule
@@ -24,12 +25,14 @@ public sealed class ConfigCommandModule : CommandModule
             [Summary("role", "The role to assign to users in the group.")] IRole role
         )
         {
-            await verifier.SetRoleAsync(Context.Guild, group, role);
+            await verifier.LinkRoleAsync(Context.Guild, group, role);
 
             await RespondWithEmbedAsync(
                 $"Set role for group {group} to {role.Mention}.",
                 ResponseType.Success
             );
+
+            await verifier.AssignAllRolesAsync();
         }
 
         [UsedImplicitly]
@@ -44,6 +47,8 @@ public sealed class ConfigCommandModule : CommandModule
                 $"Removed role for group {group}.",
                 ResponseType.Success
             );
+
+            await verifier.AssignAllRolesAsync();
         }
     }
 }
