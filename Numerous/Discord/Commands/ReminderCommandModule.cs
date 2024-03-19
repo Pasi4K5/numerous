@@ -103,8 +103,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
             if (timeZoneId is null)
             {
                 await FollowupWithEmbedAsync(
-                    "To use this command, please set your time zone with `/settimezone` first.",
-                    ResponseType.Error
+                    message: "To use this command, please set your time zone with `/settimezone` first.",
+                    type: ResponseType.Error
                 );
 
                 return;
@@ -120,8 +120,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                 if (timestamp is null)
                 {
                     await FollowupWithEmbedAsync(
-                        "The specified time must be at least 10 seconds in the future.",
-                        ResponseType.Error
+                        message: "The specified time must be at least 10 seconds in the future.",
+                        type: ResponseType.Error
                     );
 
                     return;
@@ -143,7 +143,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
             }
             catch (ArgumentOutOfRangeException)
             {
-                await FollowupWithEmbedAsync("The specified time is invalid.", ResponseType.Error);
+                await FollowupWithEmbedAsync("The specified time is invalid.", type: ResponseType.Error);
             }
         }
 
@@ -281,7 +281,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
 
         if (index < 1 || index > reminders.Count)
         {
-            await FollowupWithEmbedAsync("There is no reminder with that index.", ResponseType.Error);
+            await FollowupWithEmbedAsync("There is no reminder with that index.", type: ResponseType.Error);
 
             return;
         }

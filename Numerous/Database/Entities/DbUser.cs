@@ -10,5 +10,6 @@ public sealed record DbUser : DbEntity<ulong>
     // For future osu!-related features
     // public DbOsuUser? OsuUser { get; init; }
 
+    public uint? OsuId { get; set; }
     public string? TimeZone { get; set; }
 }

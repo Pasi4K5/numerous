@@ -43,19 +43,26 @@ public sealed class DbManager
         }
     }
 
+    public async Task EnsureUserExistsAsync(ulong id)
+    {
+        await GetUserAsync(id);
+    }
+
     public async Task<DbUser> GetUserAsync(ulong id)
     {
         var user = await Users.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-        if (user is null)
+        if (user is not null)
         {
-            user = new DbUser
-            {
-                Id = id,
-            };
-
-            await Users.InsertOneAsync(user);
+            return user;
         }
+
+        user = new DbUser
+        {
+            Id = id,
+        };
+
+        await Users.InsertOneAsync(user);
 
         return user;
     }

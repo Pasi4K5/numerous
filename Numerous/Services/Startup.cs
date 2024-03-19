@@ -20,7 +20,8 @@ public sealed class Startup(
     DiscordSocketClient discordClient,
     ConfigManager cfgManager,
     DbManager dbManager,
-    ReminderService reminderService
+    ReminderService reminderService,
+    OsuVerifier verifier
 ) : IHostedService
 {
     private Config Cfg => cfgManager.Get();
@@ -46,6 +47,7 @@ public sealed class Startup(
         }
 
         await reminderService.StartAsync(cancellationToken);
+        await verifier.StartAsync();
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

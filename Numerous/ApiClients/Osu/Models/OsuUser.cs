@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Numerous.ApiClients.Osu.Models;
 
-public record struct OsuUser
+public record OsuUser
 {
     [JsonProperty("id")]
     public uint Id { get; init; }
@@ -16,5 +16,34 @@ public record struct OsuUser
     public bool IsBot { get; init; }
 
     [JsonProperty("username")]
-    public string Username { get; init; }
+    public string Username { get; init; } = null!;
+
+    [JsonProperty("groups")]
+    public OsuUserGroup[]? Groups { get; set; } = Array.Empty<OsuUserGroup>();
+
+    [JsonProperty("graveyard_beatmapset_count")]
+    public uint GraveyardBeatmapsetCount { get; init; }
+
+    [JsonProperty("guest_beatmapset_count")]
+    public uint GuestBeatmapsetCount { get; init; }
+
+    [JsonProperty("loved_beatmapset_count")]
+    public uint LovedBeatmapsetCount { get; init; }
+
+    [JsonProperty("pending_beatmapset_count")]
+    public uint PendingBeatmapsetCount { get; init; }
+
+    [JsonProperty("ranked_beatmapset_count")]
+    public uint RankedBeatmapsetCount { get; init; }
+
+    public OsuUserGroup[] GetGroups()
+    {
+        return Groups ?? Array.Empty<OsuUserGroup>();
+    }
+}
+
+public sealed record OsuUserExtended : OsuUser
+{
+    [JsonProperty("discord")]
+    public string DiscordUsername { get; init; } = null!;
 }

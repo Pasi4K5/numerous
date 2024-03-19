@@ -3,29 +3,27 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Numerous.ApiClients.Osu;
+using Numerous.ApiClients.Osu.Models;
 
-namespace Numerous.Database.Entities;
+namespace Numerous.ApiClients.Osu;
 
-// TODO: Remove comment
-// ReSharper disable UnusedMember.Global
-public sealed record GuildOptions : DbEntity<ulong>
+public static class Extensions
 {
-    public bool TrackMessages { get; init; }
-    public bool TrackMemberCount { get; init; }
-    public ICollection<OsuRole> OsuRoles { get; init; } = [];
-
-    public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();
-
-    public record struct TrackingOptions
+    public static bool IsRankedMapper(this OsuUser user)
     {
-        public ulong DiscordId { get; init; }
-        public bool TrackPlayer { get; init; }
+        return user.RankedBeatmapsetCount > 0
+               || user.GuestBeatmapsetCount > 0;
     }
 
-    public record struct OsuRole
+    public static bool IsLovedMapper(this OsuUser user)
     {
-        public OsuUserGroup Group { get; init; }
-        public ulong RoleId { get; init; }
+        return user.LovedBeatmapsetCount > 0;
+    }
+
+    public static bool IsUnrankedMapper(this OsuUser user)
+    {
+        return
+            (user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0)
+            && !user.IsRankedMapper();
     }
 }

@@ -30,9 +30,10 @@ public abstract class CommandModule : InteractionModuleBase<SocketInteractionCon
         );
     }
 
-    protected async Task FollowupWithEmbedAsync(string message, ResponseType type = ResponseType.Info)
+    protected async Task FollowupWithEmbedAsync(string title = "", string message = "", ResponseType type = ResponseType.Info)
     {
         await FollowupAsync(embed: new EmbedBuilder()
+            .WithTitle(title)
             .WithColor(GetTypeColor(type))
             .WithDescription(message)
             .Build()

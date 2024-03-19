@@ -25,6 +25,14 @@ public partial class OsuApi
         return await RequestRefAsync<JObject>($"users/{user}", ("key", "id"));
     }
 
+    /// <summary>
+    /// Prioritizes the user ID over the username.
+    /// </summary>
+    public async Task<OsuUserExtended?> GetUserAsync(string user)
+    {
+        return await RequestRefAsync<OsuUserExtended>($"users/{user}");
+    }
+
     public async Task<Beatmapset?> GetBeatmapsetAsync(uint id)
     {
         return await RequestValAsync<Beatmapset>($"beatmapsets/{id}");

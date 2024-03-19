@@ -22,7 +22,7 @@ public sealed class InteractionHandler(
     ConfigManager configManager
 ) : IHostedService
 {
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         var cfg = configManager.Get();
 
@@ -40,8 +40,11 @@ public sealed class InteractionHandler(
             return Task.CompletedTask;
         };
 
-        client.Ready += cfg.GuildMode
-            ? async () =>
+        client.Ready += async () =>
+        {
+            await interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+
+            if (cfg.GuildMode)
             {
                 foreach (var cmd in await client.GetGlobalApplicationCommandsAsync())
                 {
@@ -53,7 +56,7 @@ public sealed class InteractionHandler(
                     await interactions.RegisterCommandsToGuildAsync(guildId);
                 }
             }
-            : async () =>
+            else
             {
                 foreach (var guild in await client.Rest.GetGuildsAsync())
                 {
@@ -61,10 +64,11 @@ public sealed class InteractionHandler(
                 }
 
                 await interactions.RegisterCommandsGloballyAsync();
-            };
+            }
+        };
         client.InteractionCreated += OnInteractionCreatedAsync;
 
-        await interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+        return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
