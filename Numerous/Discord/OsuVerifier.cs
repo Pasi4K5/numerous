@@ -135,14 +135,14 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 
         async Task AssignRoleAsync(OsuUserGroup group, bool add)
         {
-            var roleId = guildConfig?.OsuRoles.FirstOrDefault(osuRole => osuRole.Group == group).RoleId;
+            var roleId = guildConfig.OsuRoles.FirstOrDefault(osuRole => osuRole.Group == group).RoleId;
 
-            if (roleId is null)
+            if (roleId == default)
             {
                 return;
             }
 
-            var role = guildUser.Guild.GetRole(roleId.Value);
+            var role = guildUser.Guild.GetRole(roleId);
 
             if (role is not null)
             {
