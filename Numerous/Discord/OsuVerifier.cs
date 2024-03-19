@@ -85,7 +85,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         );
     }
 
-    public async Task RemoveRoleAsync(IGuild guild, OsuUserGroup group)
+    public async Task UnlinkRoleAsync(IGuild guild, OsuUserGroup group)
     {
         var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).SingleAsync();
 

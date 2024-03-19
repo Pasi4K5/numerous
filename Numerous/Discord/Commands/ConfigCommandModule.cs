@@ -38,7 +38,7 @@ public sealed class ConfigCommandModule : CommandModule
             [Summary("group", "The group to remove the role for.")] OsuUserGroup group
         )
         {
-            await verifier.RemoveRoleAsync(Context.Guild, group);
+            await verifier.UnlinkRoleAsync(Context.Guild, group);
 
             await RespondWithEmbedAsync(
                 $"Removed role for group {group}.",
