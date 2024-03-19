@@ -4,23 +4,24 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord.Interactions;
+using JetBrains.Annotations;
 
 namespace Numerous.ApiClients.Osu;
 
 public enum OsuUserGroup
 {
-    [ChoiceDisplay("Unranked Mapper")] UnrankedMapper = -1,
-    [ChoiceDisplay("Ranked Mapper")] RankedMapper = -2,
-    [ChoiceDisplay("Loved Mapper")] LovedMapper = -3,
-    [ChoiceDisplay("GMT")] GlobalModerationTeam = 4,
-    [ChoiceDisplay("NAT")] NominationAssessmentTeam = 7,
-    [ChoiceDisplay("Developers")] Developers = 11,
-    [ChoiceDisplay("Community Contributors")] OsuAlumin = 16,
-    [ChoiceDisplay("Technical Support Team")] TechnicalSupportTeam = 17,
-    [ChoiceDisplay("Beatmap Nominators")] BeatmapNominators = 28,
-    [ChoiceDisplay("Project Loved")] ProjectLoved = 31,
-    [ChoiceDisplay("Beatmap Nominators (Probationary)")] BeatmapNominatorsProbationary = 32,
-    [ChoiceDisplay("ppy")] Ppy = 33,
-    [ChoiceDisplay("Featured Artists")] FeaturedArtists = 35,
-    [ChoiceDisplay("Beatmap Spotlight Curators")] BeatmapSpotlightCurators = 48,
+    [UsedImplicitly] [ChoiceDisplay("Unranked Mapper")] UnrankedMapper = -1,
+    [UsedImplicitly] [ChoiceDisplay("Ranked Mapper")] RankedMapper = -2,
+    [UsedImplicitly] [ChoiceDisplay("Loved Mapper")] LovedMapper = -3,
+    [UsedImplicitly] [ChoiceDisplay("GMT")] GlobalModerationTeam = 4,
+    [UsedImplicitly] [ChoiceDisplay("NAT")] NominationAssessmentTeam = 7,
+    [UsedImplicitly] [ChoiceDisplay("Developers")] Developers = 11,
+    [UsedImplicitly] [ChoiceDisplay("Community Contributors")] OsuAlumin = 16,
+    [UsedImplicitly] [ChoiceDisplay("Technical Support Team")] TechnicalSupportTeam = 17,
+    [UsedImplicitly] [ChoiceDisplay("Beatmap Nominators")] BeatmapNominators = 28,
+    [UsedImplicitly] [ChoiceDisplay("Project Loved")] ProjectLoved = 31,
+    [UsedImplicitly] [ChoiceDisplay("Beatmap Nominators (Probationary)")] BeatmapNominatorsProbationary = 32,
+    [UsedImplicitly] [ChoiceDisplay("ppy")] Ppy = 33,
+    [UsedImplicitly] [ChoiceDisplay("Featured Artists")] FeaturedArtists = 35,
+    [UsedImplicitly] [ChoiceDisplay("Beatmap Spotlight Curators")] BeatmapSpotlightCurators = 48,
 }
