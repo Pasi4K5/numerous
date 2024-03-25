@@ -3,19 +3,23 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Text.RegularExpressions;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.ApiClients.Osu;
 
 namespace Numerous.Discord.Commands;
 
-public sealed class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : CommandModule
+public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : CommandModule
 {
+    [GeneratedRegex(@"osu\.ppy\.sh/u(?:sers)?/(\d+)")]
+    private static partial Regex OsuUserUrlRegex();
+
     [UsedImplicitly]
     [SlashCommand("verify", "Verifies your osu! account.")]
     public async Task Verify(
-        [Summary("user", "Your osu! username or user ID")]
-        string username
+        [Summary("user", "Your osu! username, user ID or profile link")]
+        string user
     )
     {
         await DeferAsync();
@@ -32,7 +36,14 @@ public sealed class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : Comm
             return;
         }
 
-        var osuUser = await osu.GetUserAsync(username);
+        var match = OsuUserUrlRegex().Match(user);
+
+        if (match.Success)
+        {
+            user = match.Groups[1].Value;
+        }
+
+        var osuUser = await osu.GetUserAsync(user);
 
         if (osuUser is null)
         {
@@ -76,7 +87,8 @@ public sealed class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : Comm
 
         await FollowupWithEmbedAsync(
             "Verification successful",
-            type: ResponseType.Success
+            $"You have successfully verified as [**{osuUser.Username}**](https://osu.ppy.sh/users/{osuUser.Id}).",
+            ResponseType.Success
         );
     }
 }
