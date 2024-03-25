@@ -107,13 +107,14 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
     private async Task AssignRolesAsync(IGuildUser guildUser)
     {
         var osuUser = await GetOsuUserAsync(guildUser);
+        var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guildUser.GuildId)).SingleAsync();
+
+        await AssignRoleAsync(OsuUserGroup.Verified, osuUser is not null);
 
         if (osuUser is null)
         {
             return;
         }
-
-        var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guildUser.GuildId)).SingleAsync();
 
         foreach (var osuRole in guildConfig.OsuRoles.Where(osuRole => osuRole.Group > 0))
         {

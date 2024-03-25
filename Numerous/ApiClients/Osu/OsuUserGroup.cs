@@ -10,6 +10,7 @@ namespace Numerous.ApiClients.Osu;
 
 public enum OsuUserGroup
 {
+    [UsedImplicitly] [ChoiceDisplay("Verified")] Verified = 0,
     [UsedImplicitly] [ChoiceDisplay("Unranked Mapper")] UnrankedMapper = -1,
     [UsedImplicitly] [ChoiceDisplay("Ranked Mapper")] RankedMapper = -2,
     [UsedImplicitly] [ChoiceDisplay("Loved Mapper")] LovedMapper = -3,
