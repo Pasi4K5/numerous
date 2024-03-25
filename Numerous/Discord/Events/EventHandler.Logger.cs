@@ -15,7 +15,8 @@ public partial class DiscordEventHandler
     private void Logger_Init()
     {
         client.SlashCommandExecuted += LogSlashCommand;
-        client.InteractionCreated += LogInteraction;
+        client.MessageCommandExecuted += LogMessageCommand;
+        client.UserCommandExecuted += LogUserCommand;
     }
 
     private async Task LogSlashCommand(SocketSlashCommand cmd)
@@ -36,17 +37,26 @@ public partial class DiscordEventHandler
             cmd.GuildId);
     }
 
-    private static Task LogInteraction(SocketInteraction interaction)
+    private static Task LogMessageCommand(SocketMessageCommand msgCmd)
     {
-        if (interaction is SocketMessageCommand msgCmd)
-        {
-            Log.Information(
-                """User "{User}" (ID: {Uid}) executed message command "{Cmd}" on message <{Msg}>.""",
-                msgCmd.User.Username,
-                msgCmd.User.Id,
-                msgCmd.CommandName,
-                msgCmd.Data.Message.GetLink());
-        }
+        Log.Information(
+            """User "{User}" (ID: {Uid}) executed message command "{Cmd}" on message <{Msg}>.""",
+            msgCmd.User.Username,
+            msgCmd.User.Id,
+            msgCmd.CommandName,
+            msgCmd.Data.Message.GetLink());
+
+        return Task.CompletedTask;
+    }
+
+    private static Task LogUserCommand(SocketUserCommand userCmd)
+    {
+        Log.Information("""User "{User} (ID: {Uid}) executed user command "{Cmd}" on user "{Target} (ID: {Tid}).""",
+            userCmd.User.Username,
+            userCmd.User.Id,
+            userCmd.CommandName,
+            userCmd.Data.Member.Username,
+            userCmd.Data.Member.Id);
 
         return Task.CompletedTask;
     }

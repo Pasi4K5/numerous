@@ -46,16 +46,21 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         }
     }
 
-    public async Task<bool> UserIsVerifiedAsync(IGuildUser guildUser)
+    public async Task<bool> UserIsVerifiedAsync(IUser user)
     {
-        var user = await db.GetUserAsync(guildUser.Id);
+        var dbUser = await db.GetUserAsync(user.Id);
 
-        return user.OsuId is not null;
+        return dbUser.OsuId is not null;
     }
 
     public async Task<bool> OsuUserIsVerifiedAsync(OsuUser osuUser)
     {
         return await db.Users.Find(x => x.OsuId == osuUser.Id).AnyAsync();
+    }
+
+    public async Task<ulong?> GetOsuIdAsync(IUser discordUser)
+    {
+        return (await db.GetUserAsync(discordUser.Id)).OsuId;
     }
 
     public async Task VerifyUserAsync(IGuildUser guildUser, OsuUser osuUser)
