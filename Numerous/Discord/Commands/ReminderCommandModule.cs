@@ -32,7 +32,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
         {
             if (hours is null && minutes is null && seconds is null)
             {
-                await RespondWithEmbedAsync("Please specify a time.", ResponseType.Error);
+                await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
 
                 return;
             }
@@ -91,7 +91,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
         {
             if (year is null && month is null && day is null && hour is null && minute is null && second is null)
             {
-                await RespondWithEmbedAsync("Please specify a time.", ResponseType.Error);
+                await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
 
                 return;
             }

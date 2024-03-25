@@ -29,7 +29,7 @@ public sealed class ConfigCommandModule : CommandModule
 
             await RespondWithEmbedAsync(
                 $"Set role for group {group} to {role.Mention}.",
-                ResponseType.Success
+                type: ResponseType.Success
             );
 
             await verifier.AssignAllRolesAsync();
@@ -45,7 +45,7 @@ public sealed class ConfigCommandModule : CommandModule
 
             await RespondWithEmbedAsync(
                 $"Removed role for group {group}.",
-                ResponseType.Success
+                type: ResponseType.Success
             );
 
             await verifier.AssignAllRolesAsync();

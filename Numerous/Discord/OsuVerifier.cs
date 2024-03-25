@@ -26,6 +26,11 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         return Task.CompletedTask;
     }
 
+    public async Task<ulong?> GetGuildVerificationChannelIdAsync(IGuild guild)
+    {
+        return (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).Single().VerificationChannelId;
+    }
+
     public async Task AssignAllRolesAsync()
     {
         foreach (var guild in discord.Guilds)

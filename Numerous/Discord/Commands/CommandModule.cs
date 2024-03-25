@@ -21,10 +21,11 @@ public abstract class CommandModule : InteractionModuleBase<SocketInteractionCon
         };
     }
 
-    protected async Task RespondWithEmbedAsync(string message, ResponseType type = ResponseType.Info)
+    protected async Task RespondWithEmbedAsync(string title = "", string message = "", ResponseType type = ResponseType.Info)
     {
         await RespondAsync(embed: new EmbedBuilder()
             .WithColor(GetTypeColor(type))
+            .WithTitle(title)
             .WithDescription(message)
             .Build()
         );

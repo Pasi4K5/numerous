@@ -36,6 +36,19 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
             return;
         }
 
+        var verificationChannelId = await verifier.GetGuildVerificationChannelIdAsync(Context.Guild);
+
+        if (verificationChannelId is not null && verificationChannelId != Context.Channel.Id)
+        {
+            await FollowupWithEmbedAsync(
+                "Verification failed",
+                $"You can only verify in <#{verificationChannelId}>.",
+                ResponseType.Error
+            );
+
+            return;
+        }
+
         var match = OsuUserUrlRegex().Match(user);
 
         if (match.Success)
@@ -48,6 +61,7 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         if (osuUser is null)
         {
             await FollowupWithEmbedAsync(
+                "Verification failed",
                 "User not found.",
                 type: ResponseType.Error
             );
