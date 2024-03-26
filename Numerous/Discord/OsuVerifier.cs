@@ -21,7 +21,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 {
     public Task StartAsync()
     {
-        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync).EveryFiveSeconds());
+        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync).EveryMinute());
 
         return Task.CompletedTask;
     }
@@ -35,19 +35,10 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
     {
         foreach (var guild in discord.Guilds)
         {
-            var dbUsers = await db.Users.FindAsync(x => x.OsuId != null);
-
-            await dbUsers.ForEachAsync(async dbUser =>
+            await foreach (var guildUser in guild.GetUsersAsync().Flatten())
             {
-                var guildUser = guild.GetUser(dbUser.Id);
-
-                if (guildUser is null)
-                {
-                    return;
-                }
-
                 await AssignRolesAsync(guildUser);
-            });
+            }
         }
     }
 
