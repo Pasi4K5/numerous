@@ -32,6 +32,8 @@ public sealed class UnDeleteCommandModule(DbManager db, AttachmentManager attach
             .SortByDescending(m => m.DeletedAt)
             .ToListAsync();
 
+        await RemoveForbiddenMessages(messages);
+
         _messageCache[Context.Channel.Id] = messages;
 
         var message = messages.FirstOrDefault();
@@ -79,6 +81,9 @@ public sealed class UnDeleteCommandModule(DbManager db, AttachmentManager attach
             .Build();
 
         var messages = _messageCache[Context.Channel.Id];
+
+        await RemoveForbiddenMessages(messages, messages.IndexOf(msg));
+
         var prevDisabled = messages.IndexOf(msg) == messages.Count - 1;
         var nextDisabled = messages.IndexOf(msg) == 0;
         var prevMsg = prevDisabled ? null : messages[messages.IndexOf(msg) + 1];
@@ -138,5 +143,16 @@ public sealed class UnDeleteCommandModule(DbManager db, AttachmentManager attach
         await AddComponentsToMessage(responseMsg, nextMsg);
 
         await RespondAsync();
+    }
+
+    private async Task RemoveForbiddenMessages(IList<DiscordMessage> messages, int index = 0)
+    {
+        for (var i = index; i <= index + 1; i++)
+        {
+            while (messages.Count > i && await Context.Guild.GetBanAsync(messages[i].AuthorId) is not null)
+            {
+                messages.RemoveAt(i);
+            }
+        }
     }
 }
