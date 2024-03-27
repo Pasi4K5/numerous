@@ -11,6 +11,7 @@ namespace Numerous.Discord.Events;
 
 public partial class MessageResponder
 {
+    // ReSharper disable once UnusedMember.Local
     private async Task RespondWithChatBotAsync(SocketMessage msg)
     {
         if (msg.Author.IsBot || msg.Channel is IPrivateChannel)

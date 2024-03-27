@@ -58,6 +58,7 @@ public static class Extensions
         return messages;
     }
 
+    // ReSharper disable once UnusedMember.Global
     public static async Task<T?> ToObjectAsync<T>(this Task<HttpResponseMessage> response)
     {
         var responseText = await (await response).Content.ReadAsStringAsync();
