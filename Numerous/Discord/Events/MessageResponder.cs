@@ -36,10 +36,12 @@ public sealed partial class MessageResponder(
             {
                 if (await RespondToBanMessageAsync(msg))
                 {
+                    // ReSharper disable once RedundantJumpStatement
                     return;
                 }
 
-                await RespondWithChatBotAsync(msg);
+                // Chat bot is disabled for now
+                // await RespondWithChatBotAsync(msg);
             });
         }
 
