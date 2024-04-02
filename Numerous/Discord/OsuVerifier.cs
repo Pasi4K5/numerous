@@ -26,11 +26,6 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         return Task.CompletedTask;
     }
 
-    public async Task<ulong?> GetGuildVerificationChannelIdAsync(IGuild guild)
-    {
-        return (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).Single().VerificationChannelId;
-    }
-
     public async Task AssignAllRolesAsync()
     {
         foreach (var guild in discord.Guilds)
@@ -67,8 +62,6 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
             Builders<DbUser>.Filter.Eq(x => x.Id, guildUser.Id),
             Builders<DbUser>.Update.Set(x => x.OsuId, osuUser.Id)
         );
-
-        await AssignRolesAsync(guildUser);
     }
 
     public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
@@ -100,7 +93,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         );
     }
 
-    private async Task AssignRolesAsync(IGuildUser guildUser)
+    public async Task AssignRolesAsync(IGuildUser guildUser)
     {
         var osuUser = await GetOsuUserAsync(guildUser);
         var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guildUser.GuildId)).SingleAsync();

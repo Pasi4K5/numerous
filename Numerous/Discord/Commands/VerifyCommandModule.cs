@@ -36,19 +36,6 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
             return;
         }
 
-        var verificationChannelId = await verifier.GetGuildVerificationChannelIdAsync(Context.Guild);
-
-        if (verificationChannelId is not null && verificationChannelId != Context.Channel.Id)
-        {
-            await FollowupWithEmbedAsync(
-                "Verification failed",
-                $"You can only verify in <#{verificationChannelId}>.",
-                ResponseType.Error
-            );
-
-            return;
-        }
-
         var match = OsuUserUrlRegex().Match(user);
 
         if (match.Success)
@@ -73,9 +60,9 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         {
             await FollowupWithEmbedAsync(
                 "Verification failed",
-                "Please make sure that the provided osu! username or ID is correct and that "
-                + $"the \"Discord\" field on your osu! profile matches your Discord username (\"{Context.User.Username}\").\n"
-                + "You can change that in your [osu! account settings](https://osu.ppy.sh/home/account/edit) under \"Profile\"\u2192\"discord\".\n"
+                "Please make sure that the provided osu! username, ID or profile page link is correct and that "
+                + $"the *Discord* field on your osu! profile matches your Discord username (*{Context.User.Username}*).\n"
+                + "You can change that in your [osu! account settings](https://osu.ppy.sh/home/account/edit) under *Profile*\u2192*discord*.\n"
                 + "After the verification, you can remove it again if you want to.\n\n"
                 + "**Important:**\n"
                 + "* Do not enter another person's Discord username in your osu! profile. Otherwise they will be able to verify as you.\n"
@@ -104,5 +91,7 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
             $"You have successfully verified as [**{osuUser.Username}**](https://osu.ppy.sh/users/{osuUser.Id}).",
             ResponseType.Success
         );
+
+        await verifier.AssignRolesAsync(guildUser);
     }
 }
