@@ -24,7 +24,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync)
             .EveryMinute()
             .PreventOverlapping("RoleAssignment"));
-        discord.GuildMemberUpdated += async (u0, user) => await AssignRolesAsync(user);
+        discord.GuildMemberUpdated += async (_, user) => await AssignRolesAsync(user);
 
         return Task.CompletedTask;
     }
