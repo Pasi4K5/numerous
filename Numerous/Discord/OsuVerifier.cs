@@ -173,6 +173,13 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
             return null;
         }
 
-        return await osu.GetUserAsync(user.OsuId.Value.ToString());
+        var osuUser = await osu.GetUserAsync(user.OsuId.Value.ToString());
+
+        if (osuUser is null)
+        {
+            throw new Exception("Failed to get osu! user.");
+        }
+
+        return osuUser;
     }
 }
