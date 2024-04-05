@@ -21,7 +21,10 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 {
     public Task StartAsync()
     {
-        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync).EveryMinute());
+        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync)
+            .EveryMinute()
+            .PreventOverlapping("RoleAssignment"));
+        discord.GuildMemberUpdated += async (u0, user) => await AssignRolesAsync(user);
 
         return Task.CompletedTask;
     }
@@ -30,9 +33,14 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
     {
         foreach (var guild in discord.Guilds)
         {
-            await foreach (var guildUser in guild.GetUsersAsync().Flatten())
+            foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync())
             {
                 await AssignRolesAsync(guildUser);
+
+                if (await UserIsVerifiedAsync(guildUser))
+                {
+                    await Task.Delay(2000);
+                }
             }
         }
     }
