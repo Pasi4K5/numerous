@@ -16,6 +16,7 @@ public abstract class CommandModule : InteractionModuleBase<SocketInteractionCon
         {
             ResponseType.Info => Color.Blue,
             ResponseType.Success => Color.Green,
+            ResponseType.Warning => Color.Orange,
             ResponseType.Error => Color.DarkRed,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
@@ -45,6 +46,7 @@ public abstract class CommandModule : InteractionModuleBase<SocketInteractionCon
     {
         Info,
         Success,
+        Warning,
         Error,
     }
 }

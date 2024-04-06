@@ -60,14 +60,14 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         {
             await FollowupWithEmbedAsync(
                 "Verification failed",
-                "Please make sure that the provided osu! username, ID or profile page link is correct and that "
-                + $"the *Discord* field on your osu! profile matches your Discord username (*{Context.User.Username}*).\n"
-                + "You can change that in your [osu! account settings](https://osu.ppy.sh/home/account/edit) under *Profile*\u2192*discord*.\n"
-                + "After the verification, you can remove it again if you want to.\n\n"
+                $"**To verify, please fill in your Discord username (*{Context.User.Username}*) into the *Discord* field on your osu! profile.**\n"
+                + "You can do that in your [osu! account settings](https://osu.ppy.sh/home/account/edit) under *Profile*\u2192*discord*.\n\n"
+                + "After the verification, you **can** remove your Discord username from your profile **if you want to**.\n\n"
+                + "If that doesn't work, please double-check if the provided osu! **username**, **ID** or **profile link** is correct.\n\n"
                 + "**Important:**\n"
-                + "* Do not enter another person's Discord username in your osu! profile. Otherwise they will be able to verify as you.\n"
-                + "* You can only perform this verification once.",
-                ResponseType.Error
+                + "* Do **not** put another person's Discord username into the *Discord* field of your profile. Otherwise they will be able to verify as you.\n"
+                + "* You can only perform this verification **once**.\n",
+                ResponseType.Warning
             );
 
             return;
