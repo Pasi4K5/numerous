@@ -13,6 +13,7 @@ using Numerous.ApiClients.Osu.Models;
 using Numerous.Database;
 using Numerous.Database.Entities;
 using Numerous.DependencyInjection;
+using Serilog;
 
 namespace Numerous.Discord;
 
@@ -35,7 +36,17 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         {
             foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync())
             {
-                await AssignRolesAsync(guildUser);
+                try
+                {
+                    await AssignRolesAsync(guildUser);
+                }
+                catch (Exception e)
+                {
+                    Log.Warning(e,
+                        "Failed to assign roles to user {User} in guild {Guild}",
+                        guildUser.Id, guild.Id
+                    );
+                }
 
                 if (await UserIsVerifiedAsync(guildUser))
                 {
@@ -185,7 +196,10 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 
         if (osuUser is null)
         {
-            throw new Exception("Failed to get osu! user.");
+            throw new Exception(
+                $"Failed to get osu! user \"{user.OsuId}\" "
+                + $"for Discord user \"{discordUser.Username}\" (ID: {discordUser.Id})."
+            );
         }
 
         return osuUser;
