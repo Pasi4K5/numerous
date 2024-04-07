@@ -183,6 +183,27 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
         }
     }
 
+    public async Task<IMessageChannel?> GetVerificationLogChannelAsync(IGuild guild)
+    {
+        var guildConfig = db.GuildOptions.Find(x => x.Id == guild.Id).FirstOrDefault();
+        var channelId = guildConfig?.VerificationLogChannel;
+
+        if (channelId is null)
+        {
+            return null;
+        }
+
+        return await guild.GetTextChannelAsync(channelId.Value);
+    }
+
+    public async Task SetVerificationLogChannelAsync(SocketGuild guild, IMessageChannel? channel)
+    {
+        await db.GuildOptions.UpdateOneAsync(
+            Builders<GuildOptions>.Filter.Eq(x => x.Id, guild.Id),
+            Builders<GuildOptions>.Update.Set(x => x.VerificationLogChannel, channel?.Id)
+        );
+    }
+
     private async Task<OsuUserExtended?> GetOsuUserAsync(IUser discordUser)
     {
         var user = await db.GetUserAsync(discordUser.Id);

@@ -51,4 +51,38 @@ public sealed class ConfigCommandModule : CommandModule
             await verifier.AssignAllRolesAsync();
         }
     }
+
+    [Group("verify", "Verification configuration commands")]
+    public sealed class VerifyCommandModule(OsuVerifier verifier) : CommandModule
+    {
+        [UsedImplicitly]
+        [SlashCommand("setlogchannel", "Sets the channel to log verifications to.")]
+        public async Task SetLogChannel(
+            [Summary("channel", "The channel to log verifications to.")] ITextChannel channel
+        )
+        {
+            await DeferAsync();
+
+            await verifier.SetVerificationLogChannelAsync(Context.Guild, channel);
+
+            await FollowupWithEmbedAsync(
+                $"Set verification log channel to {channel.Mention}.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("unsetlogchannel", "Unsets the channel to log verifications to.")]
+        public async Task RemoveLogChannel()
+        {
+            await DeferAsync();
+
+            await verifier.SetVerificationLogChannelAsync(Context.Guild, null);
+
+            await FollowupWithEmbedAsync(
+                "Removed verification log channel.",
+                type: ResponseType.Success
+            );
+        }
+    }
 }

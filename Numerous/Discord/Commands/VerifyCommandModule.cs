@@ -4,9 +4,11 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Text.RegularExpressions;
+using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.ApiClients.Osu;
+using Numerous.ApiClients.Osu.Models;
 
 namespace Numerous.Discord.Commands;
 
@@ -22,16 +24,19 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         string user
     )
     {
-        await DeferAsync();
+        await DeferAsync(true);
 
         var guildUser = Context.Guild.GetUser(Context.User.Id);
 
         if (await verifier.UserIsVerifiedAsync(guildUser))
         {
             await FollowupWithEmbedAsync(
+                "Verification failed",
                 "You are already verified.",
                 type: ResponseType.Info
             );
+
+            await LogVerificationAsync(Type.AlreadyVerified, cmdArg: user);
 
             return;
         }
@@ -53,6 +58,8 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
                 type: ResponseType.Error
             );
 
+            await LogVerificationAsync(Type.UserNotFound, osuUser, user);
+
             return;
         }
 
@@ -70,6 +77,8 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
                 ResponseType.Warning
             );
 
+            await LogVerificationAsync(Type.Fail, osuUser, user);
+
             return;
         }
 
@@ -80,6 +89,8 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
                          + "If you believe this is a mistake or you have lost access to your Discord account, please contact a server administrator.",
                 type: ResponseType.Error
             );
+
+            await LogVerificationAsync(Type.VerifiedByOther, osuUser, user);
 
             return;
         }
@@ -92,6 +103,68 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
             ResponseType.Success
         );
 
+        await LogVerificationAsync(Type.Success, osuUser);
+
         await verifier.AssignRolesAsync(guildUser);
+    }
+
+    private async Task LogVerificationAsync(Type type, OsuUser? osuUser = null, string? cmdArg = null)
+    {
+        var logChannel = await verifier.GetVerificationLogChannelAsync(Context.Guild);
+
+        if (logChannel is null)
+        {
+            return;
+        }
+
+        var user = Context.User.Mention;
+        var channel = (Context.Channel as ITextChannel)?.Mention;
+
+        var (title, description, resType) = type switch
+        {
+            Type.Success => (
+                "Successful Verification",
+                $"{user} verified as *[{osuUser?.Username ?? "null"}](https://osu.ppy.sh/users/{osuUser?.Id ?? 0})* in {channel}.",
+                EmbedMessage.ResponseType.Info
+            ),
+            Type.AlreadyVerified => (
+                "Unsuccessful Verification",
+                $"{user} tried to verify as *{cmdArg}* in {channel}, but is already verified.",
+                EmbedMessage.ResponseType.Warning
+            ),
+            Type.VerifiedByOther => (
+                "Unsuccessful Verification",
+                $"{user} tried to verify as *[**{osuUser?.Username ?? "null"}**](https://osu.ppy.sh/users/{osuUser?.Id ?? 0})* "
+                + $"in {channel}, but this user has already been verified by someone else.",
+                EmbedMessage.ResponseType.Warning
+            ),
+            Type.UserNotFound => (
+                "Unsuccessful Verification",
+                $"{user} tried to verify as *{cmdArg}* in {channel}, but the user was not found.",
+                EmbedMessage.ResponseType.Warning
+            ),
+            Type.Fail => (
+                "Unsuccessful Verification",
+                $"{user} tried to verify as *{cmdArg}* in {channel}, but failed.",
+                EmbedMessage.ResponseType.Warning
+            ),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+        };
+
+        await logChannel.SendMessageAsync(new EmbedMessage
+        {
+            Title = title,
+            Description = description,
+            Type = resType,
+        });
+    }
+
+    private enum Type
+    {
+        Success,
+        AlreadyVerified,
+        VerifiedByOther,
+        UserNotFound,
+        Fail,
     }
 }
