@@ -54,7 +54,8 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         {
             await FollowupWithEmbedAsync(
                 "Verification failed",
-                "User not found.",
+                "**The provided user could not be found.**\n"
+                + "Please make sure you have entered the correct osu! username, user ID or profile link.",
                 type: ResponseType.Error
             );
 
@@ -67,14 +68,11 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         {
             await FollowupWithEmbedAsync(
                 "Verification failed",
-                $"**To verify, please fill in your Discord username (*{Context.User.Username}*) into the *Discord* field on your osu! profile.**\n"
-                + "You can do that in your [osu! account settings](https://osu.ppy.sh/home/account/edit) under *Profile*\u2192*discord*.\n\n"
-                + "After the verification, you **can** remove your Discord username from your profile **if you want to**.\n\n"
-                + "If that doesn't work, please double-check if the provided osu! **username**, **ID** or **profile link** is correct.\n\n"
-                + "**Important:**\n"
-                + "* Do **not** put another person's Discord username into the *Discord* field of your profile. Otherwise they will be able to verify as you.\n"
-                + "* You can only perform this verification **once**.\n",
-                ResponseType.Warning
+                "**The provided user does not match your Discord username.**\n"
+                + $"The Discord field on your osu! profile must be set to *{Context.User.Username}*, "
+                + $"but currently it is {(string.IsNullOrEmpty(osuUser.DiscordUsername) ? "empty" : $"set to *{osuUser.DiscordUsername}*")}.\n"
+                + "Please read the instructions above carefully and try again.",
+                ResponseType.Error
             );
 
             await LogVerificationAsync(Type.Fail, osuUser, user);
@@ -85,8 +83,10 @@ public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier
         if (await verifier.OsuUserIsVerifiedAsync(osuUser))
         {
             await FollowupWithEmbedAsync(
-                message: "This osu! account is already verified. "
-                         + "If you believe this is a mistake or you have lost access to your Discord account, please contact a server administrator.",
+                "Verification failed",
+                "**This osu! account has already been verified by someone else.**\n"
+                + "If you believe this is a mistake or you have lost access to your Discord account, "
+                + "please contact a server administrator.",
                 type: ResponseType.Error
             );
 
