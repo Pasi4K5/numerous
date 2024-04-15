@@ -20,5 +20,4 @@ public record struct Config()
     public bool GuildMode { get; init; } = true;
     public ulong[] GuildIds { get; init; } = [];
     public string AttachmentDirectory { get; init; } = "./attachments/";
-    public string? WaifuItAccessToken { get; init; } = null;
 }
