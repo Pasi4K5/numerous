@@ -15,8 +15,6 @@ public record struct Config()
     public string MongoDatabaseName { get; init; } = "";
     public uint OsuClientId { get; init; } = 0;
     public string OsuClientSecret { get; init; } = "";
-    public string OpenAiApiKey { get; init; } = "";
-    public string GptInstructionsPath { get; init; } = "./instructions.txt";
     public bool GuildMode { get; init; } = true;
     public ulong[] GuildIds { get; init; } = [];
     public string AttachmentDirectory { get; init; } = "./attachments/";

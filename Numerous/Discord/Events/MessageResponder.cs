@@ -5,16 +5,12 @@
 
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.ApiClients.OpenAi;
 using Numerous.DependencyInjection;
 
 namespace Numerous.Discord.Events;
 
 [HostedService]
-public sealed partial class MessageResponder(
-    DiscordSocketClient client,
-    OpenAiClient openAi
-) : IHostedService
+public sealed partial class MessageResponder(DiscordSocketClient client) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -32,17 +28,7 @@ public sealed partial class MessageResponder(
     {
         if (!msg.Author.IsBot)
         {
-            Task.Run(async () =>
-            {
-                if (await RespondToBanMessageAsync(msg))
-                {
-                    // ReSharper disable once RedundantJumpStatement
-                    return;
-                }
-
-                // Chat bot is disabled for now
-                // await RespondWithChatBotAsync(msg);
-            });
+            Task.Run(async () => await RespondToBanMessageAsync(msg));
         }
 
         return Task.CompletedTask;

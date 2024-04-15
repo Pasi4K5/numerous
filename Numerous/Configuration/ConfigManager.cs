@@ -17,10 +17,7 @@ public sealed class ConfigManager
     {
         lock (_lock)
         {
-            var defaultConfig = new Config
-            {
-                GptInstructionsPath = "./instructions.txt",
-            };
+            var defaultConfig = new Config();
 
             if (!File.Exists(Path))
             {
