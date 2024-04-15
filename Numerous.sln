@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerous", "Numerous\Numerous.csproj", "{FCAB5573-44D2-4D1C-B82E-D4E801096E54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerous", "src\Numerous\Numerous.csproj", "{FCAB5573-44D2-4D1C-B82E-D4E801096E54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
