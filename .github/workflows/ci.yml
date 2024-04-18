@@ -23,11 +23,10 @@ jobs:
     - name: Inspect Code
       run: >
         dotnet tool install -g JetBrains.ReSharper.GlobalTools &&
-        jb inspectcode --no-build --swea --output="inspectcodereport.xml" --verbosity=WARN "Numerous.sln"
+        jb inspectcode --no-build --swea --output="inspectcodereport.xml" --verbosity=WARN -f="xml" "Numerous.sln"
     - name: Inspection Report
       run: >
-        dotnet tool install -g nvika &&
-        cat inspectcodereport.xml && 
+        dotnet tool install -g nvika && 
         nvika parsereport "inspectcodereport.xml" --treatwarningsaserrors
     - name: Test
       run: dotnet test --no-build --verbosity normal
