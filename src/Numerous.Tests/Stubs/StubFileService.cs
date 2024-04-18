@@ -3,32 +3,27 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
-using Numerous.Configuration;
-using Numerous.Database;
-using Numerous.DependencyInjection;
-using Numerous.Util;
+using System.IO.Enumeration;
+using Numerous.Services;
 
-namespace Numerous.Discord.Events;
+namespace Numerous.Tests.Stubs;
 
-[HostedService]
-public sealed partial class DiscordEventHandler(
-    IConfigService cfgService,
-    DiscordSocketClient client,
-    DbManager db,
-    AttachmentService attachmentService
-) : IHostedService
+public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public bool DirectoryExists(string path)
     {
-        this.Init();
-
-        return Task.CompletedTask;
+        return Path.GetFullPath(path) == Path.GetFullPath(directory);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public string[] GetFiles(string path, string searchPattern)
     {
-        return Task.CompletedTask;
+        if (!DirectoryExists(path))
+        {
+            throw new DirectoryNotFoundException();
+        }
+
+        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
+            .Select(f => Path.Combine(path, f))
+            .ToArray();
     }
 }

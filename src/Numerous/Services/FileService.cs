@@ -3,32 +3,26 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
-using Numerous.Configuration;
-using Numerous.Database;
 using Numerous.DependencyInjection;
-using Numerous.Util;
 
-namespace Numerous.Discord.Events;
+namespace Numerous.Services;
 
-[HostedService]
-public sealed partial class DiscordEventHandler(
-    IConfigService cfgService,
-    DiscordSocketClient client,
-    DbManager db,
-    AttachmentService attachmentService
-) : IHostedService
+public interface IFileService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        this.Init();
+    bool DirectoryExists(string path);
+    string[] GetFiles(string path, string searchPattern);
+}
 
-        return Task.CompletedTask;
+[SingletonService<IFileService>]
+public class FileService : IFileService
+{
+    public bool DirectoryExists(string path)
+    {
+        return Directory.Exists(path);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public string[] GetFiles(string path, string searchPattern)
     {
-        return Task.CompletedTask;
+        return Directory.GetFiles(path, searchPattern);
     }
 }

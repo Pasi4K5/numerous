@@ -7,7 +7,12 @@ using Newtonsoft.Json;
 
 namespace Numerous.Configuration;
 
-public sealed class ConfigManager
+public interface IConfigService
+{
+    Config Get();
+}
+
+public sealed class ConfigService : IConfigService
 {
     private const string Path = "./config.json";
 

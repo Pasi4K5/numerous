@@ -6,33 +6,33 @@
 using Discord;
 using Numerous.Configuration;
 using Numerous.DependencyInjection;
+using Numerous.Services;
 
 namespace Numerous.Discord;
 
 [SingletonService]
-public sealed class AttachmentManager(ConfigManager cm)
+public sealed class AttachmentService(IConfigService cfgService, IFileService files)
 {
-    private Config Config => cm.Get();
+    private Config Config => cfgService.Get();
 
-    public string GetTargetPath(ulong msgId, IList<IAttachment> attachments, IAttachment attachment)
+    public string GetTargetPath(ulong msgId, IAttachment attachment, int index)
     {
         var imgDirPath = Config.AttachmentDirectory;
-        var uri = new Uri(attachment.Url);
-        var fileName = uri.Segments.Last();
+        var fileName = new Uri(attachment.Url).Segments.Last();
 
-        return Path.Join(imgDirPath, $"{msgId}_{attachments.IndexOf(attachment)}_{fileName}");
+        return Path.Join(imgDirPath, $"{msgId}_{index}_{fileName}");
     }
 
-    public IEnumerable<FileAttachment> GetFileAttachments(ulong msgId)
+    public IEnumerable<FileAttachmentInfo> GetFileAttachments(ulong msgId)
     {
         var imgDirPath = Config.AttachmentDirectory;
 
-        if (!Directory.Exists(imgDirPath))
+        if (!files.DirectoryExists(imgDirPath))
         {
-            return Array.Empty<FileAttachment>();
+            return Array.Empty<FileAttachmentInfo>();
         }
 
-        return Directory.GetFiles(imgDirPath, $"{msgId}_*")
-            .Select(filePath => new FileAttachment(filePath, string.Join('_', Path.GetFileName(filePath).Split('_')[2..])));
+        return files.GetFiles(imgDirPath, $"{msgId}_*")
+            .Select(filePath => new FileAttachmentInfo(filePath, string.Join('_', Path.GetFileName(filePath).Split('_')[2..])));
     }
 }

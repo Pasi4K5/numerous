@@ -19,12 +19,12 @@ public sealed class InteractionHandler(
     DiscordSocketClient client,
     InteractionService interactions,
     IServiceProvider services,
-    ConfigManager configManager
+    IConfigService cfgService
 ) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var cfg = configManager.Get();
+        var cfg = cfgService.Get();
 
         interactions.SlashCommandExecuted += (info, _, result) =>
         {

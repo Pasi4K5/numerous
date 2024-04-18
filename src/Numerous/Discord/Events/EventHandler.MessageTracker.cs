@@ -36,7 +36,7 @@ public partial class DiscordEventHandler
                 GuildId = channel.GuildId,
             });
 
-            var imgDirPath = cm.Get().AttachmentDirectory;
+            var imgDirPath = cfgService.Get().AttachmentDirectory;
 
             if (!Directory.Exists(imgDirPath))
             {
@@ -49,7 +49,7 @@ public partial class DiscordEventHandler
             var storeAttachmentsTask = Task.WhenAll(attachments.Select(async attachment =>
             {
                 var response = await httpClient.GetAsync(attachment.Url);
-                var filePath = attachmentManager.GetTargetPath(msg.Id, attachments, attachment);
+                var filePath = attachmentService.GetTargetPath(msg.Id, attachment, attachments.IndexOf(attachment));
 
                 await using var fs = new FileStream(filePath, FileMode.CreateNew);
                 await response.Content.CopyToAsync(fs);

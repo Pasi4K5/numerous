@@ -26,7 +26,7 @@ var loggersInitialized = false;
 
 try
 {
-    var cm = new ConfigManager();
+    var cm = new ConfigService();
 
     #region Logger
 
@@ -86,7 +86,7 @@ try
         });
 
         s.AddSingleton(discordClient);
-        s.AddSingleton(cm);
+        s.AddSingleton<IConfigService>(cm);
         s.AddSingleton<InteractionService>();
         s.AddSingleton(new HttpClient());
         s.AddScheduler();

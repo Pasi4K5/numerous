@@ -30,7 +30,7 @@ public sealed class DbManager
     public IMongoCollection<GuildStats> GuildStats =>
         _db.GetCollection<GuildStats>("guildStats");
 
-    public DbManager(ConfigManager configManager)
+    public DbManager(IConfigService configManager)
     {
         var config = configManager.Get();
         var dbName = config.MongoDatabaseName;

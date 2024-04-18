@@ -18,13 +18,13 @@ namespace Numerous.Services;
 [HostedService]
 public sealed class Startup(
     DiscordSocketClient discordClient,
-    ConfigManager cfgManager,
+    IConfigService cfgService,
     DbManager dbManager,
     ReminderService reminderService,
     OsuVerifier verifier
 ) : IHostedService
 {
-    private Config Cfg => cfgManager.Get();
+    private Config Cfg => cfgService.Get();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {

@@ -13,7 +13,7 @@ using Numerous.DependencyInjection;
 namespace Numerous.ApiClients.Osu;
 
 [SingletonService]
-public sealed partial class OsuApi(ConfigManager config)
+public sealed partial class OsuApi(IConfigService config)
 {
     private const string BaseUrl = "https://osu.ppy.sh/api/v2/";
     private const string TokenUrl = "https://osu.ppy.sh/oauth/token";

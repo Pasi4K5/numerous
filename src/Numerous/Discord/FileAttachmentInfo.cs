@@ -3,32 +3,14 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
-using Numerous.Configuration;
-using Numerous.Database;
-using Numerous.DependencyInjection;
-using Numerous.Util;
+using Discord;
 
-namespace Numerous.Discord.Events;
+namespace Numerous.Discord;
 
-[HostedService]
-public sealed partial class DiscordEventHandler(
-    IConfigService cfgService,
-    DiscordSocketClient client,
-    DbManager db,
-    AttachmentService attachmentService
-) : IHostedService
+public readonly record struct FileAttachmentInfo(string Path, string FileName)
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public static explicit operator FileAttachment(FileAttachmentInfo info)
     {
-        this.Init();
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        return new FileAttachment(info.Path, info.FileName);
     }
 }
