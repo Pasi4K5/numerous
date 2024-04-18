@@ -19,14 +19,15 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore -warnaserror -p:EnforceCodeStyleInBuild=true
     - name: Inspect Code
       run: >
         dotnet tool install -g JetBrains.ReSharper.GlobalTools &&
-        jb inspectcode --no-build --swea --output="${{ github.workspace }}/inspectcode.xml" Numerous.sln
+        jb inspectcode --no-build --swea --output="inspectcodereport.xml" --verbosity=WARN "Numerous.sln"
     - name: Inspection Report
       run: >
-        dotnet tool install -g nvika && 
-        nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
+        dotnet tool install -g nvika &&
+        cat inspectcodereport.xml && 
+        nvika parsereport "inspectcodereport.xml" --treatwarningsaserrors
     - name: Test
       run: dotnet test --no-build --verbosity normal
