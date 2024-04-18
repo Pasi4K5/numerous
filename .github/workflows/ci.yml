@@ -27,6 +27,6 @@ jobs:
     - name: Inspection Report
       run: >
         dotnet tool install -g nvika && 
-        dotnet nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
+        nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
     - name: Test
       run: dotnet test --no-build --verbosity normal
