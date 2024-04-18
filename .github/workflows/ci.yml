@@ -20,9 +20,13 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-    - name: JetBrains Inspect Code
-      run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --verbosity=INFO --debug --swea --output=inspectcode.xml Numerous.sln
+    - name: Inspect Code
+      run: >
+        dotnet tool install -g JetBrains.ReSharper.GlobalTools &&
+        jb inspectcode --no-build --swea --output="${{ github.workspace }}/inspectcode.xml" Numerous.sln
     - name: Inspection Report
-      run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
+      run: >
+        dotnet tool install -g nvika && 
+        dotnet nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
     - name: Test
       run: dotnet test --no-build --verbosity normal
