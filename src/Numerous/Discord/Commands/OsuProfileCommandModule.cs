@@ -15,10 +15,10 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : CommandModule
     [SlashCommand("profile", "View the osu! profile of a user.")]
     public async Task Profile(
         [Summary("user", "The user to view the profile of.")]
-        IUser user
+        IUser? user = null
     )
     {
-        await Execute(user, false);
+        await Execute(user ?? Context.User, false);
     }
 
     [UsedImplicitly]
@@ -36,9 +36,10 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : CommandModule
 
         if (osuId is null)
         {
+            // TODO: Reference verify channel
             await FollowupWithEmbedAsync(
-                "This user is not verified.",
-                "They can use `/verify` to verify their osu! account."
+                (user == Context.User ? "You are" : $"{user.Mention} is") + " not verified.",
+                (user == Context.User ? "You" : "They") + " can use `/verify` to verify their osu! account."
             );
 
             return;
