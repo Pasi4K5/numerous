@@ -40,24 +40,6 @@ public static class Extensions
         return s;
     }
 
-    public static IEnumerable<string> ToDiscordMessageStrings(this string message)
-    {
-        var remaining = message;
-        var messages = new List<string>();
-
-        while (remaining.Length > 0)
-        {
-            var index = remaining.Length > 2000
-                ? remaining[..2000].LastIndexOf('\n')
-                : remaining.Length;
-
-            messages.Add(remaining[..index]);
-            remaining = remaining[index..];
-        }
-
-        return messages;
-    }
-
     // ReSharper disable once UnusedMember.Global
     public static async Task<T?> ToObjectAsync<T>(this Task<HttpResponseMessage> response)
     {
