@@ -35,13 +35,13 @@ public sealed partial class OsuApi(IConfigService config)
         return !await RequestAsync(endpoint, result, parameters) ? null : result.Data;
     }
 
-    private async Task<T?> RequestValAsync<T>(string endpoint, params (string key, string value)[] parameters)
-        where T : struct
-    {
-        var result = new Wrapper<T?>();
-
-        return !await RequestAsync(endpoint, result, parameters) ? null : result.Data;
-    }
+    // private async Task<T?> RequestValAsync<T>(string endpoint, params (string key, string value)[] parameters)
+    //     where T : struct
+    // {
+    //     var result = new Wrapper<T?>();
+    //
+    //     return !await RequestAsync(endpoint, result, parameters) ? null : result.Data;
+    // }
 
     // private async Task<ICollection<T>> RequestCollectionAsync<T>(string endpoint, params (string key, string value)[] parameters)
     // {
