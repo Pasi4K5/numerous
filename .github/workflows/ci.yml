@@ -3,27 +3,26 @@ name: Continuous Integration
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  inspect:
-    name: Build and Inspect
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: .NET Setup
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0
-      - name: .NET Build
-        shell: bash
-        run: dotnet build
-      - name: JetBrains Inspect Code
-        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --verbosity=TRACE --debug --swea --output=inspectcode.xml Numerous.sln
-      - name: Inspection Report
-        run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: JetBrains Inspect Code
+      run: dotnet tool install -g JetBrains.ReSharper.GlobalTools && jb inspectcode --no-build --verbosity=INFO --debug --swea --output=inspectcode.xml Numerous.sln
+    - name: Inspection Report
+      run: dotnet tool install -g nvika && nvika parsereport "${{ github.workspace }}/inspectcode.xml" --treatwarningsaserrors
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
