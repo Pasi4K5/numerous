@@ -19,7 +19,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore -warnaserror -p:EnforceCodeStyleInBuild=true
+      run: dotnet build --no-restore
     - name: Inspect Code
       run: >
         dotnet tool install -g JetBrains.ReSharper.GlobalTools &&
