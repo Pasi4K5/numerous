@@ -13,7 +13,7 @@ public record struct Config()
     public string BotToken { get; init; } = "";
     public string MongoConnectionString { get; init; } = "";
     public string MongoDatabaseName { get; init; } = "";
-    public uint OsuClientId { get; init; } = 0;
+    public uint OsuClientId { get; init; }
     public string OsuClientSecret { get; init; } = "";
     public bool GuildMode { get; init; } = true;
     public ulong[] GuildIds { get; init; } = [];
