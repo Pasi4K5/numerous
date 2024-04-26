@@ -5,4 +5,10 @@
 
 namespace Numerous.Database.Entities;
 
-public sealed record Reminder(ulong UserId, ulong ChannelId, DateTimeOffset Timestamp, string? Message) : DbEntity;
+public sealed record Reminder : DbEntity
+{
+    public ulong UserId { get; init; }
+    public ulong ChannelId { get; init; }
+    public DateTimeOffset Timestamp { get; init; }
+    public string? Message { get; init; }
+}

@@ -5,7 +5,6 @@
 
 using Discord;
 using Discord.WebSocket;
-using MongoDB.Driver;
 using Numerous.Util;
 
 namespace Numerous.Discord.Events;
@@ -29,7 +28,7 @@ public partial class DiscordEventHandler
 
         Task.Run(async () =>
         {
-            var options = await (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).FirstOrDefaultAsync();
+            var options = await db.GuildOptions.FindByIdAsync(guild.Id);
 
             if (options?.ReadOnlyChannels.Contains(msg.Channel.Id) == true)
             {

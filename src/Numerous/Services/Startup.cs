@@ -6,10 +6,8 @@
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
 using Numerous.Configuration;
 using Numerous.Database;
-using Numerous.Database.Entities;
 using Numerous.DependencyInjection;
 using Numerous.Discord;
 
@@ -19,7 +17,7 @@ namespace Numerous.Services;
 public sealed class Startup(
     DiscordSocketClient discordClient,
     IConfigService cfgService,
-    DbManager dbManager,
+    IDbService dbService,
     ReminderService reminderService,
     OsuVerifier verifier
 ) : IHostedService
@@ -35,15 +33,7 @@ public sealed class Startup(
 
         foreach (var guild in await discordClient.Rest.GetGuildsAsync())
         {
-            var guildOptions = await dbManager.GuildOptions.Find(x => x.Id == guild.Id).FirstOrDefaultAsync(cancellationToken);
-
-            if (guildOptions is null)
-            {
-                await dbManager.GuildOptions.InsertOneAsync(new GuildOptions
-                {
-                    Id = guild.Id,
-                }, cancellationToken: cancellationToken);
-            }
+            await dbService.GuildOptions.FindOrInsertByIdAsync(guild.Id, cancellationToken);
         }
 
         await reminderService.StartAsync(cancellationToken);

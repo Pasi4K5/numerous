@@ -15,27 +15,23 @@ using Timer = System.Timers.Timer;
 namespace Numerous.Discord;
 
 [SingletonService]
-public sealed class ReminderService(DbManager db, DiscordSocketClient client)
+public sealed class ReminderService(IDbService db, DiscordSocketClient client)
 {
     [UsedImplicitly] private readonly Dictionary<Guid, Timer> _timers = new();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var reminders = await db.Reminders
-            .Find(FilterDefinition<Reminder>.Empty)
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        foreach (var reminder in reminders)
+        await (await db.Reminders.FindManyAsync(cancellationToken: cancellationToken)).ForEachAsync(async reminder =>
         {
             if (reminder.Timestamp < DateTimeOffset.Now)
             {
-                await db.Reminders.DeleteOneAsync(x => x.Id == reminder.Id, cancellationToken: cancellationToken);
+                await db.Reminders.DeleteByIdAsync(reminder.Id, cancellationToken);
             }
             else
             {
                 await AddReminderAsync(reminder, false);
             }
-        }
+        }, cancellationToken: cancellationToken);
     }
 
     public async Task AddReminderAsync(Reminder reminder, bool insertIntoDb = true)
@@ -66,7 +62,7 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
 
             await channel.SendMessageAsync($"<@{reminder.UserId}>", embed: embed);
 
-            await db.Reminders.DeleteOneAsync(x => x.Id == reminder.Id);
+            await db.Reminders.DeleteByIdAsync(reminder.Id);
 
             _timers.Remove(reminder.Id);
         };
@@ -75,7 +71,7 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
 
         if (insertIntoDb)
         {
-            await db.Reminders.InsertOneAsync(reminder);
+            await db.Reminders.InsertAsync(reminder);
         }
     }
 
@@ -87,6 +83,6 @@ public sealed class ReminderService(DbManager db, DiscordSocketClient client)
             timer.Dispose();
         }
 
-        await db.Reminders.DeleteOneAsync(x => x.Id == reminder.Id);
+        await db.Reminders.DeleteByIdAsync(reminder.Id);
     }
 }

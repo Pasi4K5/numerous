@@ -6,20 +6,18 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using MongoDB.Driver;
 using Numerous.Database;
-using Numerous.Database.Entities;
 
 namespace Numerous.Discord.Commands;
 
-public sealed class SuperDeleteCommandModule(DbManager db) : CommandModule
+public sealed class SuperDeleteCommandModule(IDbService db) : CommandModule
 {
     [UsedImplicitly]
     [MessageCommand("Superdelete")]
     [DefaultMemberPermissions(GuildPermission.ManageMessages)]
     public async Task SuperDelete(IMessage msg)
     {
-        var hideTask = HideMessage(msg.Id);
+        var hideTask = HideMessageAsync(msg.Id);
         var deleteTask = msg.DeleteAsync();
 
         await Task.WhenAll(hideTask, deleteTask);
@@ -44,7 +42,7 @@ public sealed class SuperDeleteCommandModule(DbManager db) : CommandModule
             return;
         }
 
-        List<Task> tasks = [HideMessage(msgId.Value)];
+        List<Task> tasks = [HideMessageAsync(msgId.Value)];
 
         var msg = await Context.Channel.GetMessageAsync(msgId.Value);
 
@@ -55,7 +53,7 @@ public sealed class SuperDeleteCommandModule(DbManager db) : CommandModule
 
         await Task.WhenAll(tasks);
 
-        if (msg is not null || await db.DiscordMessages.Find(m => m.Id == msgId).AnyAsync())
+        if (msg is not null || await db.DiscordMessages.AnyAsync(m => m.Id == msgId.Value))
         {
             await FollowupAsync($"Message `{msgId}` fully deleted.");
         }
@@ -65,15 +63,11 @@ public sealed class SuperDeleteCommandModule(DbManager db) : CommandModule
         }
     }
 
-    private async Task HideMessage(ulong msgId)
+    private Task HideMessageAsync(ulong msgId)
     {
-        var deferTask = DeferAsync(true);
-
-        var hideTask = db.DiscordMessages.UpdateOneAsync(
-            x => x.Id == msgId,
-            Builders<DiscordMessage>.Update.Set(x => x.IsHidden, true)
+        return Task.WhenAll(
+            DeferAsync(true),
+            db.DiscordMessages.SetHiddenAsync(msgId)
         );
-
-        await Task.WhenAll(deferTask, hideTask);
     }
 }

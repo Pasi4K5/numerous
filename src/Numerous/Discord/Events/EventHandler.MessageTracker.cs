@@ -4,7 +4,6 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord;
-using MongoDB.Driver;
 using Numerous.Database.Entities;
 using Numerous.Util;
 
@@ -16,8 +15,9 @@ public partial class DiscordEventHandler
     private void MessageTracker_Init()
     {
         client.MessageReceived += MessageTracker_StoreAsync;
-        client.MessageDeleted += (message, _) => MessageTracker_DeleteAsync(message.Id);
-        client.MessageUpdated += (_, after, _) => MessageTracker_UpdateAsync(after);
+        client.MessageDeleted += async (message, channel) =>
+            await MessageTracker_DeleteAsync(message.Id, await channel.GetOrDownloadAsync());
+        client.MessageUpdated += (_, after, channel) => MessageTracker_UpdateAsync(after, channel);
     }
 
     private Task MessageTracker_StoreAsync(IMessage msg)
@@ -25,12 +25,12 @@ public partial class DiscordEventHandler
         Task.Run(async () =>
         {
             if (msg.Channel is not IGuildChannel channel
-                || !(await db.GuildOptions.Find(x => x.Id == channel.GuildId).FirstOrDefaultAsync())?.TrackMessages == true)
+                || !(await db.GuildOptions.FindOrInsertByIdAsync(channel.GuildId)).TrackMessages)
             {
                 return;
             }
 
-            var insertTask = db.DiscordMessages.InsertOneAsync(new DiscordMessage(msg)
+            var insertTask = db.DiscordMessages.InsertAsync(new DiscordMessage(msg)
             {
                 Id = msg.Id,
                 GuildId = channel.GuildId,
@@ -61,49 +61,33 @@ public partial class DiscordEventHandler
         return Task.CompletedTask;
     }
 
-    private async Task MessageTracker_DeleteAsync(ulong msgId)
+    private async Task MessageTracker_DeleteAsync(ulong msgId, IMessageChannel channel)
     {
-        if (!await ShouldUpdateMessagesAsync(msgId))
+        if (!await ShouldUpdateMessagesAsync(channel))
         {
             return;
         }
 
-        await db.DiscordMessages.UpdateOneAsync(
-            m => m.Id == msgId,
-            Builders<DiscordMessage>.Update.Set(m => m.DeletedAt, DateTime.UtcNow)
-        );
+        await db.DiscordMessages.SetDeleted(msgId);
     }
 
-    private async Task MessageTracker_UpdateAsync(IMessage newMsg)
+    private async Task MessageTracker_UpdateAsync(IMessage newMsg, IMessageChannel channel)
     {
-        if (!await ShouldUpdateMessagesAsync(newMsg.Id) || newMsg.Channel is not IGuildChannel || newMsg.Content is null)
+        if (!await ShouldUpdateMessagesAsync(channel) || newMsg.Channel is not IGuildChannel || newMsg.Content is null)
         {
             return;
         }
 
-        await db.DiscordMessages.UpdateOneAsync(
-            x => x.Id == newMsg.Id,
-            Builders<DiscordMessage>.Update
-                .AddToSet(m => m.Timestamps, DateTime.UtcNow)
-                .AddToSet(m => m.Contents, newMsg.Content)
-                .AddToSet(m => m.CleanContents, newMsg.CleanContent)
-        );
+        await db.DiscordMessages.AddVersionAsync(newMsg.Id, newMsg.Content, newMsg.CleanContent);
     }
 
-    private async Task<bool> ShouldUpdateMessagesAsync(ulong msgId)
+    private async Task<bool> ShouldUpdateMessagesAsync(IMessageChannel channel)
     {
-        if (!await (await db.DiscordMessages.FindAsync(m => m.Id == msgId)).AnyAsync())
+        if (channel is not IGuildChannel guildChannel)
         {
             return false;
         }
 
-        var guildId = (await (await db.DiscordMessages.FindAsync(m => m.Id == msgId)).FirstOrDefaultAsync())?.GuildId;
-
-        if (guildId is null)
-        {
-            return false;
-        }
-
-        return (await db.GuildOptions.Find(x => x.Id == guildId).FirstOrDefaultAsync())?.TrackMessages == true;
+        return (await db.GuildOptions.FindByIdAsync(guildChannel.GuildId))?.TrackMessages == true;
     }
 }

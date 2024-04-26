@@ -7,12 +7,11 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using JetBrains.Annotations;
-using MongoDB.Driver;
 using Numerous.Database;
 
 namespace Numerous.Discord.Commands;
 
-public sealed class UnEditCommandModule(DbManager db, DiscordSocketClient client) : CommandModule
+public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient client) : CommandModule
 {
     [UsedImplicitly]
     [MessageCommand("Unedit")]
@@ -45,9 +44,9 @@ public sealed class UnEditCommandModule(DbManager db, DiscordSocketClient client
             return;
         }
 
-        var discordMessage = await db.DiscordMessages.Find(m => m.Id == messageId && !m.IsHidden).FirstOrDefaultAsync();
+        var discordMessage = await db.DiscordMessages.FindByIdAsync(messageId.Value);
 
-        if (discordMessage is null)
+        if (discordMessage is null || discordMessage.IsHidden)
         {
             await FollowupAsync("Message not found.");
 

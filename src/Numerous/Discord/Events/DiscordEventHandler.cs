@@ -16,7 +16,7 @@ namespace Numerous.Discord.Events;
 public sealed partial class DiscordEventHandler(
     IConfigService cfgService,
     DiscordSocketClient client,
-    DbManager db,
+    IDbService db,
     AttachmentService attachmentService
 ) : IHostedService
 {

@@ -17,7 +17,7 @@ namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
 [Group("serverstats", "Shows stats about the server.")]
-public sealed class ServerStatsCommandModule(DbManager db) : CommandModule
+public sealed class ServerStatsCommandModule(IDbService db) : CommandModule
 {
     [UsedImplicitly]
     [SlashCommand("channels", "Shows a chart of the given variable for each channel in the server.")]
@@ -60,7 +60,7 @@ public sealed class ServerStatsCommandModule(DbManager db) : CommandModule
             .ToDictionary(x => x.Id, x => x.Name);
 
         var messages = await db.DiscordMessages
-            .FindAsync(m =>
+            .FindManyAsync(m =>
                 m.GuildId == Context.Guild.Id
                 && (startTime == null || m.Timestamps.First() >= startTime)
                 && channelNames.Keys.Any(x => x == m.ChannelId));
@@ -108,7 +108,7 @@ public sealed class ServerStatsCommandModule(DbManager db) : CommandModule
                 foreach (var (channelId, _) in channelMessageCounts)
                 {
                     var channelMessages = await db.DiscordMessages
-                        .FindAsync(m =>
+                        .FindManyAsync(m =>
                             m.GuildId == Context.Guild.Id
                             && m.ChannelId == channelId
                             && (startTime == null || m.Timestamps.First() >= startTime));

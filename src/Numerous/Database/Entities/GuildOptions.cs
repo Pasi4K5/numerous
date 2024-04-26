@@ -18,7 +18,7 @@ public sealed record GuildOptions : DbEntity<ulong>
 
     public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();
 
-    public ulong[] ReadOnlyChannels { get; init; } = Array.Empty<ulong>();
+    public IList<ulong> ReadOnlyChannels { get; init; } = Array.Empty<ulong>();
 
     public record struct TrackingOptions
     {

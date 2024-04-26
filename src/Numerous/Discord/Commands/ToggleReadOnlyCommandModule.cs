@@ -6,13 +6,11 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using MongoDB.Driver;
 using Numerous.Database;
-using Numerous.Database.Entities;
 
 namespace Numerous.Discord.Commands;
 
-public sealed class ToggleReadOnlyCommandModule(DbManager db) : CommandModule
+public sealed class ToggleReadOnlyCommandModule(IDbService db) : CommandModule
 {
     [UsedImplicitly]
     [DefaultMemberPermissions(GuildPermission.Administrator)]
@@ -21,27 +19,10 @@ public sealed class ToggleReadOnlyCommandModule(DbManager db) : CommandModule
         [Summary("channel", "The channel to make read-only.")] ITextChannel channel
     )
     {
-        var guildOptions = await (await db.GuildOptions
-                .FindAsync(x => x.Id == Context.Guild.Id)
-            ).FirstOrDefaultAsync();
-
-        if (guildOptions.ReadOnlyChannels.Contains(channel.Id))
-        {
-            await db.GuildOptions.UpdateOneAsync(
-                x => x.Id == Context.Guild.Id,
-                Builders<GuildOptions>.Update.Pull(x => x.ReadOnlyChannels, channel.Id)
-            );
-        }
-        else
-        {
-            await db.GuildOptions.UpdateOneAsync(
-                x => x.Id == Context.Guild.Id,
-                Builders<GuildOptions>.Update.Push(x => x.ReadOnlyChannels, channel.Id)
-            );
-        }
+        var isReadOnly = await db.GuildOptions.ToggleReadOnlyAsync(channel.GuildId, channel.Id);
 
         await RespondWithEmbedAsync(
-            $"Channel {channel.Mention} is now {(guildOptions.ReadOnlyChannels.Contains(channel.Id) ? "writable" : "read-only")}.",
+            $"Channel {channel.Mention} is now {(isReadOnly ? "read-only" : "writable")}.",
             type: ResponseType.Success
         );
     }

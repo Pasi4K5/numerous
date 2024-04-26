@@ -18,7 +18,7 @@ using Serilog;
 namespace Numerous.Discord;
 
 [SingletonService]
-public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManager db, OsuApi osu)
+public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbService db, OsuApi osu)
 {
     public Task StartAsync()
     {
@@ -58,34 +58,29 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 
     public async Task<bool> UserIsVerifiedAsync(IUser user)
     {
-        var dbUser = await db.GetUserAsync(user.Id);
+        var dbUser = await db.Users.FindOrInsertByIdAsync(user.Id);
 
         return dbUser.OsuId is not null;
     }
 
     public async Task<bool> OsuUserIsVerifiedAsync(OsuUser osuUser)
     {
-        return await db.Users.Find(x => x.OsuId == osuUser.Id).AnyAsync();
+        return await (await db.Users.FindManyAsync(x => x.OsuId == osuUser.Id)).AnyAsync();
     }
 
     public async Task<ulong?> GetOsuIdAsync(IUser discordUser)
     {
-        return (await db.GetUserAsync(discordUser.Id)).OsuId;
+        return (await db.Users.FindOrInsertByIdAsync(discordUser.Id)).OsuId;
     }
 
     public async Task VerifyUserAsync(IGuildUser guildUser, OsuUser osuUser)
     {
-        await db.EnsureUserExistsAsync(guildUser.Id);
-
-        await db.Users.UpdateOneAsync(
-            Builders<DbUser>.Filter.Eq(x => x.Id, guildUser.Id),
-            Builders<DbUser>.Update.Set(x => x.OsuId, osuUser.Id)
-        );
+        await db.Users.SetVerifiedAsync(guildUser.Id, osuUser.Id);
     }
 
     public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
     {
-        var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).SingleAsync();
+        var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
 
         guildConfig.OsuRoles.Remove(guildConfig.OsuRoles.FirstOrDefault(x => x.Group == group));
         guildConfig.OsuRoles.Add(new GuildOptions.OsuRole
@@ -94,28 +89,22 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
             RoleId = role.Id,
         });
 
-        await db.GuildOptions.UpdateOneAsync(
-            Builders<GuildOptions>.Filter.Eq(x => x.Id, guild.Id),
-            Builders<GuildOptions>.Update.Set(x => x.OsuRoles, guildConfig.OsuRoles)
-        );
+        await db.GuildOptions.UpdateRolesAsync(guild.Id, guildConfig.OsuRoles);
     }
 
     public async Task UnlinkRoleAsync(IGuild guild, OsuUserGroup group)
     {
-        var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guild.Id)).SingleAsync();
+        var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
 
         guildConfig.OsuRoles.Remove(guildConfig.OsuRoles.FirstOrDefault(x => x.Group == group));
 
-        await db.GuildOptions.UpdateOneAsync(
-            Builders<GuildOptions>.Filter.Eq(x => x.Id, guild.Id),
-            Builders<GuildOptions>.Update.Set(x => x.OsuRoles, guildConfig.OsuRoles)
-        );
+        await db.GuildOptions.UpdateRolesAsync(guild.Id, guildConfig.OsuRoles);
     }
 
     public async Task AssignRolesAsync(IGuildUser guildUser)
     {
         var osuUser = await GetOsuUserAsync(guildUser);
-        var guildConfig = await (await db.GuildOptions.FindAsync(x => x.Id == guildUser.GuildId)).SingleAsync();
+        var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guildUser.GuildId);
 
         await AssignRoleAsync(OsuUserGroup.Verified, osuUser is not null);
 
@@ -185,8 +174,8 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 
     public async Task<IMessageChannel?> GetVerificationLogChannelAsync(IGuild guild)
     {
-        var guildConfig = db.GuildOptions.Find(x => x.Id == guild.Id).FirstOrDefault();
-        var channelId = guildConfig?.VerificationLogChannel;
+        var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
+        var channelId = guildConfig.VerificationLogChannel;
 
         if (channelId is null)
         {
@@ -198,15 +187,12 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, DbManag
 
     public async Task SetVerificationLogChannelAsync(SocketGuild guild, IMessageChannel? channel)
     {
-        await db.GuildOptions.UpdateOneAsync(
-            Builders<GuildOptions>.Filter.Eq(x => x.Id, guild.Id),
-            Builders<GuildOptions>.Update.Set(x => x.VerificationLogChannel, channel?.Id)
-        );
+        await db.GuildOptions.SetVerificationLogChannel(guild.Id, channel?.Id);
     }
 
     private async Task<OsuUserExtended?> GetOsuUserAsync(IUser discordUser)
     {
-        var user = await db.GetUserAsync(discordUser.Id);
+        var user = await db.Users.FindOrInsertByIdAsync(discordUser.Id);
 
         if (user.OsuId is null)
         {

@@ -14,7 +14,7 @@ using Numerous.Util;
 namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
-public sealed class UnDeleteCommandModule(DbManager db, AttachmentService attachmentService) : CommandModule
+public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attachmentService) : CommandModule
 {
     private const string PreviousButtonId = "cmd:undelete:previous";
     private const string NextButtonId = "cmd:undelete:next";
@@ -27,9 +27,8 @@ public sealed class UnDeleteCommandModule(DbManager db, AttachmentService attach
     {
         await DeferAsync();
 
-        var messages = await db.DiscordMessages
-            .Find(m => m.ChannelId == Context.Channel.Id && m.DeletedAt != null && !m.IsHidden)
-            .SortByDescending(m => m.DeletedAt)
+        var messages = await (await db.DiscordMessages
+                .FindManyAsync(m => m.ChannelId == Context.Channel.Id && m.DeletedAt != null && !m.IsHidden))
             .ToListAsync();
 
         await RemoveForbiddenMessages(messages);

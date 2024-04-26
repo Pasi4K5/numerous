@@ -7,7 +7,12 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Numerous.Database.Entities;
 
-public record DbEntity<TId> where TId : struct
+public interface IDbEntity<TId> where TId : struct, IEquatable<TId>
+{
+    TId Id { get; init; }
+}
+
+public record DbEntity<TId> : IDbEntity<TId> where TId : struct, IEquatable<TId>
 {
     [BsonId]
     public virtual TId Id { get; init; }

@@ -6,13 +6,12 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using MongoDB.Driver;
 using Numerous.Database;
 
 namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
-public sealed class SetTimeZoneCommandModule(DbManager db) : CommandModule
+public sealed class SetTimeZoneCommandModule(IDbService db) : CommandModule
 {
     private const string SelectMenuId = "cmd:settimezone:select:menu";
     private const string FirstButtonId = "cmd:settimezone:select:first";
@@ -153,11 +152,7 @@ public sealed class SetTimeZoneCommandModule(DbManager db) : CommandModule
     {
         await DeferAsync(true);
 
-        var user = await db.GetUserAsync(Context.User.Id);
-
-        user.TimeZone = SelectedTimeZone?.Id;
-
-        await db.Users.ReplaceOneAsync(x => x.Id == user.Id, user);
+        await db.Users.SetTimezoneAsync(Context.User.Id, SelectedTimeZone);
 
         await CurrentState.ModifyOriginalResponseAsync(msg =>
         {

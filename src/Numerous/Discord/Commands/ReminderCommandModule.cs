@@ -15,11 +15,11 @@ namespace Numerous.Discord.Commands;
 
 [UsedImplicitly]
 [Group("reminder", "Reminds you.")]
-public sealed class ReminderCommandModule(ReminderService reminderService, DbManager db) : CommandModule
+public sealed class ReminderCommandModule(ReminderService reminderService, IDbService db) : CommandModule
 {
     [UsedImplicitly]
     [Group("set", "Sets a reminder.")]
-    public sealed class Set(ReminderService reminderService, DbManager db) : CommandModule
+    public sealed class Set(ReminderService reminderService, IDbService db) : CommandModule
     {
         [UsedImplicitly]
         [SlashCommand("in", "Sets a reminder after the specified time.")]
@@ -63,7 +63,13 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
 
             await DeferAsync();
 
-            await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id, timestamp, message));
+            await reminderService.AddReminderAsync(new Reminder
+            {
+                UserId = Context.User.Id,
+                ChannelId = Context.Channel.Id,
+                Timestamp = timestamp,
+                Message = message,
+            });
 
             await FollowupAsync(embed:
                 new EmbedBuilder()
@@ -98,7 +104,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
 
             await DeferAsync();
 
-            var timeZoneId = (await db.GetUserAsync(Context.User.Id)).TimeZone;
+            var timeZoneId = (await db.Users.FindOrInsertByIdAsync(Context.User.Id)).TimeZone;
 
             if (timeZoneId is null)
             {
@@ -127,8 +133,13 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
                     return;
                 }
 
-                await reminderService.AddReminderAsync(new Reminder(Context.User.Id, Context.Channel.Id,
-                    timestamp.Value, message));
+                await reminderService.AddReminderAsync(new Reminder
+                {
+                    UserId = Context.User.Id,
+                    ChannelId = Context.Channel.Id,
+                    Timestamp = timestamp.Value,
+                    Message = message,
+                });
 
                 await FollowupAsync(embed:
                     new EmbedBuilder()
@@ -302,10 +313,10 @@ public sealed class ReminderCommandModule(ReminderService reminderService, DbMan
         );
     }
 
-    private async Task<List<Reminder>> GetOrderedRemindersByUserId()
+    private async Task<IList<Reminder>> GetOrderedRemindersByUserId()
     {
         return (await (await db.Reminders
-                    .FindAsync(x => x.UserId == Context.User.Id)
+                    .FindManyAsync(x => x.UserId == Context.User.Id)
                 ).ToListAsync()
             ).OrderBy(x => x.Timestamp)
             .ToList();

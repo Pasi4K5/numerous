@@ -42,7 +42,7 @@ public sealed record DiscordMessage : DbEntity<ulong>
         return HashCode.Combine(Id);
     }
 
-    public required ulong GuildId { get; init; }
+    public ulong GuildId { get; init; }
 
     public ulong ChannelId { get; init; }
 
@@ -66,5 +66,5 @@ public sealed record DiscordMessage : DbEntity<ulong>
 
     public DateTimeOffset? DeletedAt { get; init; }
 
-    public bool IsHidden { get; init; } = false;
+    public bool IsHidden { get; set; }
 }
