@@ -66,9 +66,9 @@ public partial class AnilistSearchCommandModule
             builder.AddField("Format", MakeReadable(media.Format), true);
         }
 
-        var date = media.StartDate?.ToString();
+        var date = media.StartDate.ToString();
 
-        if (date is not null)
+        if (!string.IsNullOrEmpty(date))
         {
             builder.AddField("Release Date", date, true);
         }

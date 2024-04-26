@@ -3,6 +3,7 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Text;
 using System.Text.RegularExpressions;
 using Discord;
 using Discord.WebSocket;
@@ -52,23 +53,23 @@ public static partial class DiscordExtensions
             return "[]";
         }
 
-        var s = "";
+        var sb = new StringBuilder();
 
         foreach (var option in options)
         {
-            s += string.IsNullOrEmpty(option.Value?.ToString())
-                ? option.Name
-                : $"{option.Name}: \"{option.Value}\", ";
+            sb.Append(
+                string.IsNullOrEmpty(option.Value?.ToString())
+                    ? option.Name
+                    : $"{option.Name}: \"{option.Value}\", "
+            );
 
             if (option.Options.Count > 0)
             {
-                s += ", " + option.Options.ToLogString() + ", ";
+                sb.Append(", " + option.Options.ToLogString() + ", ");
             }
         }
 
-        s = $"[{s[..^2]}]";
-
-        return s;
+        return $"[{sb.ToString()[..^2]}]";
     }
 
     public static string ToDiscordTimestampRel(this DateTimeOffset timestamp)

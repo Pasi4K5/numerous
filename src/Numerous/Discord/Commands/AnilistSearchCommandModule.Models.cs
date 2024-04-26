@@ -96,11 +96,11 @@ public partial class AnilistSearchCommandModule
         [JsonProperty("day")]
         public int? Day { get; init; }
 
-        public override string? ToString()
+        public override string ToString()
         {
             if (Year is null && Month is null && Day is null)
             {
-                return null;
+                return "";
             }
 
             var sb = new StringBuilder();

@@ -131,6 +131,8 @@ public sealed class ServerStatsCommandModule(IDbService db) : CommandModule
 
                 break;
             }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
 
         var stream = new MemoryStream();

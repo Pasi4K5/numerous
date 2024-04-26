@@ -5,7 +5,7 @@
 
 namespace Numerous.Discord;
 
-public static class Constants
+internal static class Constants
 {
-    public const ulong MudaeUserId = 432610292342587392;
+    internal const ulong MudaeUserId = 432610292342587392;
 }
