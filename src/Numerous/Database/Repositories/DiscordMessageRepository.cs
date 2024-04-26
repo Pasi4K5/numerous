@@ -18,7 +18,7 @@ public interface IDiscordMessageRepository : IRepository<DiscordMessage, ulong>
 public sealed class DiscordMessageRepository(IMongoDatabase db, string collectionName)
     : Repository<DiscordMessage, ulong>(db, collectionName), IDiscordMessageRepository
 {
-    public async Task SetHiddenAsync(ulong messageId, bool hidden, CancellationToken cancellationToken)
+    public async Task SetHiddenAsync(ulong messageId, bool hidden, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == messageId,
@@ -27,7 +27,7 @@ public sealed class DiscordMessageRepository(IMongoDatabase db, string collectio
         );
     }
 
-    public async Task SetDeleted(ulong id, CancellationToken cancellationToken)
+    public async Task SetDeleted(ulong id, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == id,
@@ -36,7 +36,7 @@ public sealed class DiscordMessageRepository(IMongoDatabase db, string collectio
         );
     }
 
-    public async Task AddVersionAsync(ulong id, string content, string cleanContent, CancellationToken cancellationToken)
+    public async Task AddVersionAsync(ulong id, string content, string cleanContent, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == id,

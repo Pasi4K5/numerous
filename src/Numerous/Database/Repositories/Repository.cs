@@ -30,7 +30,7 @@ public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) 
 {
     protected readonly IMongoCollection<TEntity> Collection = db.GetCollection<TEntity>(collectionName);
 
-    public async Task<TEntity?> FindByIdAsync(TId id, CancellationToken cancellationToken)
+    public async Task<TEntity?> FindByIdAsync(TId id, CancellationToken cancellationToken = default)
     {
         return await Collection
             .Find(x => x.Id.Equals(id))
@@ -38,7 +38,7 @@ public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) 
     }
 
     /// <inheritdoc />
-    public async Task<TEntity> FindOrInsertByIdAsync(TId id, CancellationToken cancellationToken)
+    public async Task<TEntity> FindOrInsertByIdAsync(TId id, CancellationToken cancellationToken = default)
     {
         var entity = await FindByIdAsync(id, cancellationToken);
 
@@ -54,24 +54,24 @@ public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) 
         return newEntity;
     }
 
-    public Task<IAsyncCursor<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken)
+    public Task<IAsyncCursor<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken = default)
     {
         return Collection.FindAsync(filter ?? FilterDefinition<TEntity>.Empty, cancellationToken: cancellationToken);
     }
 
-    public Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken)
+    public Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken = default)
     {
         var result = filter is null ? Collection.Find(Builders<TEntity>.Filter.Empty) : Collection.Find(filter);
 
         return result.AnyAsync(cancellationToken);
     }
 
-    public async Task InsertAsync(TEntity entity, CancellationToken cancellationToken)
+    public async Task InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await Collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
     }
 
-    public Task DeleteByIdAsync(TId id, CancellationToken cancellationToken)
+    public Task DeleteByIdAsync(TId id, CancellationToken cancellationToken = default)
     {
         return Collection.DeleteOneAsync(Builders<TEntity>.Filter.Eq(x => x.Id, id), cancellationToken);
     }

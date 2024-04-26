@@ -19,7 +19,7 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
     : Repository<GuildOptions, ulong>(db, collectionName), IGuildOptionsRepository
 {
     /// <returns><see langword="true"/> if the channel is now read-only, <see langword="false"/> otherwise.</returns>
-    public async Task<bool> ToggleReadOnlyAsync(ulong id, ulong channelId, CancellationToken cancellationToken)
+    public async Task<bool> ToggleReadOnlyAsync(ulong id, ulong channelId, CancellationToken cancellationToken = default)
     {
         var guildOptions = await Collection
             .Find(x => x.Id == id)
@@ -47,7 +47,7 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
         }
     }
 
-    public async Task SetVerificationLogChannel(ulong id, ulong? channelId, CancellationToken cancellationToken)
+    public async Task SetVerificationLogChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == id,
@@ -56,7 +56,7 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
         );
     }
 
-    public async Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken)
+    public async Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             Builders<GuildOptions>.Filter.Eq(x => x.Id, id),

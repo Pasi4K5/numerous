@@ -17,7 +17,7 @@ public interface IUserRepository : IRepository<DbUser, ulong>
 public sealed class UserRepository(IMongoDatabase db, string collectionName)
     : Repository<DbUser, ulong>(db, collectionName), IUserRepository
 {
-    public async Task SetTimezoneAsync(ulong id, TimeZoneInfo? timeZone, CancellationToken cancellationToken)
+    public async Task SetTimezoneAsync(ulong id, TimeZoneInfo? timeZone, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == id,
@@ -26,7 +26,7 @@ public sealed class UserRepository(IMongoDatabase db, string collectionName)
         );
     }
 
-    public async Task SetVerifiedAsync(ulong id, uint osuUserId, CancellationToken cancellationToken)
+    public async Task SetVerifiedAsync(ulong id, uint osuUserId, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == id,
