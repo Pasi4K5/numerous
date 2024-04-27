@@ -18,7 +18,7 @@ public interface IDiscordMessageRepository : IRepository<DiscordMessage, ulong>
 public sealed class DiscordMessageRepository(IMongoDatabase db, string collectionName)
     : Repository<DiscordMessage, ulong>(db, collectionName), IDiscordMessageRepository
 {
-    public async Task SetHiddenAsync(ulong messageId, bool hidden, CancellationToken cancellationToken = default)
+    public async Task SetHiddenAsync(ulong messageId, bool hidden = true, CancellationToken cancellationToken = default)
     {
         await Collection.UpdateOneAsync(
             x => x.Id == messageId,

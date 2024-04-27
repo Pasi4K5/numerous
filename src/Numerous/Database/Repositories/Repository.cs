@@ -54,12 +54,12 @@ public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) 
         return newEntity;
     }
 
-    public Task<IAsyncCursor<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken = default)
+    public Task<IAsyncCursor<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
     {
         return Collection.FindAsync(filter ?? FilterDefinition<TEntity>.Empty, cancellationToken: cancellationToken);
     }
 
-    public Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken = default)
+    public Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
     {
         var result = filter is null ? Collection.Find(Builders<TEntity>.Filter.Empty) : Collection.Find(filter);
 
