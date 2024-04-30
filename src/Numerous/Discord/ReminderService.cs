@@ -18,7 +18,7 @@ namespace Numerous.Discord;
 [SingletonService]
 public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClient client)
 {
-    private static readonly TimeSpan _cacheInterval = TimeSpan.FromSeconds(10) + TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _cacheInterval = TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1);
 
     private readonly Dictionary<Guid, Timer> _timerCache = new();
 
