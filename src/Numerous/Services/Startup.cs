@@ -36,7 +36,7 @@ public sealed class Startup(
             await dbService.GuildOptions.FindOrInsertByIdAsync(guild.Id, cancellationToken);
         }
 
-        await reminderService.StartAsync(cancellationToken);
+        reminderService.StartAsync();
         await verifier.StartAsync();
     }
 

@@ -56,7 +56,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
 
             if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
             {
-                await RespondAsync("The specified time must be at least 10 seconds in the future.");
+                await RespondWithEmbedAsync(message: "The specified time must be at least 10 seconds in the future.", type: ResponseType.Error);
 
                 return;
             }
@@ -116,28 +116,31 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
                 return;
             }
 
-            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-
             try
             {
-                var timestamp = GetTimestamp(year, month, day, hour, minute, second, Context.Interaction.CreatedAt,
-                    timeZone);
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                var now = Context.Interaction.CreatedAt;
 
-                if (timestamp is null)
+                var timestamp = TimeUtil.ParametersToDateTime(
+                    now.ToDateTime(timeZone),
+                    (ushort?)year,
+                    (byte?)month,
+                    (byte?)day,
+                    (byte?)hour,
+                    (byte?)minute,
+                    (byte?)second
+                ).ToOffset(timeZone);
+
+                if (timestamp < now.AddSeconds(10))
                 {
-                    await FollowupWithEmbedAsync(
-                        message: "The specified time must be at least 10 seconds in the future.",
-                        type: ResponseType.Error
-                    );
-
-                    return;
+                    throw new ArgumentOutOfRangeException();
                 }
 
                 await reminderService.AddReminderAsync(new Reminder
                 {
                     UserId = Context.User.Id,
                     ChannelId = Context.Channel.Id,
-                    Timestamp = timestamp.Value,
+                    Timestamp = timestamp,
                     Message = message,
                 });
 
@@ -147,104 +150,32 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
                         .WithTitle("Reminder Set")
                         .WithDescription(
                             $"{message}\n".OnlyIf(message is not null)
-                            + $"{timestamp.Value.ToDiscordTimestampDateTime()} ({timestamp.Value.ToDiscordTimestampRel()})"
+                            + $"{timestamp.ToDiscordTimestampDateTime()} ({timestamp.ToDiscordTimestampRel()})"
                         )
                         .Build()
                 );
             }
+            catch (InvalidCastException)
+            {
+                await FollowupWithEmbedAsync(
+                    message: "The specified time is invalid.",
+                    type: ResponseType.Error
+                );
+            }
             catch (ArgumentOutOfRangeException)
             {
-                await FollowupWithEmbedAsync("The specified time is invalid.", type: ResponseType.Error);
+                await FollowupWithEmbedAsync(
+                    message: "The specified time must be at least 10 seconds in the future.",
+                    type: ResponseType.Error
+                );
             }
-        }
-
-        private static DateTimeOffset? GetTimestamp(int? year, int? month, int? day, int? hour, int? minute, int? second, DateTimeOffset now, TimeZoneInfo tz)
-        {
-            if (!CorrectParameters(ref year, ref month, ref day, ref hour, ref minute, second, now, tz))
+            catch (ArgumentNullException)
             {
-                return null;
+                await FollowupWithEmbedAsync(
+                    message: "Please specify at least on parameter.",
+                    type: ResponseType.Error
+                );
             }
-
-            var userNow = TimeZoneInfo.ConvertTime(now, tz);
-
-            var timestamp = new DateTimeOffset(
-                year ?? 0,
-                month ?? 1,
-                day ?? 1,
-                hour ?? 0,
-                minute ?? 0,
-                second ?? 0,
-                tz.GetUtcOffset(userNow)
-            );
-
-            if (timestamp < now.AddSeconds(10))
-            {
-                return null;
-            }
-
-            return timestamp;
-        }
-
-        // I hate this but what am I supposed to do?
-        private static bool CorrectParameters(ref int? year, ref int? month, ref int? day, ref int? hour, ref int? minute, int? second, DateTimeOffset now, TimeZoneInfo tz)
-        {
-            var userNow = TimeZoneInfo.ConvertTime(now, tz);
-
-            if (year is null)
-            {
-                year ??= userNow.Year;
-
-                if (month is null)
-                {
-                    month ??= userNow.Month;
-
-                    if (day is null)
-                    {
-                        day ??= userNow.Day;
-
-                        if (hour is null)
-                        {
-                            hour ??= userNow.Hour;
-
-                            if (minute is null)
-                            {
-                                minute ??= userNow.Minute;
-
-                                if (userNow.Second > second)
-                                {
-                                    minute++;
-                                }
-                            }
-
-                            if (userNow.Minute > minute)
-                            {
-                                hour++;
-                            }
-                        }
-
-                        if (userNow.Hour > hour)
-                        {
-                            day++;
-                        }
-                    }
-
-                    if (userNow.Day > day)
-                    {
-                        month++;
-                    }
-                }
-
-                if (userNow.Month > month)
-                {
-                    year++;
-                }
-            }
-            else if (userNow.Year > year)
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 

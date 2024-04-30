@@ -3,9 +3,10 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Coravel;
 using Discord;
 using Discord.WebSocket;
-using JetBrains.Annotations;
+using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using Numerous.Database;
 using Numerous.Database.Entities;
@@ -15,59 +16,35 @@ using Timer = System.Timers.Timer;
 namespace Numerous.Discord;
 
 [SingletonService]
-public sealed class ReminderService(IDbService db, DiscordSocketClient client)
+public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClient client)
 {
-    [UsedImplicitly] private readonly Dictionary<Guid, Timer> _timers = new();
+    private static readonly TimeSpan _cacheInterval = TimeSpan.FromSeconds(10) + TimeSpan.FromSeconds(1);
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    private readonly Dictionary<Guid, Timer> _timerCache = new();
+
+    public void StartAsync()
     {
-        await (await db.Reminders.FindManyAsync(cancellationToken: cancellationToken)).ForEachAsync(async reminder =>
-        {
-            if (reminder.Timestamp < DateTimeOffset.Now)
-            {
-                await db.Reminders.DeleteByIdAsync(reminder.Id, cancellationToken);
-            }
-            else
-            {
-                await AddReminderAsync(reminder, false);
-            }
-        }, cancellationToken: cancellationToken);
+        host.Services.UseScheduler(s =>
+            s.ScheduleAsync(CacheRemindersAsync).EveryTenSeconds().RunOnceAtStart().PreventOverlapping(nameof(ReminderService))
+        );
     }
 
     public async Task AddReminderAsync(Reminder reminder, bool insertIntoDb = true)
     {
-        var timer = new Timer
+        if (reminder.Timestamp < DateTimeOffset.Now + _cacheInterval)
         {
-            AutoReset = false,
-            Interval = (reminder.Timestamp - DateTimeOffset.Now).TotalMilliseconds,
-        };
-
-        _timers[reminder.Id] = timer;
-
-        timer.Elapsed += async (_, _) =>
-        {
-            var channel = client.GetChannel(reminder.ChannelId) as IMessageChannel;
-
-            if (channel is null)
+            var timer = new Timer
             {
-                return;
-            }
+                AutoReset = false,
+                Interval = (reminder.Timestamp - DateTimeOffset.Now).TotalMilliseconds,
+            };
 
-            var embed = new EmbedBuilder()
-                .WithColor(Color.Gold)
-                .WithTitle(":alarm_clock: Reminder! :alarm_clock:")
-                .WithDescription(reminder.Message ?? "")
-                .WithTimestamp(reminder.Timestamp)
-                .Build();
+            _timerCache[reminder.Id] = timer;
 
-            await channel.SendMessageAsync($"<@{reminder.UserId}>", embed: embed);
+            timer.Elapsed += async (_, _) => await TriggerReminderAsync(reminder);
 
-            await db.Reminders.DeleteByIdAsync(reminder.Id);
-
-            _timers.Remove(reminder.Id);
-        };
-
-        timer.Start();
+            timer.Start();
+        }
 
         if (insertIntoDb)
         {
@@ -77,12 +54,56 @@ public sealed class ReminderService(IDbService db, DiscordSocketClient client)
 
     public async Task RemoveReminderAsync(Reminder reminder)
     {
-        if (_timers.TryGetValue(reminder.Id, out var timer))
+        if (_timerCache.TryGetValue(reminder.Id, out var timer))
         {
             timer.Stop();
             timer.Dispose();
         }
 
         await db.Reminders.DeleteByIdAsync(reminder.Id);
+    }
+
+    private async Task CacheRemindersAsync()
+    {
+        await (await db.Reminders.FindManyAsync()).ForEachAsync(async reminder =>
+        {
+            if (reminder.Timestamp > DateTimeOffset.Now + _cacheInterval
+                || _timerCache.ContainsKey(reminder.Id))
+            {
+                return;
+            }
+
+            if (reminder.Timestamp < DateTimeOffset.Now)
+            {
+                await TriggerReminderAsync(reminder);
+            }
+            else
+            {
+                await AddReminderAsync(reminder, false);
+            }
+        });
+    }
+
+    private async Task TriggerReminderAsync(Reminder reminder)
+    {
+        var channel = client.GetChannel(reminder.ChannelId) as IMessageChannel;
+
+        if (channel is null)
+        {
+            return;
+        }
+
+        var embed = new EmbedBuilder()
+            .WithColor(Color.Gold)
+            .WithTitle(":alarm_clock: Reminder! :alarm_clock:")
+            .WithDescription(reminder.Message ?? "")
+            .WithTimestamp(reminder.Timestamp)
+            .Build();
+
+        await channel.SendMessageAsync($"<@{reminder.UserId}>", embed: embed);
+
+        await db.Reminders.DeleteByIdAsync(reminder.Id);
+
+        _timerCache.Remove(reminder.Id);
     }
 }
