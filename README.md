@@ -1,9 +1,7 @@
 
 # Numerous
-![Lines of Code](https://tokei.rs/b1/github/pasi4k5/numerous?category=code)
-[![CodeFactor](https://www.codefactor.io/repository/github/pasi4k5/numerous/badge)](https://www.codefactor.io/repository/github/pasi4k5/numerous)
-[![Codacy](https://app.codacy.com/project/badge/Grade/e964c5ae90f04ac8ba28cfd6c85e5874)](https://app.codacy.com/gh/Pasi4K5/numerous/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![CodeQL](https://github.com/Pasi4K5/numerous/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Pasi4K5/numerous/actions/workflows/github-code-scanning/codeql)
-![Continuous Integration](https://github.com/pasi4k5/numerous/actions/workflows/ci.yml/badge.svg)
+[![Codacy grade](https://img.shields.io/codacy/grade/e964c5ae90f04ac8ba28cfd6c85e5874?style=for-the-badge)](https://app.codacy.com/gh/Pasi4K5/numerous)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/github-code-scanning%2Fcodeql?style=for-the-badge&label=CodeQL)](https://github.com/Pasi4K5/numerous/actions/workflows/github-code-scanning/codeql)
+[![Continuous Integration](https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/ci.yml?style=for-the-badge&label=Continuous%20Integration)](https://github.com/Pasi4K5/numerous/actions/workflows/ci.yml)
 
 A Discord Bot for the Numerus Discord server.
