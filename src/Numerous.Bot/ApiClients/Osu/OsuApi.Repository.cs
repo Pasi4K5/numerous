@@ -3,27 +3,17 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO.Enumeration;
-using Numerous.Bot.Services;
+using Numerous.Bot.ApiClients.Osu.Models;
 
-namespace Numerous.Tests.Stubs;
+namespace Numerous.Bot.ApiClients.Osu;
 
-public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
+public partial class OsuApi
 {
-    public bool DirectoryExists(string path)
+    /// <summary>
+    /// Prioritizes the user ID over the username.
+    /// </summary>
+    public async Task<OsuUserExtended?> GetUserAsync(string user)
     {
-        return Path.GetFullPath(path) == Path.GetFullPath(directory);
-    }
-
-    public string[] GetFiles(string path, string searchPattern)
-    {
-        if (!DirectoryExists(path))
-        {
-            throw new DirectoryNotFoundException();
-        }
-
-        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
-            .Select(f => Path.Combine(path, f))
-            .ToArray();
+        return await RequestRefAsync<OsuUserExtended>($"users/{user}");
     }
 }

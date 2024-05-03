@@ -3,27 +3,21 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO.Enumeration;
-using Numerous.Bot.Services;
+using System.Reflection;
 
-namespace Numerous.Tests.Stubs;
+namespace Numerous.Bot.Util;
 
-public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
+public static class ReflectionExtensions
 {
-    public bool DirectoryExists(string path)
+    public static void Init(this object o)
     {
-        return Path.GetFullPath(path) == Path.GetFullPath(directory);
-    }
+        var methods = o.GetType()
+            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            .Where(m => m.GetCustomAttribute<InitAttribute>() is not null);
 
-    public string[] GetFiles(string path, string searchPattern)
-    {
-        if (!DirectoryExists(path))
+        foreach (var method in methods)
         {
-            throw new DirectoryNotFoundException();
+            method.Invoke(o, null);
         }
-
-        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
-            .Select(f => Path.Combine(path, f))
-            .ToArray();
     }
 }

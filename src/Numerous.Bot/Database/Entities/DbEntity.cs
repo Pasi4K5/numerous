@@ -3,27 +3,22 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO.Enumeration;
-using Numerous.Bot.Services;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace Numerous.Tests.Stubs;
+namespace Numerous.Bot.Database.Entities;
 
-public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
+public interface IDbEntity<TId> where TId : struct, IEquatable<TId>
 {
-    public bool DirectoryExists(string path)
-    {
-        return Path.GetFullPath(path) == Path.GetFullPath(directory);
-    }
+    TId Id { get; init; }
+}
 
-    public string[] GetFiles(string path, string searchPattern)
-    {
-        if (!DirectoryExists(path))
-        {
-            throw new DirectoryNotFoundException();
-        }
+public record DbEntity<TId> : IDbEntity<TId> where TId : struct, IEquatable<TId>
+{
+    [BsonId]
+    public virtual TId Id { get; init; }
+}
 
-        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
-            .Select(f => Path.Combine(path, f))
-            .ToArray();
-    }
+public record DbEntity : DbEntity<Guid>
+{
+    public override Guid Id { get; init; } = Guid.NewGuid();
 }

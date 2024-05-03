@@ -3,27 +3,34 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO.Enumeration;
-using Numerous.Bot.Services;
+using Discord.WebSocket;
+using Microsoft.Extensions.Hosting;
+using Numerous.Bot.DependencyInjection;
 
-namespace Numerous.Tests.Stubs;
+namespace Numerous.Bot.Discord.Events;
 
-public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
+[HostedService]
+public sealed partial class MessageResponder(DiscordSocketClient client) : IHostedService
 {
-    public bool DirectoryExists(string path)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        return Path.GetFullPath(path) == Path.GetFullPath(directory);
+        client.MessageReceived += async msg => await RespondAsync(msg);
+
+        return Task.CompletedTask;
     }
 
-    public string[] GetFiles(string path, string searchPattern)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        if (!DirectoryExists(path))
+        return Task.CompletedTask;
+    }
+
+    private Task RespondAsync(SocketMessage msg)
+    {
+        if (!msg.Author.IsBot)
         {
-            throw new DirectoryNotFoundException();
+            Task.Run(async () => await RespondToBanMessageAsync(msg));
         }
 
-        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
-            .Select(f => Path.Combine(path, f))
-            .ToArray();
+        return Task.CompletedTask;
     }
 }

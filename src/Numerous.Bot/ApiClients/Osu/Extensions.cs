@@ -3,27 +3,27 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO.Enumeration;
-using Numerous.Bot.Services;
+using Numerous.Bot.ApiClients.Osu.Models;
 
-namespace Numerous.Tests.Stubs;
+namespace Numerous.Bot.ApiClients.Osu;
 
-public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
+public static class Extensions
 {
-    public bool DirectoryExists(string path)
+    public static bool IsRankedMapper(this OsuUser user)
     {
-        return Path.GetFullPath(path) == Path.GetFullPath(directory);
+        return user.RankedBeatmapsetCount > 0
+               || user.GuestBeatmapsetCount > 0;
     }
 
-    public string[] GetFiles(string path, string searchPattern)
+    public static bool IsLovedMapper(this OsuUser user)
     {
-        if (!DirectoryExists(path))
-        {
-            throw new DirectoryNotFoundException();
-        }
+        return user.LovedBeatmapsetCount > 0;
+    }
 
-        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
-            .Select(f => Path.Combine(path, f))
-            .ToArray();
+    public static bool IsUnrankedMapper(this OsuUser user)
+    {
+        return
+            (user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0)
+            && !user.IsRankedMapper();
     }
 }

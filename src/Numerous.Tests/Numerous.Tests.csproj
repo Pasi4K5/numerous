@@ -29,7 +29,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\Numerous\Numerous.csproj" />
+	  <ProjectReference Include="..\Numerous.Bot\Numerous.Bot.csproj" />
 	</ItemGroup>
 
 </Project>

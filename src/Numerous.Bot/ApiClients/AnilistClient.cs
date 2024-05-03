@@ -3,27 +3,27 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO.Enumeration;
-using Numerous.Bot.Services;
+using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
+using Numerous.Bot.DependencyInjection;
 
-namespace Numerous.Tests.Stubs;
+namespace Numerous.Bot.ApiClients;
 
-public sealed class StubFileService(IEnumerable<string> fileNames, string directory) : IFileService
+[SingletonService]
+public sealed class AnilistClient : IDisposable
 {
-    public bool DirectoryExists(string path)
+    private const string AnilistEndpoint = "https://graphql.anilist.co";
+
+    public GraphQLHttpClient Client { get; } = new(AnilistEndpoint, new NewtonsoftJsonSerializer());
+
+    ~AnilistClient()
     {
-        return Path.GetFullPath(path) == Path.GetFullPath(directory);
+        Dispose();
     }
 
-    public string[] GetFiles(string path, string searchPattern)
+    public void Dispose()
     {
-        if (!DirectoryExists(path))
-        {
-            throw new DirectoryNotFoundException();
-        }
-
-        return fileNames.Where(f => FileSystemName.MatchesSimpleExpression(searchPattern.AsSpan(), f))
-            .Select(f => Path.Combine(path, f))
-            .ToArray();
+        GC.SuppressFinalize(this);
+        Client.Dispose();
     }
 }
