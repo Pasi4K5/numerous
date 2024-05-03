@@ -23,7 +23,7 @@ public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attac
 
     [UsedImplicitly]
     [SlashCommand("undelete", "Reveals the last deleted message in this channel.")]
-    public async Task UnDelete(IMessageChannel? channel = null)
+    public async Task UnDelete(ITextChannel? channel = null)
     {
         await DeferAsync();
 
