@@ -23,13 +23,15 @@ public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attac
 
     [UsedImplicitly]
     [SlashCommand("undelete", "Reveals the last deleted message in this channel.")]
-    public async Task UnDelete()
+    public async Task UnDelete(IMessageChannel? channel = null)
     {
         await DeferAsync();
 
-        var messages = await (await db.DiscordMessages
-                .FindManyAsync(m => m.ChannelId == Context.Channel.Id && m.DeletedAt != null && !m.IsHidden))
-            .ToListAsync();
+        var channelId = channel?.Id ?? Context.Channel.Id;
+
+        var messages = (await (await db.DiscordMessages
+                .FindManyAsync(m => m.ChannelId == channelId && m.DeletedAt != null && !m.IsHidden))
+            .ToListAsync()).OrderByDescending(m => m.DeletedAt).ToList();
 
         await RemoveForbiddenMessages(messages);
 
