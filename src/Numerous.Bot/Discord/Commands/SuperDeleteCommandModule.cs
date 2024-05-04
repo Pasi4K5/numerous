@@ -7,16 +7,22 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Database;
+using Numerous.Bot.Discord.Events;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public sealed class SuperDeleteCommandModule(IDbService db) : CommandModule
+public sealed class SuperDeleteCommandModule(IDbService db, DiscordEventHandler eventHandler) : CommandModule
 {
     [UsedImplicitly]
     [MessageCommand("Superdelete")]
     [DefaultMemberPermissions(GuildPermission.ManageMessages)]
     public async Task SuperDelete(IMessage msg)
     {
+        lock (eventHandler.SuperdeletedMessagesLock)
+        {
+            eventHandler.SuperdeletedMessages.Add(msg.Id);
+        }
+
         var hideTask = HideMessageAsync(msg.Id);
         var deleteTask = msg.DeleteAsync();
 
@@ -48,6 +54,11 @@ public sealed class SuperDeleteCommandModule(IDbService db) : CommandModule
 
         if (msg is not null)
         {
+            lock (eventHandler.SuperdeletedMessagesLock)
+            {
+                eventHandler.SuperdeletedMessages.Add(msgId.Value);
+            }
+
             tasks.Add(msg.DeleteAsync());
         }
 

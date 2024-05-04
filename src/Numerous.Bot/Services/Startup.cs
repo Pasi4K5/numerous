@@ -10,6 +10,7 @@ using Numerous.Bot.Configuration;
 using Numerous.Bot.Database;
 using Numerous.Bot.DependencyInjection;
 using Numerous.Bot.Discord;
+using Numerous.Bot.Discord.Events;
 
 namespace Numerous.Bot.Services;
 
@@ -19,7 +20,8 @@ public sealed class Startup(
     IConfigService cfgService,
     IDbService dbService,
     ReminderService reminderService,
-    OsuVerifier verifier
+    OsuVerifier verifier,
+    DiscordEventHandler eventHandler
 ) : IHostedService
 {
     private Config Cfg => cfgService.Get();
@@ -38,6 +40,7 @@ public sealed class Startup(
 
         reminderService.StartAsync();
         await verifier.StartAsync();
+        eventHandler.Start();
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

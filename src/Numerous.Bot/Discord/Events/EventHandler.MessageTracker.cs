@@ -11,6 +11,9 @@ namespace Numerous.Bot.Discord.Events;
 
 public partial class DiscordEventHandler
 {
+    public List<ulong> SuperdeletedMessages { get; } = new();
+    public object SuperdeletedMessagesLock { get; } = new();
+
     [Init]
     private void MessageTracker_Init()
     {
@@ -69,6 +72,58 @@ public partial class DiscordEventHandler
         }
 
         await db.DiscordMessages.SetDeleted(msgId);
+
+        lock (SuperdeletedMessagesLock)
+        {
+            if (SuperdeletedMessages.Remove(msgId))
+            {
+                return;
+            }
+        }
+
+        if (channel is not IGuildChannel guildChannel)
+        {
+            return;
+        }
+
+        var deletedMessagesChannelId = (await db.GuildOptions.FindByIdAsync(guildChannel.GuildId))?.DeletedMessagesChannel;
+
+        if (deletedMessagesChannelId is null)
+        {
+            return;
+        }
+
+        var message = await db.DiscordMessages.FindByIdAsync(msgId);
+
+        if (message is null)
+        {
+            return;
+        }
+
+        var deletedMessagesChannel = await guildChannel.Guild.GetTextChannelAsync(deletedMessagesChannelId.Value);
+
+        if (deletedMessagesChannel is null)
+        {
+            return;
+        }
+
+        var author = await client.Rest.GetUserAsync(message.AuthorId);
+
+        var embed = new EmbedBuilder()
+            .WithAuthor("\u2800", author.GetAvatarUrl())
+            .WithDescription($"Message by {author.Mention} was deleted in <#{message.ChannelId}>.")
+            .WithFields([
+                new()
+                {
+                    Name = "Message",
+                    Value = message.CleanContents.Last(),
+                },
+            ])
+            .WithFooter($"Message ID: {msgId}")
+            .WithTimestamp(message.Timestamps.First())
+            .Build();
+
+        await deletedMessagesChannel.SendMessageAsync(embed: embed);
     }
 
     private async Task MessageTracker_UpdateAsync(IMessage newMsg, IMessageChannel channel)

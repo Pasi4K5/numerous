@@ -7,6 +7,7 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.ApiClients.Osu;
+using Numerous.Bot.Database;
 
 namespace Numerous.Bot.Discord.Commands;
 
@@ -81,6 +82,40 @@ public sealed class ConfigCommandModule : CommandModule
 
             await FollowupWithEmbedAsync(
                 "Removed verification log channel.",
+                type: ResponseType.Success
+            );
+        }
+    }
+
+    [Group("deletedmessages", "Deleted messages configuration commands")]
+    public sealed class DeletedMessagesCommandModule(IDbService db) : CommandModule
+    {
+        [UsedImplicitly]
+        [SlashCommand("setchannel", "Sets the channel to log deleted messages to.")]
+        public async Task SetChannel(
+            [Summary("channel", "The channel to log deleted messages to.")] ITextChannel channel
+        )
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.SetDeletedMessagesChannel(Context.Guild.Id, channel.Id);
+
+            await FollowupWithEmbedAsync(
+                $"Set deleted messages channel to {channel.Mention}.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("unsetchannel", "Unsets the channel to log deleted messages to.")]
+        public async Task RemoveChannel()
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.SetDeletedMessagesChannel(Context.Guild.Id, null);
+
+            await FollowupWithEmbedAsync(
+                "Removed deleted messages channel.",
                 type: ResponseType.Success
             );
         }

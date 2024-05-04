@@ -13,6 +13,7 @@ public interface IGuildOptionsRepository : IRepository<GuildOptions, ulong>
     Task<bool> ToggleReadOnlyAsync(ulong id, ulong channelId, CancellationToken cancellationToken = default);
     Task SetVerificationLogChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
     Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default);
+    Task SetDeletedMessagesChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
 }
 
 public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionName)
@@ -61,6 +62,15 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
         await Collection.UpdateOneAsync(
             Builders<GuildOptions>.Filter.Eq(x => x.Id, id),
             Builders<GuildOptions>.Update.Set(x => x.OsuRoles, roles),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task SetDeletedMessagesChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.Set(x => x.DeletedMessagesChannel, channelId),
             cancellationToken: cancellationToken
         );
     }

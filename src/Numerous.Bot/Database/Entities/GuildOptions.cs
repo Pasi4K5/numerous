@@ -15,6 +15,7 @@ public sealed record GuildOptions : DbEntity<ulong>
     public bool TrackMemberCount { get; init; }
     public ICollection<OsuRole> OsuRoles { get; init; } = [];
     public ulong? VerificationLogChannel { get; init; } = null;
+    public ulong? DeletedMessagesChannel { get; init; } = null;
 
     public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();
 

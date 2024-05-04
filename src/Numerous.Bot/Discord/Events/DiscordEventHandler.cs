@@ -12,23 +12,16 @@ using Numerous.Bot.Util;
 
 namespace Numerous.Bot.Discord.Events;
 
-[HostedService]
+[SingletonService]
 public sealed partial class DiscordEventHandler(
     IConfigService cfgService,
     DiscordSocketClient client,
     IDbService db,
     AttachmentService attachmentService
-) : IHostedService
+)
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public void Start()
     {
         this.Init();
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
     }
 }
