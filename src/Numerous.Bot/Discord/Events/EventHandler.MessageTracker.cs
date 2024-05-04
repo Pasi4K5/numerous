@@ -111,7 +111,7 @@ public partial class DiscordEventHandler
 
         var embed = new EmbedBuilder()
             .WithAuthor("\u2800", author.GetAvatarUrl())
-            .WithDescription($"Message by {author.Mention} was deleted in <#{message.ChannelId}>.")
+            .WithDescription($"Message by {author.Mention} in <#{message.ChannelId}> was deleted.")
             .WithFields([
                 new()
                 {
