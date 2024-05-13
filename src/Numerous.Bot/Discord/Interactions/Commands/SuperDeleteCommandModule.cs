@@ -7,7 +7,6 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Database;
-using Numerous.Bot.Discord.Commands;
 using Numerous.Bot.Discord.Events;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;

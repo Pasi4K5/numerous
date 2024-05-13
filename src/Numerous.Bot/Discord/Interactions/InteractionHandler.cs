@@ -12,7 +12,7 @@ using Numerous.Bot.Configuration;
 using Numerous.Bot.DependencyInjection;
 using Serilog;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions;
 
 [HostedService]
 public sealed class InteractionHandler(
@@ -42,7 +42,7 @@ public sealed class InteractionHandler(
 
         client.Ready += async () =>
         {
-            await interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+            await interactions.AddModulesAsync(Assembly.GetExecutingAssembly(), services);
 
             if (cfg.GuildMode)
             {

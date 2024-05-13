@@ -8,7 +8,6 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.Database;
-using Numerous.Bot.Discord.Commands;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 

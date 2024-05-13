@@ -8,7 +8,6 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Bot.Database;
-using Numerous.Bot.Discord.Commands;
 using Numerous.Bot.Util;
 using ScottPlot;
 using Color = System.Drawing.Color;

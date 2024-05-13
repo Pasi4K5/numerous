@@ -95,20 +95,23 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                             .WithDescription(
                                 $"Message by {message.Author.Mention} in <#{channel.Id}> contains attachment with NSFW content ({((1 - neutral) * 100):0.00}%).\n"
                                 + $"The message has been deleted."
-                            ).Build());
+                            ).Build()
+                    );
                 }
                 else if (neutral < ReportThreshold)
                 {
-                    await logChannel.SendMessageAsync(
+                    var msg = await logChannel.SendMessageAsync(
                         string.Join('\n', message.Attachments.Select(x => x.Url)),
-                        embed: new EmbedBuilder()
-                            .WithColor(Color.Orange)
-                            .WithTitle("NuMod - Warning")
-                            .WithDescription(
-                                $"Message {message.GetLink()} by {message.Author.Mention} contains attachment with **potential** NSFW content ({((1 - neutral) * 100):0.00}%).\n"
-                                + $"The message has **not** been deleted."
-                            ).Build()
+                        embed: NuModComponentBuilder.BuildWarningEmbed(
+                            $"Message {message.GetLink()} by {message.Author.Mention} contains attachment with **potentially** NSFW content ({(1 - neutral) * 100:0.00}%).\n"
+                            + $"The message has **not** been deleted."
+                        )
                     );
+
+                    await msg.ModifyAsync(orig =>
+                    {
+                        orig.Components = NuModComponentBuilder.BuildDeleteComponents(logChannel.Id, msg.Id, channel.Id, message.Id);
+                    });
                 }
             }, cancellationToken);
 

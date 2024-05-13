@@ -12,7 +12,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public partial class AnilistSearchCommandModule
 {
-    private static Embed[] BuildEmbeds(Media media, Character? character)
+    private static Embed[] BuildEmbeds(AnilistSearchCommandModule.Media media, AnilistSearchCommandModule.Character? character)
     {
         var embeds = new List<Embed> { BuildMediaEmbed(media) };
 
@@ -28,7 +28,7 @@ public partial class AnilistSearchCommandModule
         return embeds.ToArray();
     }
 
-    private static Embed BuildMediaEmbed(Media media)
+    private static Embed BuildMediaEmbed(AnilistSearchCommandModule.Media media)
     {
         var desc = new StringBuilder();
 
@@ -58,12 +58,12 @@ public partial class AnilistSearchCommandModule
 
         if (media.Description is not null)
         {
-            builder.AddField("Description", ReplaceHtml(media.Description).LimitLength(MaxFieldLength));
+            builder.AddField("Description", AnilistSearchCommandModule.ReplaceHtml(media.Description).LimitLength(MaxFieldLength));
         }
 
         if (media.Format is not null)
         {
-            builder.AddField("Format", MakeReadable(media.Format), true);
+            builder.AddField("Format", AnilistSearchCommandModule.MakeReadable(media.Format), true);
         }
 
         var date = media.StartDate.ToString();
@@ -75,7 +75,7 @@ public partial class AnilistSearchCommandModule
 
         if (media.Status is not null)
         {
-            builder.AddField("Status", ToTitleCase(media.Status), true);
+            builder.AddField("Status", AnilistSearchCommandModule.ToTitleCase(media.Status), true);
         }
 
         if (media.AverageScore > 0)
@@ -120,7 +120,7 @@ public partial class AnilistSearchCommandModule
         return builder.Build();
     }
 
-    private static Embed BuildCharacterEmbed(Character character)
+    private static Embed BuildCharacterEmbed(AnilistSearchCommandModule.Character character)
     {
         var builder = new EmbedBuilder()
             .WithColor(_embedDefaultColor)
@@ -134,7 +134,7 @@ public partial class AnilistSearchCommandModule
 
         if (character.Description is not null)
         {
-            builder.AddField("Description", ReplaceHtml(character.Description)
+            builder.AddField("Description", AnilistSearchCommandModule.ReplaceHtml(character.Description)
                 .LimitLength(MaxFieldLength)
                 // Remove spoilers
                 .Split("\n~").First()

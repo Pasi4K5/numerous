@@ -6,7 +6,7 @@
 using Discord;
 using Discord.Interactions;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions;
 
 public abstract class InteractionModule : InteractionModuleBase<SocketInteractionContext>
 {

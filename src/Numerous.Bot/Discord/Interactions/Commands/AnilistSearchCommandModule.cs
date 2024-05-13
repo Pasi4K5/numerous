@@ -10,7 +10,6 @@ using GraphQL.Client.Http;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using Numerous.Bot.ApiClients;
-using Numerous.Bot.Discord.Commands;
 using Numerous.Bot.Util;
 using Color = Discord.Color;
 
@@ -29,7 +28,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
     public async Task RespondToCommandAsync(IMessage msg)
     {
         var embed = msg.Embeds.FirstOrDefault();
-        var mediaTitle = ExtractMediaTitle(embed?.Description);
+        var mediaTitle = AnilistSearchCommandModule.ExtractMediaTitle(embed?.Description);
 
         if (mediaTitle is null)
         {
@@ -52,7 +51,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
             }
 
             var character = embed?.Author is not null
-                ? await FindCharacterAsync(ExtractCharName(embed.Author.Value.Name), media)
+                ? await FindCharacterAsync(AnilistSearchCommandModule.ExtractCharName(embed.Author.Value.Name), media)
                 : null;
 
             if (media.IsAdult == true)
@@ -70,7 +69,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
 
             await FollowupAsync(
                 msg.GetLink(),
-                BuildEmbeds(media, character)
+                AnilistSearchCommandModule.BuildEmbeds(media, character)
             );
         }
         catch (GraphQLHttpRequestException)
@@ -79,18 +78,18 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         }
     }
 
-    private async Task<Media?> FindMediaAsync(string mediaTitle)
+    private async Task<AnilistSearchCommandModule.Media?> FindMediaAsync(string mediaTitle)
     {
         var req = new GraphQLHttpRequest
         {
-            Query = MediaQuery,
+            Query = AnilistSearchCommandModule.MediaQuery,
             Variables = new
             {
                 mediaTitle,
             },
         };
 
-        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media?>();
+        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<AnilistSearchCommandModule.Media?>();
 
         if (media is null)
         {
@@ -102,7 +101,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         return titles.Any(t => RoughlyEqual(t, mediaTitle, 3)) ? media : null;
     }
 
-    private async ValueTask<Character?> FindCharacterAsync(string charName, Media media)
+    private async ValueTask<AnilistSearchCommandModule.Character?> FindCharacterAsync(string charName, AnilistSearchCommandModule.Media media)
     {
         var characters = media.Characters?.Nodes;
 
@@ -121,14 +120,14 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         {
             var response = await anilist.Client.SendQueryAsync<JObject>(new GraphQLHttpRequest
             {
-                Query = CharQuery,
+                Query = AnilistSearchCommandModule.CharQuery,
                 Variables = new
                 {
                     charName,
                 },
             });
 
-            var character = response.Data["Character"]?.ToObject<Character>();
+            var character = response.Data["Character"]?.ToObject<AnilistSearchCommandModule.Character>();
 
             if (character is null)
             {
@@ -148,7 +147,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         }
     }
 
-    private static int GetCharacterMatchScore(string query, Character character)
+    private static int GetCharacterMatchScore(string query, AnilistSearchCommandModule.Character character)
     {
         var names = character.Name?.All;
         var queryWords = query.Split(' ').Distinct();
