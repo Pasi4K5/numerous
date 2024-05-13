@@ -9,6 +9,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NsfwSpyNS;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.DependencyInjection;
 using Serilog;
@@ -89,6 +90,7 @@ try
         s.AddSingleton<IConfigService>(cm);
         s.AddSingleton<InteractionService>();
         s.AddSingleton(new HttpClient());
+        s.AddScoped<INsfwSpy, NsfwSpy>();
         s.AddScheduler();
     });
 

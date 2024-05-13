@@ -120,4 +120,70 @@ public sealed class ConfigCommandModule : CommandModule
             );
         }
     }
+
+    [Group("numod", "NuMod configuration commands")]
+    public sealed class NuModCommandModule(IDbService db) : CommandModule
+    {
+        [UsedImplicitly]
+        [SlashCommand("setenabled", "Enables or disables NuMod.")]
+        public async Task SetEnabled(
+            [Summary("enabled", "Whether to enable or disable NuMod.")] bool enabled
+        )
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.SetNuModEnabled(Context.Guild.Id, enabled);
+
+            await FollowupWithEmbedAsync(
+                $"NuMod is now {(enabled ? "enabled" : "disabled")}.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("setchannel", "Sets the channel for NuMod reports.")]
+        public async Task SetChannel(
+            [Summary("channel", "The channel to log NuMod actions to.")] ITextChannel channel
+        )
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.SetNuModChannel(Context.Guild.Id, channel.Id);
+
+            await FollowupWithEmbedAsync(
+                $"Set NuMod channel to {channel.Mention}.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("unsetchannel", "Unsets the channel for NuMod reports.")]
+        public async Task RemoveChannel()
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.SetNuModChannel(Context.Guild.Id, null);
+
+            await FollowupWithEmbedAsync(
+                "Removed NuMod channel.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("adminsbypass", "Enables or disables admins bypassing NuMod.")]
+        public async Task SetAdminsBypass(
+            [Summary("enabled", "Whether admins should bypass NuMod.")] bool enabled
+        )
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.SetAdminsBypassNuMod(Context.Guild.Id, enabled);
+
+            await FollowupWithEmbedAsync(
+                $"Admins can now {(enabled ? "bypass" : "not bypass")} NuMod.",
+                type: ResponseType.Success
+            );
+        }
+    }
 }

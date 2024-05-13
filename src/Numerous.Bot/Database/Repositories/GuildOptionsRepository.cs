@@ -14,6 +14,9 @@ public interface IGuildOptionsRepository : IRepository<GuildOptions, ulong>
     Task SetVerificationLogChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
     Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default);
     Task SetDeletedMessagesChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
+    Task SetNuModChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
+    Task SetNuModEnabled(ulong id, bool enabled, CancellationToken cancellationToken = default);
+    Task SetAdminsBypassNuMod(ulong id, bool enabled, CancellationToken cancellationToken = default);
 }
 
 public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionName)
@@ -71,6 +74,33 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
         await Collection.UpdateOneAsync(
             x => x.Id == id,
             Builders<GuildOptions>.Update.Set(x => x.DeletedMessagesChannel, channelId),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task SetNuModChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.Set(x => x.NuModReportChannel, channelId),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task SetNuModEnabled(ulong id, bool enabled, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.Set(x => x.NuModEnabled, enabled),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task SetAdminsBypassNuMod(ulong id, bool enabled, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.Set(x => x.AdminsBypassNuMod, enabled),
             cancellationToken: cancellationToken
         );
     }
