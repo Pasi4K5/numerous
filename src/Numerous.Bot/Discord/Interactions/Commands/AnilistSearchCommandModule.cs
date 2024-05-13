@@ -69,7 +69,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
 
             await FollowupAsync(
                 msg.GetLink(),
-                AnilistSearchCommandModule.BuildEmbeds(media, character)
+                BuildEmbeds(media, character)
             );
         }
         catch (GraphQLHttpRequestException)
@@ -78,18 +78,18 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         }
     }
 
-    private async Task<AnilistSearchCommandModule.Media?> FindMediaAsync(string mediaTitle)
+    private async Task<Media?> FindMediaAsync(string mediaTitle)
     {
         var req = new GraphQLHttpRequest
         {
-            Query = AnilistSearchCommandModule.MediaQuery,
+            Query = MediaQuery,
             Variables = new
             {
                 mediaTitle,
             },
         };
 
-        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<AnilistSearchCommandModule.Media?>();
+        var media = (await anilist.Client.SendQueryAsync<JObject>(req)).Data["Media"]?.ToObject<Media?>();
 
         if (media is null)
         {
@@ -101,7 +101,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         return titles.Any(t => RoughlyEqual(t, mediaTitle, 3)) ? media : null;
     }
 
-    private async ValueTask<AnilistSearchCommandModule.Character?> FindCharacterAsync(string charName, AnilistSearchCommandModule.Media media)
+    private async ValueTask<Character?> FindCharacterAsync(string charName, Media media)
     {
         var characters = media.Characters?.Nodes;
 
@@ -127,7 +127,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
                 },
             });
 
-            var character = response.Data["Character"]?.ToObject<AnilistSearchCommandModule.Character>();
+            var character = response.Data["Character"]?.ToObject<Character>();
 
             if (character is null)
             {
@@ -147,7 +147,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         }
     }
 
-    private static int GetCharacterMatchScore(string query, AnilistSearchCommandModule.Character character)
+    private static int GetCharacterMatchScore(string query, Character character)
     {
         var names = character.Name?.All;
         var queryWords = query.Split(' ').Distinct();

@@ -12,7 +12,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public partial class AnilistSearchCommandModule
 {
-    private static Embed[] BuildEmbeds(AnilistSearchCommandModule.Media media, AnilistSearchCommandModule.Character? character)
+    private static Embed[] BuildEmbeds(Media media, Character? character)
     {
         var embeds = new List<Embed> { BuildMediaEmbed(media) };
 
@@ -28,7 +28,7 @@ public partial class AnilistSearchCommandModule
         return embeds.ToArray();
     }
 
-    private static Embed BuildMediaEmbed(AnilistSearchCommandModule.Media media)
+    private static Embed BuildMediaEmbed(Media media)
     {
         var desc = new StringBuilder();
 
@@ -120,7 +120,7 @@ public partial class AnilistSearchCommandModule
         return builder.Build();
     }
 
-    private static Embed BuildCharacterEmbed(AnilistSearchCommandModule.Character character)
+    private static Embed BuildCharacterEmbed(Character character)
     {
         var builder = new EmbedBuilder()
             .WithColor(_embedDefaultColor)
@@ -134,7 +134,7 @@ public partial class AnilistSearchCommandModule
 
         if (character.Description is not null)
         {
-            builder.AddField("Description", AnilistSearchCommandModule.ReplaceHtml(character.Description)
+            builder.AddField("Description", ReplaceHtml(character.Description)
                 .LimitLength(MaxFieldLength)
                 // Remove spoilers
                 .Split("\n~").First()
