@@ -16,7 +16,7 @@ using Color = Discord.Color;
 namespace Numerous.Bot.Discord.Commands;
 
 [UsedImplicitly]
-public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : CommandModule
+public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : InteractionModule
 {
     private const ushort MaxFieldLength = 1024;
 

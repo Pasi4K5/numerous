@@ -11,7 +11,7 @@ using Numerous.Bot.Database;
 namespace Numerous.Bot.Discord.Commands;
 
 [UsedImplicitly]
-public sealed class SetTimeZoneCommandModule(IDbService db) : CommandModule
+public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
 {
     private const string SelectMenuId = "cmd:settimezone:select:menu";
     private const string FirstButtonId = "cmd:settimezone:select:first";

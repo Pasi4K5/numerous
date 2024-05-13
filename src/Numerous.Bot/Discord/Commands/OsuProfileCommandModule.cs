@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public sealed class OsuProfileCommand(OsuVerifier verifier) : CommandModule
+public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("profile", "View the osu! profile of a user.")]

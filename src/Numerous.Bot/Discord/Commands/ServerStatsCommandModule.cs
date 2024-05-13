@@ -17,7 +17,7 @@ namespace Numerous.Bot.Discord.Commands;
 
 [UsedImplicitly]
 [Group("serverstats", "Shows stats about the server.")]
-public sealed class ServerStatsCommandModule(IDbService db) : CommandModule
+public sealed class ServerStatsCommandModule(IDbService db) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("channels", "Shows a chart of the given variable for each channel in the server.")]

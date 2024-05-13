@@ -8,7 +8,7 @@ using Discord.Interactions;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public abstract class CommandModule : InteractionModuleBase<SocketInteractionContext>
+public abstract class InteractionModule : InteractionModuleBase<SocketInteractionContext>
 {
     private static Color GetTypeColor(ResponseType type)
     {

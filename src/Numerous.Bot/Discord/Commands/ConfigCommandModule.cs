@@ -14,10 +14,10 @@ namespace Numerous.Bot.Discord.Commands;
 [UsedImplicitly]
 [Group("config", "Configuration commands")]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
-public sealed class ConfigCommandModule : CommandModule
+public sealed class ConfigCommandModule : InteractionModule
 {
     [Group("role", "Role configuration commands")]
-    public sealed class RoleCommandModule(OsuVerifier verifier) : CommandModule
+    public sealed class RoleCommandModule(OsuVerifier verifier) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("set", "Configures which role to assign to which users.")]
@@ -54,7 +54,7 @@ public sealed class ConfigCommandModule : CommandModule
     }
 
     [Group("verify", "Verification configuration commands")]
-    public sealed class VerifyCommandModule(OsuVerifier verifier) : CommandModule
+    public sealed class VerifyCommandModule(OsuVerifier verifier) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("setlogchannel", "Sets the channel to log verifications to.")]
@@ -88,7 +88,7 @@ public sealed class ConfigCommandModule : CommandModule
     }
 
     [Group("deletedmessages", "Deleted messages configuration commands")]
-    public sealed class DeletedMessagesCommandModule(IDbService db) : CommandModule
+    public sealed class DeletedMessagesCommandModule(IDbService db) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("setchannel", "Sets the channel to log deleted messages to.")]
@@ -122,7 +122,7 @@ public sealed class ConfigCommandModule : CommandModule
     }
 
     [Group("numod", "NuMod configuration commands")]
-    public sealed class NuModCommandModule(IDbService db) : CommandModule
+    public sealed class NuModCommandModule(IDbService db) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("setenabled", "Enables or disables NuMod.")]

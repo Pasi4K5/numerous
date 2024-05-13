@@ -11,7 +11,7 @@ using Numerous.Bot.Database;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient client) : CommandModule
+public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient client) : InteractionModule
 {
     [UsedImplicitly]
     [MessageCommand("Unedit")]

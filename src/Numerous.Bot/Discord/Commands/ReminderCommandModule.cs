@@ -15,11 +15,11 @@ namespace Numerous.Bot.Discord.Commands;
 
 [UsedImplicitly]
 [Group("reminder", "Reminds you.")]
-public sealed class ReminderCommandModule(ReminderService reminderService, IDbService db) : CommandModule
+public sealed class ReminderCommandModule(ReminderService reminderService, IDbService db) : InteractionModule
 {
     [UsedImplicitly]
     [Group("set", "Sets a reminder.")]
-    public sealed class Set(ReminderService reminderService, IDbService db) : CommandModule
+    public sealed class Set(ReminderService reminderService, IDbService db) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("in", "Sets a reminder after the specified time.")]

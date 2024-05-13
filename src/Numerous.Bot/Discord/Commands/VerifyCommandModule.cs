@@ -12,7 +12,7 @@ using Numerous.Bot.ApiClients.Osu.Models;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : CommandModule
+public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : InteractionModule
 {
     [GeneratedRegex(@"osu\.ppy\.sh/u(?:sers)?/(\d+)")]
     private static partial Regex OsuUserUrlRegex();

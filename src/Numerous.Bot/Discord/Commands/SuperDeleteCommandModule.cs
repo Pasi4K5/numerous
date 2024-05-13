@@ -11,7 +11,7 @@ using Numerous.Bot.Discord.Events;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public sealed class SuperDeleteCommandModule(IDbService db, DiscordEventHandler eventHandler) : CommandModule
+public sealed class SuperDeleteCommandModule(IDbService db, DiscordEventHandler eventHandler) : InteractionModule
 {
     [UsedImplicitly]
     [MessageCommand("Superdelete")]

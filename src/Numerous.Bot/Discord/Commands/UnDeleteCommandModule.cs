@@ -14,7 +14,7 @@ using Numerous.Bot.Util;
 namespace Numerous.Bot.Discord.Commands;
 
 [UsedImplicitly]
-public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attachmentService) : CommandModule
+public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attachmentService) : InteractionModule
 {
     private const string PreviousButtonId = "cmd:undelete:previous";
     private const string NextButtonId = "cmd:undelete:next";

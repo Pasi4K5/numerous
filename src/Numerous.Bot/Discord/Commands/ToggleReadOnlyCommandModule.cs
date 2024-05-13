@@ -10,7 +10,7 @@ using Numerous.Bot.Database;
 
 namespace Numerous.Bot.Discord.Commands;
 
-public sealed class ToggleReadOnlyCommandModule(IDbService db) : CommandModule
+public sealed class ToggleReadOnlyCommandModule(IDbService db) : InteractionModule
 {
     [UsedImplicitly]
     [DefaultMemberPermissions(GuildPermission.Administrator)]
