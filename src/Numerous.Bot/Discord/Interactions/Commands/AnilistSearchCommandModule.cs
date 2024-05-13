@@ -10,10 +10,11 @@ using GraphQL.Client.Http;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using Numerous.Bot.ApiClients;
+using Numerous.Bot.Discord.Commands;
 using Numerous.Bot.Util;
 using Color = Discord.Color;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [UsedImplicitly]
 public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : InteractionModule

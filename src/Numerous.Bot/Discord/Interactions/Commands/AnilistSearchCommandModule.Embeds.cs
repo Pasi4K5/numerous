@@ -8,7 +8,7 @@ using System.Text;
 using Discord;
 using Numerous.Bot.Util;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public partial class AnilistSearchCommandModule
 {

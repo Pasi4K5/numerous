@@ -9,8 +9,9 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.ApiClients.Osu.Models;
+using Numerous.Bot.Discord.Commands;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public sealed partial class VerifyCommandModule(OsuApi osu, OsuVerifier verifier) : InteractionModule
 {

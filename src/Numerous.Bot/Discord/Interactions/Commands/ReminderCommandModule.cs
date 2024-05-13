@@ -9,9 +9,10 @@ using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Bot.Database;
 using Numerous.Bot.Database.Entities;
+using Numerous.Bot.Discord.Commands;
 using Numerous.Bot.Util;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [UsedImplicitly]
 [Group("reminder", "Reminds you.")]

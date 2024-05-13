@@ -8,12 +8,13 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using MongoDB.Driver;
 using Numerous.Bot.Database;
+using Numerous.Bot.Discord.Commands;
 using Numerous.Bot.Util;
 using ScottPlot;
 using Color = System.Drawing.Color;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [UsedImplicitly]
 [Group("serverstats", "Shows stats about the server.")]

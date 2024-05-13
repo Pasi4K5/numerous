@@ -7,8 +7,9 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Database;
+using Numerous.Bot.Discord.Commands;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public sealed class ToggleReadOnlyCommandModule(IDbService db) : InteractionModule
 {

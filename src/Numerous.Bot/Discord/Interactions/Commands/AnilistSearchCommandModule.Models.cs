@@ -6,7 +6,7 @@
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public partial class AnilistSearchCommandModule
 {

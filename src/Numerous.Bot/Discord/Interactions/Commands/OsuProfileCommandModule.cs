@@ -6,8 +6,9 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Bot.Discord.Commands;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
 {

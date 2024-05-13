@@ -7,8 +7,9 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Database;
+using Numerous.Bot.Discord.Commands;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [UsedImplicitly]
 public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule

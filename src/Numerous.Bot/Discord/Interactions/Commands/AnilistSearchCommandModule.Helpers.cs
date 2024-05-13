@@ -6,7 +6,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public partial class AnilistSearchCommandModule
 {

@@ -8,8 +8,9 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Numerous.Bot.Database;
+using Numerous.Bot.Discord.Commands;
 
-namespace Numerous.Bot.Discord.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient client) : InteractionModule
 {
