@@ -57,12 +57,13 @@ public static class NuModComponentBuilder
             .Build();
     }
 
-    public static Embed BuildWarningEmbed(string desc)
+    public static Embed BuildNsfwWarningEmbed(string desc, string confidence)
     {
         return new EmbedBuilder()
             .WithColor(Color.Orange)
             .WithTitle("NuMod - Warning")
             .WithDescription(desc)
+            .WithFields(new EmbedFieldBuilder().WithName("Confidence").WithValue(confidence).WithIsInline(true))
             .WithTimestamp(DateTimeOffset.UtcNow)
             .Build();
     }

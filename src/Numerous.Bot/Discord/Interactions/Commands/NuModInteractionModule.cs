@@ -84,7 +84,10 @@ public sealed class NuModInteractionModule(IDbService db) : InteractionModule
                 orig.Components = NuModComponentBuilder.BuildDisabledDeleteComponents();
                 orig.Embeds = new[]
                 {
-                    NuModComponentBuilder.BuildWarningEmbed(reportMsg.Embeds.FirstOrDefault()?.Description ?? ""),
+                    NuModComponentBuilder.BuildNsfwWarningEmbed(
+                        reportMsg.Embeds.FirstOrDefault()?.Description ?? "",
+                        reportMsg.Embeds.FirstOrDefault()?.Fields.FirstOrDefault().Value ?? ""
+                    ),
                     new EmbedBuilder()
                         .WithTitle("Resolved")
                         .WithDescription(messageDeleted

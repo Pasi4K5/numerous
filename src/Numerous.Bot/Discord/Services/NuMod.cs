@@ -15,8 +15,7 @@ namespace Numerous.Bot.Discord.Services;
 [HostedService]
 public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbService db, AttachmentService attachmentService) : IHostedService
 {
-    private const float DeleteThreshold = 0.4f;
-    private const float ReportThreshold = 0.8f;
+    private const float NsfwThreshold = 0.2f;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -33,6 +32,7 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                 var guildOptions = await db.GuildOptions.FindByIdAsync(channel.GuildId, cancellationToken);
 
                 if ((channel as ITextChannel)?.IsNsfw == true
+                    || channel.Id == guildOptions?.NuModReportChannel
                     || guildOptions is not { NuModEnabled: true }
                     || (guildOptions.AdminsBypassNuMod && ((SocketGuildUser)message.Author).GuildPermissions.Administrator))
                 {
@@ -52,19 +52,19 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                     {
                         var result = await nsfwSpy.ClassifyGifAsync(uri);
 
-                        return result.Frames.Select(x => x.Value.Neutral).Min();
+                        return 1 - result.Frames.Select(x => x.Value.Neutral).Min();
                     }
                     else
                     {
                         var result = await nsfwSpy.ClassifyImageAsync(uri);
 
-                        return result.Neutral;
+                        return 1 - result.Neutral;
                     }
                 });
 
-                var neutral = (await Task.WhenAll(tasks)).Min();
+                var nsfwConfidence = (await Task.WhenAll(tasks)).Max();
 
-                if (neutral >= ReportThreshold)
+                if (nsfwConfidence < NsfwThreshold)
                 {
                     return;
                 }
@@ -90,37 +90,18 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                     att.IsSpoiler()
                 )));
 
-                if (neutral < DeleteThreshold)
-                {
-                    await message.DeleteAsync();
-                    await db.DiscordMessages.SetHiddenAsync(message.Id, cancellationToken: cancellationToken);
+                var msg = await logChannel.SendFilesAsync(
+                    attachments,
+                    embed: NuModComponentBuilder.BuildNsfwWarningEmbed(
+                        $"Message {message.GetLink()} by {message.Author.Mention} potentially contains one or more attachments with NSFW content.",
+                        $"{Math.Round(nsfwConfidence * 100)}%"
+                    )
+                );
 
-                    await logChannel.SendFilesAsync(
-                        attachments,
-                        embed: new EmbedBuilder()
-                            .WithColor(Color.Red)
-                            .WithTitle("NuMod - Report")
-                            .WithDescription(
-                                $"Message by {message.Author.Mention} in <#{channel.Id}> contains attachment with NSFW content ({((1 - neutral) * 100):0.00}%).\n"
-                                + $"The message has been deleted."
-                            ).Build()
-                    );
-                }
-                else if (neutral < ReportThreshold)
+                await msg.ModifyAsync(orig =>
                 {
-                    var msg = await logChannel.SendFilesAsync(
-                        attachments,
-                        embed: NuModComponentBuilder.BuildWarningEmbed(
-                            $"Message {message.GetLink()} by {message.Author.Mention} contains attachment with **potentially** NSFW content ({(1 - neutral) * 100:0.00}%).\n"
-                            + $"The message has **not** been deleted."
-                        )
-                    );
-
-                    await msg.ModifyAsync(orig =>
-                    {
-                        orig.Components = NuModComponentBuilder.BuildDeleteComponents(logChannel.Id, msg.Id, channel.Id, message.Id);
-                    });
-                }
+                    orig.Components = NuModComponentBuilder.BuildDeleteComponents(logChannel.Id, msg.Id, channel.Id, message.Id);
+                });
             }, cancellationToken);
 
             return Task.CompletedTask;
