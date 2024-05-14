@@ -86,6 +86,7 @@ public sealed class NuModInteractionModule(IDbService db) : InteractionModule
                 {
                     NuModComponentBuilder.BuildWarningEmbed(reportMsg.Embeds.FirstOrDefault()?.Description ?? ""),
                     new EmbedBuilder()
+                        .WithTitle("Resolved")
                         .WithDescription(messageDeleted
                             ? $"Message was deleted by {Context.User.Mention}."
                             : $"Marked as resolved by {Context.User.Mention}."

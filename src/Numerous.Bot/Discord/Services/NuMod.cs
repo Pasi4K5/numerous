@@ -13,18 +13,19 @@ using Numerous.Bot.DependencyInjection;
 namespace Numerous.Bot.Discord.Services;
 
 [HostedService]
-public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbService db) : IHostedService
+public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbService db, AttachmentService attachmentService) : IHostedService
 {
     private const float DeleteThreshold = 0.4f;
-    private const float ReportThreshold = 0.9f;
+    private const float ReportThreshold = 0.8f;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        // TODO: Split up this abomination into smaller methods.
         client.MessageReceived += message =>
         {
             _ = Task.Run(async () =>
             {
-                if (message.Author == client.CurrentUser || message.Channel is not IGuildChannel channel)
+                if (message.Author.Id == client.CurrentUser.Id || message.Channel is not IGuildChannel channel)
                 {
                     return;
                 }
@@ -82,13 +83,20 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                     return;
                 }
 
+                var attachments = await Task.WhenAll(message.Attachments.Select(async att => new FileAttachment(
+                    await attachmentService.GetStreamAsync(att.Url),
+                    att.Filename,
+                    att.Description,
+                    att.IsSpoiler()
+                )));
+
                 if (neutral < DeleteThreshold)
                 {
                     await message.DeleteAsync();
                     await db.DiscordMessages.SetHiddenAsync(message.Id, cancellationToken: cancellationToken);
 
-                    await logChannel.SendMessageAsync(
-                        string.Join('\n', message.Attachments.Select(x => x.Url)),
+                    await logChannel.SendFilesAsync(
+                        attachments,
                         embed: new EmbedBuilder()
                             .WithColor(Color.Red)
                             .WithTitle("NuMod - Report")
@@ -100,8 +108,8 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                 }
                 else if (neutral < ReportThreshold)
                 {
-                    var msg = await logChannel.SendMessageAsync(
-                        string.Join('\n', message.Attachments.Select(x => x.Url)),
+                    var msg = await logChannel.SendFilesAsync(
+                        attachments,
                         embed: NuModComponentBuilder.BuildWarningEmbed(
                             $"Message {message.GetLink()} by {message.Author.Mention} contains attachment with **potentially** NSFW content ({(1 - neutral) * 100:0.00}%).\n"
                             + $"The message has **not** been deleted."

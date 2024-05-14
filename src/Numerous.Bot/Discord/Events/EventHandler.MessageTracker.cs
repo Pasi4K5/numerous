@@ -46,16 +46,12 @@ public partial class DiscordEventHandler
                 Directory.CreateDirectory(imgDirPath);
             }
 
-            var httpClient = new HttpClient();
             var attachments = msg.Attachments.ToList();
 
             var storeAttachmentsTask = Task.WhenAll(attachments.Select(async attachment =>
             {
-                var response = await httpClient.GetAsync(attachment.Url);
                 var filePath = attachmentService.GetTargetPath(msg.Id, attachment, attachments.IndexOf(attachment));
-
-                await using var fs = new FileStream(filePath, FileMode.CreateNew);
-                await response.Content.CopyToAsync(fs);
+                await attachmentService.SaveAttachmentAsync(attachment.Url, filePath);
             }));
 
             await Task.WhenAll(insertTask, storeAttachmentsTask);

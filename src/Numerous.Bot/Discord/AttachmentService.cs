@@ -13,7 +13,23 @@ namespace Numerous.Bot.Discord;
 [SingletonService]
 public sealed class AttachmentService(IConfigService cfgService, IFileService files)
 {
+    private readonly HttpClient _httpClient = new();
+
     private Config Config => cfgService.Get();
+
+    public async Task SaveAttachmentAsync(string url, string targetPath)
+    {
+        var response = await _httpClient.GetAsync(url);
+        await using var fs = new FileStream(targetPath, FileMode.CreateNew);
+        await response.Content.CopyToAsync(fs);
+    }
+
+    public async Task<Stream> GetStreamAsync(string url)
+    {
+        var response = await _httpClient.GetAsync(url);
+
+        return await response.Content.ReadAsStreamAsync();
+    }
 
     public string GetTargetPath(ulong msgId, IAttachment attachment, int index)
     {
