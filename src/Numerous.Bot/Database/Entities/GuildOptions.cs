@@ -18,6 +18,7 @@ public sealed record GuildOptions : DbEntity<ulong>
     public ulong? DeletedMessagesChannel { get; init; } = null;
     public bool NuModEnabled { get; init; }
     public ulong? NuModReportChannel { get; init; } = null;
+    public float NuModNsfwThreshold { get; init; } = 0.4f;
     public bool AdminsBypassNuMod { get; init; } = true;
 
     public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();

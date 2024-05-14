@@ -15,8 +15,6 @@ namespace Numerous.Bot.Discord.Services;
 [HostedService]
 public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbService db, AttachmentService attachmentService) : IHostedService
 {
-    private const float NsfwThreshold = 0.2f;
-
     public Task StartAsync(CancellationToken cancellationToken)
     {
         // TODO: Split up this abomination into smaller methods.
@@ -64,7 +62,7 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
 
                 var nsfwConfidence = (await Task.WhenAll(tasks)).Max();
 
-                if (nsfwConfidence < NsfwThreshold)
+                if (nsfwConfidence < guildOptions.NuModNsfwThreshold)
                 {
                     return;
                 }

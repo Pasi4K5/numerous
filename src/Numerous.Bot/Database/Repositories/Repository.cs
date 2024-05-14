@@ -22,6 +22,7 @@ public interface IRepository<TEntity, in TId>
     Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default);
     Task InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
     Task DeleteByIdAsync(TId id, CancellationToken cancellationToken = default);
+    Task UpdateByIdAsync<TProp>(TId id, Expression<Func<TEntity, TProp>> property, TProp value, CancellationToken cancellationToken = default);
 }
 
 public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) : IRepository<TEntity, TId>
@@ -74,6 +75,15 @@ public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) 
     public Task DeleteByIdAsync(TId id, CancellationToken cancellationToken = default)
     {
         return Collection.DeleteOneAsync(Builders<TEntity>.Filter.Eq(x => x.Id, id), cancellationToken);
+    }
+
+    public async Task UpdateByIdAsync<TProp>(TId id, Expression<Func<TEntity, TProp>> property, TProp value, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            Builders<TEntity>.Filter.Eq(x => x.Id, id),
+            Builders<TEntity>.Update.Set(property, value),
+            cancellationToken: cancellationToken
+        );
     }
 
     // Can be made protected, non-static and virtual so that it can be overridden in derived classes.

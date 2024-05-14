@@ -135,6 +135,7 @@ public sealed class ConfigCommandModule : InteractionModule
             await db.GuildOptions.SetNuModEnabled(Context.Guild.Id, enabled);
 
             await FollowupWithEmbedAsync(
+                "NuMod",
                 $"NuMod is now {(enabled ? "enabled" : "disabled")}.",
                 type: ResponseType.Success
             );
@@ -151,6 +152,7 @@ public sealed class ConfigCommandModule : InteractionModule
             await db.GuildOptions.SetNuModChannel(Context.Guild.Id, channel.Id);
 
             await FollowupWithEmbedAsync(
+                "NuMod",
                 $"Set NuMod channel to {channel.Mention}.",
                 type: ResponseType.Success
             );
@@ -165,6 +167,7 @@ public sealed class ConfigCommandModule : InteractionModule
             await db.GuildOptions.SetNuModChannel(Context.Guild.Id, null);
 
             await FollowupWithEmbedAsync(
+                "NuMod",
                 "Removed NuMod channel.",
                 type: ResponseType.Success
             );
@@ -181,7 +184,25 @@ public sealed class ConfigCommandModule : InteractionModule
             await db.GuildOptions.SetAdminsBypassNuMod(Context.Guild.Id, enabled);
 
             await FollowupWithEmbedAsync(
+                "NuMod",
                 $"Admins can now {(enabled ? "bypass" : "not bypass")} NuMod.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("set_nsfw_threshold", "Sets the NSFW threshold for NuMod (in percent).")]
+        public async Task SetNsfwThreshold(
+            [Summary("threshold", "The NSFW threshold for NuMod (in percent).")] int threshold
+        )
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.UpdateByIdAsync(Context.Guild.Id, x => x.NuModNsfwThreshold, threshold / 100f);
+
+            await FollowupWithEmbedAsync(
+                "NuMod",
+                $"Set NSFW threshold to {threshold}%.",
                 type: ResponseType.Success
             );
         }
