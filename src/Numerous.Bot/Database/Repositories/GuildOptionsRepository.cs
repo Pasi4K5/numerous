@@ -11,7 +11,6 @@ namespace Numerous.Bot.Database.Repositories;
 public interface IGuildOptionsRepository : IRepository<GuildOptions, ulong>
 {
     Task<bool> ToggleReadOnlyAsync(ulong id, ulong channelId, CancellationToken cancellationToken = default);
-    Task SetVerificationLogChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
     Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default);
     Task SetDeletedMessagesChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
     Task SetNuModChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
@@ -49,15 +48,6 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
 
             return true;
         }
-    }
-
-    public async Task SetVerificationLogChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default)
-    {
-        await Collection.UpdateOneAsync(
-            x => x.Id == id,
-            Builders<GuildOptions>.Update.Set(x => x.VerificationLogChannel, channelId),
-            cancellationToken: cancellationToken
-        );
     }
 
     public async Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default)
