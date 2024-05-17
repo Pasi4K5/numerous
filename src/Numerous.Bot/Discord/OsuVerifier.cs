@@ -7,7 +7,6 @@ using Coravel;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
 using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.ApiClients.Osu.Models;
 using Numerous.Bot.Database;

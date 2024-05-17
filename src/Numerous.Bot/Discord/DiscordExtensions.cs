@@ -20,11 +20,6 @@ public static partial class DiscordExtensions
         await message.Channel.SendMessageAsync(text, messageReference: new(message.Id));
     }
 
-    public static async Task<IUserMessage> SendMessageAsync(this IMessageChannel channel, EmbedMessage msg)
-    {
-        return await channel.SendMessageAsync(embed: msg.Embed);
-    }
-
     public static string GetLink(this IMessage msg)
     {
         var guildId = msg.Channel is IGuildChannel channel ? channel.Guild.Id.ToString() : "@me";
