@@ -63,19 +63,9 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         return dbUser.OsuId is not null;
     }
 
-    public async Task<bool> OsuUserIsVerifiedAsync(OsuUser osuUser)
-    {
-        return await (await db.Users.FindManyAsync(x => x.OsuId == osuUser.Id)).AnyAsync();
-    }
-
     public async Task<ulong?> GetOsuIdAsync(IUser discordUser)
     {
         return (await db.Users.FindOrInsertByIdAsync(discordUser.Id)).OsuId;
-    }
-
-    public async Task VerifyUserAsync(IGuildUser guildUser, OsuUser osuUser)
-    {
-        await db.Users.SetVerifiedAsync(guildUser.Id, osuUser.Id);
     }
 
     public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
@@ -170,24 +160,6 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
                 await guildUser.RemoveRoleAsync(role);
             }
         }
-    }
-
-    public async Task<IMessageChannel?> GetVerificationLogChannelAsync(IGuild guild)
-    {
-        var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
-        var channelId = guildConfig.VerificationLogChannel;
-
-        if (channelId is null)
-        {
-            return null;
-        }
-
-        return await guild.GetTextChannelAsync(channelId.Value);
-    }
-
-    public async Task SetVerificationLogChannelAsync(SocketGuild guild, IMessageChannel? channel)
-    {
-        await db.GuildOptions.SetVerificationLogChannel(guild.Id, channel?.Id);
     }
 
     private async Task<OsuUserExtended?> GetOsuUserAsync(IUser discordUser)
