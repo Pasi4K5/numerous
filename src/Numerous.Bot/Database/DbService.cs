@@ -8,7 +8,7 @@ using MongoDB.Driver;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Database.Repositories;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.Database;
 

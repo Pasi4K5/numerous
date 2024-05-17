@@ -22,13 +22,15 @@ public abstract class InteractionModule : InteractionModuleBase<SocketInteractio
         };
     }
 
-    protected async Task RespondWithEmbedAsync(string title = "", string message = "", ResponseType type = ResponseType.Info)
+    protected async Task RespondWithEmbedAsync(string title = "", string message = "", ResponseType type = ResponseType.Info, bool ephemeral = false)
     {
-        await RespondAsync(embed: new EmbedBuilder()
-            .WithColor(GetTypeColor(type))
-            .WithTitle(title)
-            .WithDescription(message)
-            .Build()
+        await RespondAsync(
+            embed: new EmbedBuilder()
+                .WithColor(GetTypeColor(type))
+                .WithTitle(title)
+                .WithDescription(message)
+                .Build(),
+            ephemeral: ephemeral
         );
     }
 

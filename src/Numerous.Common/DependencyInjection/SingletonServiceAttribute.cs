@@ -3,9 +3,18 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Bot.DependencyInjection;
+using JetBrains.Annotations;
 
-public abstract class ServiceAttribute : Attribute
+namespace Numerous.Common.DependencyInjection;
+
+[AttributeUsage(AttributeTargets.Class)]
+[MeansImplicitUse]
+public class SingletonServiceAttribute : ServiceAttribute
 {
-    public abstract ServiceType ServiceType { get; }
+    public override ServiceType ServiceType => ServiceType.Singleton;
 }
+
+[AttributeUsage(AttributeTargets.Class)]
+[UsedImplicitly]
+[MeansImplicitUse]
+public sealed class SingletonServiceAttribute<T> : SingletonServiceAttribute where T : class;

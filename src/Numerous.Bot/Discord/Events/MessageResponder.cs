@@ -5,7 +5,7 @@
 
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.Discord.Events;
 

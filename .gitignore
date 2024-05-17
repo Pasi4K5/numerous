@@ -6,3 +6,4 @@ out/
 obj/
 bin/
 dist/
+config.json

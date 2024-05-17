@@ -8,7 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using NsfwSpyNS;
 using Numerous.Bot.Database;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.Discord.Services;
 
@@ -67,7 +67,7 @@ public sealed class NuMod(DiscordSocketClient client, INsfwSpy nsfwSpy, IDbServi
                     return;
                 }
 
-                var logChannelId = (await db.GuildOptions.FindByIdAsync(channel.GuildId, cancellationToken))?.NuModReportChannel;
+                var logChannelId = guildOptions.NuModReportChannel;
 
                 if (logChannelId is null)
                 {

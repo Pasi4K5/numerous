@@ -8,7 +8,7 @@ using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Numerous.Bot.Configuration;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.ApiClients.Osu;
 

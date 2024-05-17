@@ -1,0 +1,48 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Numerous.Bot.Database
+@using Numerous.Web.Auth
+@inject IDbService Db
+@inject NavigationManager Nav
+
+<PageTitle>Numerus Verification</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        @if (_verified)
+        {
+            <span>Verification successful! You may now close this tab.</span>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthStateTask { get; set; } = null!;
+
+    private bool _verified;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateTask;
+
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Nav.NavigateTo("/Login");
+
+            return;
+        }
+
+        var userId = authState.GetUserId();
+
+        if (userId is null || (await Db.Users.FindOrInsertByIdAsync(userId.Value)).OsuId is null)
+        {
+            Nav.NavigateTo("/Connect");
+        }
+        else
+        {
+            _verified = true;
+        }
+    }
+}

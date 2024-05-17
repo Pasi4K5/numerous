@@ -3,18 +3,9 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using JetBrains.Annotations;
+namespace Numerous.Web.Auth;
 
-namespace Numerous.Bot.DependencyInjection;
-
-[AttributeUsage(AttributeTargets.Class)]
-[MeansImplicitUse]
-public class SingletonServiceAttribute : ServiceAttribute
+internal static class DiscordConstants
 {
-    public override ServiceType ServiceType => ServiceType.Singleton;
+    internal const string AuthenticationScheme = "Discord";
 }
-
-[AttributeUsage(AttributeTargets.Class)]
-[UsedImplicitly]
-[MeansImplicitUse]
-public sealed class SingletonServiceAttribute<T> : SingletonServiceAttribute where T : class;

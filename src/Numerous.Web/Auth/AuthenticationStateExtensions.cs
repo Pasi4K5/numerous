@@ -3,26 +3,34 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Numerous.Common.DependencyInjection;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Numerous.Bot.Services;
+namespace Numerous.Web.Auth;
 
-public interface IFileService
+public static class AuthenticationStateExtensions
 {
-    bool DirectoryExists(string path);
-    string[] GetFiles(string path, string searchPattern);
-}
-
-[SingletonService<IFileService>]
-public class FileService : IFileService
-{
-    public bool DirectoryExists(string path)
+    public static ulong? GetUserId(this AuthenticationState authState)
     {
-        return Directory.Exists(path);
+        var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return null;
+        }
+
+        return ulong.Parse(userId);
     }
 
-    public string[] GetFiles(string path, string searchPattern)
+    public static ulong? GetUserId(this ClaimsPrincipal user)
     {
-        return Directory.GetFiles(path, searchPattern);
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return null;
+        }
+
+        return ulong.Parse(userId);
     }
 }

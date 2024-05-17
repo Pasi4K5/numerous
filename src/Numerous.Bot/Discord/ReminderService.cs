@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using Numerous.Bot.Database;
 using Numerous.Bot.Database.Entities;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 using Timer = System.Timers.Timer;
 
 namespace Numerous.Bot.Discord;

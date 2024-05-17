@@ -5,7 +5,7 @@
 
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.ApiClients;
 

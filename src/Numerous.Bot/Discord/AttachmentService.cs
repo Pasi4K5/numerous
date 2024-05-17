@@ -5,7 +5,7 @@
 
 using Discord;
 using Numerous.Bot.Configuration;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 using Numerous.Bot.Services;
 
 namespace Numerous.Bot.Discord;

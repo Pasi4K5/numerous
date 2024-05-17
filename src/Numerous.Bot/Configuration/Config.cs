@@ -10,6 +10,8 @@ namespace Numerous.Bot.Configuration;
 [JsonObject(MemberSerialization.OptOut)]
 public record struct Config()
 {
+    public ulong DiscordClientId { get; init; } = 0;
+    public string DiscordClientSecret { get; init; } = "";
     public string BotToken { get; init; } = "";
     public string MongoConnectionString { get; init; } = "";
     public string MongoDatabaseName { get; init; } = "";
@@ -18,4 +20,5 @@ public record struct Config()
     public bool GuildMode { get; init; } = true;
     public ulong[] GuildIds { get; init; } = [];
     public string AttachmentDirectory { get; init; } = "./attachments/";
+    public string BaseUrl { get; init; } = "https://localhost:44333";
 }

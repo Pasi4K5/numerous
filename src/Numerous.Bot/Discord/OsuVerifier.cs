@@ -12,7 +12,7 @@ using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.ApiClients.Osu.Models;
 using Numerous.Bot.Database;
 using Numerous.Bot.Database.Entities;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 using Serilog;
 
 namespace Numerous.Bot.Discord;

@@ -9,7 +9,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Configuration;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 using Serilog;
 
 namespace Numerous.Bot.Discord.Interactions;

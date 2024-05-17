@@ -8,7 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.Database;
-using Numerous.Bot.DependencyInjection;
+using Numerous.Common.DependencyInjection;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
 

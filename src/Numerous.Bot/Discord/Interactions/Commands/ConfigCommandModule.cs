@@ -54,34 +54,20 @@ public sealed class ConfigCommandModule : InteractionModule
     }
 
     [Group("verify", "Verification configuration commands")]
-    public sealed class VerifyCommandModule(OsuVerifier verifier) : InteractionModule
+    public sealed class VerifyCommandModule(IDbService db) : InteractionModule
     {
         [UsedImplicitly]
-        [SlashCommand("setlogchannel", "Sets the channel to log verifications to.")]
-        public async Task SetLogChannel(
-            [Summary("channel", "The channel to log verifications to.")] ITextChannel channel
+        [SlashCommand("set_join_message_channel", "Sets the channel to send join messages to.")]
+        public async Task SetJoinMessageChannel(
+            [Summary("channel", "The channel to send join messages to.")] ITextChannel? channel = null
         )
         {
             await DeferAsync();
 
-            await verifier.SetVerificationLogChannelAsync(Context.Guild, channel);
+            await db.GuildOptions.UpdateByIdAsync(Context.Guild.Id, x => x.JoinMessageChannel, channel?.Id);
 
             await FollowupWithEmbedAsync(
-                $"Set verification log channel to {channel.Mention}.",
-                type: ResponseType.Success
-            );
-        }
-
-        [UsedImplicitly]
-        [SlashCommand("unsetlogchannel", "Unsets the channel to log verifications to.")]
-        public async Task RemoveLogChannel()
-        {
-            await DeferAsync();
-
-            await verifier.SetVerificationLogChannelAsync(Context.Guild, null);
-
-            await FollowupWithEmbedAsync(
-                "Removed verification log channel.",
+                $"Set join message channel to {channel?.Mention ?? "none"}.",
                 type: ResponseType.Success
             );
         }
