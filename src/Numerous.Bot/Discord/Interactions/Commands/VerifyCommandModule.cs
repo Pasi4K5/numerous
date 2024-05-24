@@ -19,8 +19,7 @@ public sealed class VerifyCommandModule(IConfigService cfg) : InteractionModule
 
         await RespondWithEmbedAsync(
             message: $"Click [here]({config.BaseUrl}) to verify your osu! account.",
-            type: ResponseType.Info,
-            ephemeral: true
+            type: ResponseType.Info
         );
     }
 }
