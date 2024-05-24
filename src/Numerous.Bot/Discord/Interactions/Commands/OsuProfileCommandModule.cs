@@ -44,13 +44,17 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
         if (osuId is null)
         {
             await FollowupWithEmbedAsync(
-                (user == Context.User ? "You are" : $"{user.Mention} is") + " not verified.",
-                (user == Context.User ? "You" : "They") + " can use `/verify` to verify their osu! account."
+                "User not verified",
+                (user == Context.User ? "You are not verified. You" : $"{user.Mention} is not verified. They") + " can use `/verify` to verify their osu! account.",
+                ResponseType.Error
             );
 
             return;
         }
 
-        await FollowupAsync($"https://osu.ppy.sh/users/{osuId}");
+        await FollowupAsync(
+            (ephemeral ? $"{user.Mention}'s osu! profile: \n" : "")
+            + $"https://osu.ppy.sh/users/{osuId}"
+        );
     }
 }
