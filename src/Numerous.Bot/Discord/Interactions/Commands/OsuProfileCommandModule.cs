@@ -13,7 +13,7 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("profile", "View the osu! profile of a user.")]
-    public async Task Profile(
+    public async Task Profile_Slash(
         [Summary("user", "The user to view the profile of.")]
         IUser? user = null
     )
@@ -23,9 +23,16 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
 
     [UsedImplicitly]
     [UserCommand("osu! profile")]
-    public async Task OsuProfile(IUser user)
+    public async Task Profile_User(IUser user)
     {
         await Execute(user, true);
+    }
+
+    [UsedImplicitly]
+    [MessageCommand("osu! profile")]
+    public async Task Profile_Message(IMessage msg)
+    {
+        await Execute(msg.Author, true);
     }
 
     private async Task Execute(IUser user, bool ephemeral)
@@ -36,7 +43,6 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
 
         if (osuId is null)
         {
-            // TODO: Reference verify channel
             await FollowupWithEmbedAsync(
                 (user == Context.User ? "You are" : $"{user.Mention} is") + " not verified.",
                 (user == Context.User ? "You" : "They") + " can use `/verify` to verify their osu! account."
