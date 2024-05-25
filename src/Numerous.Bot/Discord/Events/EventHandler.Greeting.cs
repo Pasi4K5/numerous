@@ -5,6 +5,7 @@
 
 using Discord;
 using Discord.WebSocket;
+using Numerous.Bot.Discord.Interactions.Commands;
 using Numerous.Bot.Util;
 
 namespace Numerous.Bot.Discord.Events;
@@ -24,12 +25,12 @@ public partial class DiscordEventHandler
             return;
         }
 
-        var verifyUrl = cfgService.Get().BaseUrl;
+        var cmd = await cm.GetCommandMentionAsync<VerifyCommandModule>(nameof(VerifyCommandModule.Verify), user.Guild);
 
         var embed = new EmbedBuilder()
             .WithTitle("Welcome to Numerus!")
             .WithDescription(
-                $"Click [here]({verifyUrl}) to verify your osu! account and get your roles!"
+                $"Use {cmd} to verify your osu! account and get your roles!"
             ).WithColor(Color.Green)
             .Build();
 

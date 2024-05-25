@@ -32,7 +32,7 @@ public sealed class VerifyCommandModule(IConfigService cfg, IDbService db, OsuVe
         await FollowupWithEmbedAsync(
             message:
             $"## Click [here]({config.BaseUrl}) to verify your osu! account!\n"
-            + "If you are verified, then...\n"
+            + "If you are verified...\n"
             + (verifiedRole is not null && verifiedRole.Value != default ? $"* you will receive the <@&{verifiedRole.Value.RoleId}> role as well as the associated badge (role icon).\n" : "")
             + $"* you will automatically receive osu!-related roles{(rolesExist ? $" (like <@&{rankedMapper}>/<@&{unrankedMapper}>, <@&{bn}>, etc.)" : "")}\n"
             + "* you will be able to participate in more events and activities.\n"

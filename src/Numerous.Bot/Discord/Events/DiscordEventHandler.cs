@@ -16,7 +16,8 @@ public sealed partial class DiscordEventHandler(
     IConfigService cfgService,
     DiscordSocketClient client,
     IDbService db,
-    AttachmentService attachmentService
+    AttachmentService attachmentService,
+    CommandFinder cm
 )
 {
     public void Start()
