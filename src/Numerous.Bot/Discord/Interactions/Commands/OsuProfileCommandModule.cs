@@ -6,10 +6,11 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Bot.Configuration;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
+public sealed class OsuProfileCommand(OsuVerifier verifier, InteractionService interactions, IConfigService cfg) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("profile", "View the osu! profile of a user.")]
@@ -43,9 +44,25 @@ public sealed class OsuProfileCommand(OsuVerifier verifier) : InteractionModule
 
         if (osuId is null)
         {
+            var verifyCmd = interactions.GetSlashCommandInfo<VerifyCommandModule>(nameof(VerifyCommandModule.Verify));
+
+            var cmdId = (await Context.Guild.GetApplicationCommandsAsync()).FirstOrDefault(cmd =>
+                // Wonky equality check, TODO: Improve this trash
+                cmd.Name == verifyCmd.Name
+                && (!cmd.IsGlobalCommand || cmd.Guild.Id == Context.Guild.Id)
+                && cmd.IsNsfw == verifyCmd.IsNsfw
+                && cmd.IsDefaultPermission == verifyCmd.DefaultPermission
+                && cmd.Description == verifyCmd.Description
+                && cmd.ApplicationId == cfg.Get().DiscordClientId
+                && cmd.Type == verifyCmd.CommandType
+                && cmd.ContextTypes?.SequenceEqual(verifyCmd.ContextTypes) != false
+                && cmd.Options.Count == verifyCmd.Parameters.Count
+            )?.Id;
+
             await FollowupWithEmbedAsync(
-                "User not verified",
-                (user == Context.User ? "You are not verified. You" : $"{user.Mention} is not verified. They") + " can use `/verify` to verify their osu! account.",
+                "Not verified",
+                (user == Context.User ? "You are not verified. You" : $"{user.Mention} is not verified. They")
+                + $" can use </{verifyCmd.Name}:{cmdId}> to verify their osu! account.",
                 ResponseType.Error
             );
 
