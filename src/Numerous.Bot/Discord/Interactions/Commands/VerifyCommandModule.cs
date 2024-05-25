@@ -11,7 +11,7 @@ using Numerous.Bot.Database;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class VerifyCommandModule(IConfigService cfg, IDbService db) : InteractionModule
+public sealed class VerifyCommandModule(IConfigService cfg, IDbService db, OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("verify", "Verifies your osu! account.")]
@@ -27,14 +27,18 @@ public sealed class VerifyCommandModule(IConfigService cfg, IDbService db) : Int
         var rolesExist = new[] { unrankedMapper, rankedMapper, bn }.All(x => x is not null && x.Value != default);
         var verifiedRole = roles?.FirstOrDefault(x => x.Group == OsuUserGroup.Verified);
 
+        var isVerified = await verifier.UserIsVerifiedAsync(Context.User);
+
         await FollowupWithEmbedAsync(
-            "Verify your osu! account",
-            $"Click [here]({config.BaseUrl}) to verify your osu! account.\n\n"
+            message:
+            $"## Click [here]({config.BaseUrl}) to verify your osu! account!\n"
             + "If you are verified, then...\n"
-            + "* you will automatically get your osu!-related roles"
-            + (rolesExist ? $" (<@&{rankedMapper}>/<@&{unrankedMapper}>, <@&{bn}>, etc.)" : "")
-            + ".\n* other Discord members will be able to see your osu! profile by using commands.\n"
-            + (verifiedRole is not null && verifiedRole.Value != default ? $"* you will receive the <@&{verifiedRole.Value.RoleId}> role as well as the associated badge (role icon).\n" : ""),
+            + (verifiedRole is not null && verifiedRole.Value != default ? $"* you will receive the <@&{verifiedRole.Value.RoleId}> role as well as the associated badge (role icon).\n" : "")
+            + $"* you will automatically receive osu!-related roles{(rolesExist ? $" (like <@&{rankedMapper}>/<@&{unrankedMapper}>, <@&{bn}>, etc.)" : "")}\n"
+            + "* you will be able to participate in more events and activities.\n"
+            + "* you will be able to use more osu!-related features here on this Discord server.\n"
+            + "* other Discord members will be able to see public information about your osu! profile by using commands."
+            + (isVerified ? $"\n*Note: {Context.User.Mention}, you are already verified. Doing this again will not change anything for you.*" : ""),
             type: ResponseType.Info
         );
     }

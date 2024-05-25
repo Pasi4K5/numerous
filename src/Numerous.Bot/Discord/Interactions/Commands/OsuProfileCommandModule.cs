@@ -62,7 +62,7 @@ public sealed class OsuProfileCommand(OsuVerifier verifier, InteractionService i
             await FollowupWithEmbedAsync(
                 "Not verified",
                 (user == Context.User ? "You are not verified. You" : $"{user.Mention} is not verified. They")
-                + $" can use </{verifyCmd.Name}:{cmdId}> to verify their osu! account.",
+                + $" can use </{verifyCmd.Name}:{cmdId}> to verify {(user == Context.User ? "your" : "their")} osu! account.",
                 ResponseType.Error
             );
 
