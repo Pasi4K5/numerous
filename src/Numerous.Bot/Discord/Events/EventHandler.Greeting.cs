@@ -20,7 +20,7 @@ public partial class DiscordEventHandler
 
     private async Task Greet(SocketGuildUser user)
     {
-        if ((await db.Users.FindByIdAsync(user.Id))?.OsuId is not null)
+        if (user.IsBot || (await db.Users.FindByIdAsync(user.Id))?.OsuId is not null)
         {
             return;
         }
