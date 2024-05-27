@@ -22,14 +22,14 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 
     private readonly Dictionary<Guid, Timer> _timerCache = new();
 
-    public void StartAsync()
+    public void StartAsync(CancellationToken ct)
     {
         host.Services.UseScheduler(s =>
-            s.ScheduleAsync(CacheRemindersAsync).EveryTenSeconds().RunOnceAtStart().PreventOverlapping(nameof(ReminderService))
+            s.ScheduleAsync(async () => await CacheRemindersAsync(ct)).Hourly().RunOnceAtStart().PreventOverlapping(nameof(ReminderService))
         );
     }
 
-    public async Task AddReminderAsync(Reminder reminder, bool insertIntoDb = true)
+    public async Task AddReminderAsync(Reminder reminder, bool insertIntoDb = true, CancellationToken ct = default)
     {
         if (reminder.Timestamp < DateTimeOffset.Now + _cacheInterval)
         {
@@ -41,14 +41,14 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 
             _timerCache[reminder.Id] = timer;
 
-            timer.Elapsed += async (_, _) => await TriggerReminderAsync(reminder);
+            timer.Elapsed += async (_, _) => await TriggerReminderAsync(reminder, ct);
 
             timer.Start();
         }
 
         if (insertIntoDb)
         {
-            await db.Reminders.InsertAsync(reminder);
+            await db.Reminders.InsertAsync(reminder, ct);
         }
     }
 
@@ -63,9 +63,9 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
         await db.Reminders.DeleteByIdAsync(reminder.Id);
     }
 
-    private async Task CacheRemindersAsync()
+    private async Task CacheRemindersAsync(CancellationToken ct)
     {
-        await (await db.Reminders.FindManyAsync()).ForEachAsync(async reminder =>
+        await (await db.Reminders.FindManyAsync(ct: ct)).ForEachAsync(async reminder =>
         {
             if (reminder.Timestamp > DateTimeOffset.Now + _cacheInterval
                 || _timerCache.ContainsKey(reminder.Id))
@@ -75,20 +75,18 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 
             if (reminder.Timestamp < DateTimeOffset.Now)
             {
-                await TriggerReminderAsync(reminder);
+                await TriggerReminderAsync(reminder, ct);
             }
             else
             {
-                await AddReminderAsync(reminder, false);
+                await AddReminderAsync(reminder, false, ct);
             }
-        });
+        }, cancellationToken: ct);
     }
 
-    private async Task TriggerReminderAsync(Reminder reminder)
+    private async Task TriggerReminderAsync(Reminder reminder, CancellationToken ct)
     {
-        var channel = client.GetChannel(reminder.ChannelId) as IMessageChannel;
-
-        if (channel is null)
+        if (await client.GetChannelAsync(reminder.ChannelId) is not IMessageChannel channel)
         {
             return;
         }
@@ -102,7 +100,7 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 
         await channel.SendMessageAsync($"<@{reminder.UserId}>", embed: embed);
 
-        await db.Reminders.DeleteByIdAsync(reminder.Id);
+        await db.Reminders.DeleteByIdAsync(reminder.Id, ct);
 
         _timerCache.Remove(reminder.Id);
     }

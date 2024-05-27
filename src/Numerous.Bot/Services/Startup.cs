@@ -26,7 +26,7 @@ public sealed class Startup(
 {
     private Config Cfg => cfgService.Get();
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken ct)
     {
         discordClient.Log += Log;
 
@@ -35,11 +35,11 @@ public sealed class Startup(
 
         foreach (var guild in await discordClient.Rest.GetGuildsAsync())
         {
-            await dbService.GuildOptions.FindOrInsertByIdAsync(guild.Id, cancellationToken);
+            await dbService.GuildOptions.FindOrInsertByIdAsync(guild.Id, ct);
         }
 
-        reminderService.StartAsync();
-        await verifier.StartAsync();
+        reminderService.StartAsync(ct);
+        await verifier.StartAsync(ct);
         eventHandler.Start();
     }
 

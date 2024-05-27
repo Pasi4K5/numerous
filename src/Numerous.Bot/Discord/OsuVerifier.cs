@@ -19,21 +19,21 @@ namespace Numerous.Bot.Discord;
 [SingletonService]
 public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbService db, OsuApi osu)
 {
-    public Task StartAsync()
+    public Task StartAsync(CancellationToken ct)
     {
-        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(AssignAllRolesAsync)
+        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(async () => await AssignAllRolesAsync(ct))
             .EveryMinute()
-            .PreventOverlapping("RoleAssignment"));
+            .PreventOverlapping(nameof(OsuVerifier)));
         discord.GuildMemberUpdated += async (_, user) => await AssignRolesAsync(user);
 
         return Task.CompletedTask;
     }
 
-    public async Task AssignAllRolesAsync()
+    public async Task AssignAllRolesAsync(CancellationToken ct = default)
     {
         foreach (var guild in discord.Guilds)
         {
-            foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync())
+            foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync(cancellationToken: ct))
             {
                 try
                 {
@@ -49,7 +49,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
 
                 if (await UserIsVerifiedAsync(guildUser))
                 {
-                    await Task.Delay(2000);
+                    await Task.Delay(2000, ct);
                 }
             }
         }
