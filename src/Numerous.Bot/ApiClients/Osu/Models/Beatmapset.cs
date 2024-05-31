@@ -8,21 +8,21 @@ using Newtonsoft.Json;
 namespace Numerous.Bot.ApiClients.Osu.Models;
 
 [JsonObject(MemberSerialization.OptIn)]
-public record struct Beatmapset
+public record Beatmapset
 {
-    private readonly ICollection<string> _tags;
+    private readonly ICollection<string> _tags = new List<string>();
 
     [JsonProperty("id")]
-    public uint Id { get; init; }
+    public required uint Id { get; init; }
 
     [JsonProperty("artist")]
-    public string Artist { get; init; }
+    public required string Artist { get; init; }
 
     [JsonProperty("title")]
-    public string Title { get; init; }
+    public required string Title { get; init; }
 
     [JsonProperty("creator")]
-    public string Creator { get; init; }
+    public required string Creator { get; init; }
 
     [JsonProperty("bpm")]
     public double Bpm { get; init; }
@@ -34,6 +34,15 @@ public record struct Beatmapset
         init => _tags = value.Split(' ');
     }
 
+    [JsonProperty("play_count")]
+    public uint PlayCount { get; init; }
+
+    [JsonProperty("favourite_count")]
+    public uint FavouriteCount { get; init; }
+
     [JsonProperty("beatmaps")]
-    public IReadOnlyCollection<BeatmapDifficulty> Difficulties { get; init; }
+    public required IReadOnlyCollection<BeatmapDifficulty> Difficulties { get; init; }
 }
+
+[JsonObject(MemberSerialization.OptIn)]
+public record BeatmapsetExtended : Beatmapset;

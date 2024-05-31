@@ -16,10 +16,25 @@ public record OsuUser
     public bool IsBot { get; init; }
 
     [JsonProperty("username")]
-    public string Username { get; init; } = null!;
+    public required string Username { get; init; }
+
+    [JsonProperty("country_code")]
+    public required string CountryCode { get; init; }
 
     [JsonProperty("groups")]
-    public OsuUserGroup[]? Groups { get; set; } = Array.Empty<OsuUserGroup>();
+    public OsuUserGroup[]? Groups { get; set; }
+
+    [JsonProperty("avatar_url")]
+    public required string AvatarUrl { get; init; }
+
+    [JsonProperty("cover")]
+    public required UserCover Cover { get; init; }
+
+    [JsonProperty("follower_count")]
+    public uint FollowerCount { get; init; }
+
+    [JsonProperty("mapping_follower_count")]
+    public uint MappingFollowerCount { get; init; }
 
     [JsonProperty("graveyard_beatmapset_count")]
     public uint GraveyardBeatmapsetCount { get; init; }
@@ -36,14 +51,29 @@ public record OsuUser
     [JsonProperty("ranked_beatmapset_count")]
     public uint RankedBeatmapsetCount { get; init; }
 
+    [JsonProperty("kudosu")]
+    public required UserKudosu Kudosu { get; init; }
+
     public OsuUserGroup[] GetGroups()
     {
-        return Groups ?? Array.Empty<OsuUserGroup>();
+        return Groups ?? [];
+    }
+
+    public sealed record UserCover
+    {
+        [JsonProperty("url")]
+        public required string Url { get; init; }
+    }
+
+    public sealed record UserKudosu
+    {
+        [JsonProperty("total")]
+        public uint Total { get; init; }
     }
 }
 
 public sealed record OsuUserExtended : OsuUser
 {
     [JsonProperty("discord")]
-    public string DiscordUsername { get; init; } = null!;
+    public required string DiscordUsername { get; init; }
 }

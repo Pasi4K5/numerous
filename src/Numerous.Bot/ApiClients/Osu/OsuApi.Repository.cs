@@ -16,4 +16,22 @@ public partial class OsuApi
     {
         return await RequestRefAsync<OsuUserExtended>($"users/{user}");
     }
+
+    public async Task<BeatmapsetExtended[]?> GetUserBeatmapsetsAsync(ulong userId, BeatmapType type)
+    {
+        var typeStr = type switch
+        {
+            BeatmapType.Favourite => "favourite",
+            BeatmapType.Graveyard => "graveyard",
+            BeatmapType.Guest => "guest",
+            BeatmapType.Loved => "loved",
+            BeatmapType.Nominated => "nominated",
+            BeatmapType.Pending => "pending",
+            BeatmapType.Ranked => "ranked",
+            BeatmapType.MostPlayed => throw new NotSupportedException("MostPlayed is not supported"),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+        };
+
+        return await RequestRefAsync<BeatmapsetExtended[]>($"users/{userId}/beatmapsets/{typeStr}", ("limit", "10000"));
+    }
 }
