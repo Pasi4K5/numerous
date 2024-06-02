@@ -57,7 +57,7 @@ public sealed class ConfigCommandModule : InteractionModule
     public sealed class VerifyCommandModule(IDbService db) : InteractionModule
     {
         [UsedImplicitly]
-        [SlashCommand("set_join_message_channel", "Sets the channel to send join messages to.")]
+        [SlashCommand("set_join_message_channel", "(Un-)Sets the channel to send join messages to.")]
         public async Task SetJoinMessageChannel(
             [Summary("channel", "The channel to send join messages to.")] ITextChannel? channel = null
         )
@@ -68,6 +68,25 @@ public sealed class ConfigCommandModule : InteractionModule
 
             await FollowupWithEmbedAsync(
                 $"Set join message channel to {channel?.Mention ?? "none"}.",
+                type: ResponseType.Success
+            );
+        }
+
+        [UsedImplicitly]
+        [SlashCommand("set_unverified_role", "(Un-)Sets the role which's users will be greeted as soon as the role is removed.")]
+        public async Task SetMemberRole(
+            [Summary("role", "The role which's users should be greeted as soon as the role is removed")]
+            IRole? role = null
+        )
+        {
+            await DeferAsync();
+
+            await db.GuildOptions.UpdateByIdAsync(Context.Guild.Id, x => x.UnverifiedRole, role?.Id);
+
+            await FollowupWithEmbedAsync(
+                message: role is not null
+                    ? $"Users will now be greeted as soon as the {role.Mention} role is removed from them."
+                    : "Unverified role removed. If the join message channel is set, all users will be greeted as soon as they join.",
                 type: ResponseType.Success
             );
         }

@@ -15,12 +15,46 @@ public partial class DiscordEventHandler
     [Init]
     private void Greet_Init()
     {
-        client.UserJoined += Greet;
+        client.UserJoined += async u => await GreetAsync(u);
+        client.GuildMemberUpdated += GreetAsync;
     }
 
-    private async Task Greet(SocketGuildUser user)
+    private async Task GreetAsync(Cacheable<SocketGuildUser, ulong> oldUser, SocketGuildUser newUser)
     {
-        if (user.IsBot || (await db.Users.FindByIdAsync(user.Id))?.OsuId is not null)
+        var options = await db.GuildOptions.FindOrInsertByIdAsync(newUser.Guild.Id);
+        var channelId = options.JoinMessageChannel;
+        var roleId = options.UnverifiedRole;
+
+        if (roleId is null
+            || !oldUser.HasValue
+            || oldUser.Value.Roles.All(r => r.Id != roleId)
+            || newUser.Roles.Any(r => r.Id == roleId)
+            // "1 hour" magic number could be replaced with a configurable option
+            /*|| (newUser.JoinedAt is not null && newUser.JoinedAt.Value.AddHours(1) > DateTimeOffset.UtcNow)*/)
+        {
+            return;
+        }
+
+        await GreetAsync(newUser, channelId);
+    }
+
+    private async Task GreetAsync(SocketGuildUser user)
+    {
+        var options = await db.GuildOptions.FindOrInsertByIdAsync(user.Guild.Id);
+        var channelId = options.JoinMessageChannel;
+        var roleId = options.UnverifiedRole;
+
+        if (roleId is not null)
+        {
+            return;
+        }
+
+        await GreetAsync(user, channelId);
+    }
+
+    private async Task GreetAsync(SocketGuildUser user, ulong? channelId)
+    {
+        if (user.IsBot || channelId is null)
         {
             return;
         }
@@ -33,13 +67,6 @@ public partial class DiscordEventHandler
                 $"Use {cmd} to verify your osu! account and get your roles!"
             ).WithColor(Color.Green)
             .Build();
-
-        var channelId = (await db.GuildOptions.FindOrInsertByIdAsync(user.Guild.Id)).JoinMessageChannel;
-
-        if (channelId is null)
-        {
-            return;
-        }
 
         var channel = user.Guild.GetTextChannel(channelId.Value);
 

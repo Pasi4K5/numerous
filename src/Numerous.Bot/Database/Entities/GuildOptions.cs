@@ -25,6 +25,7 @@ public sealed record GuildOptions : DbEntity<ulong>
 
     public IList<ulong> ReadOnlyChannels { get; init; } = Array.Empty<ulong>();
     public ulong? JoinMessageChannel { get; set; }
+    public ulong? UnverifiedRole { get; set; }
 
     public record struct TrackingOptions
     {
