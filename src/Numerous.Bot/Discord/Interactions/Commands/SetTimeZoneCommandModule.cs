@@ -24,7 +24,7 @@ public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
 
     private static readonly Dictionary<ulong, State> _userStates = new();
 
-    private static byte TopPage => (byte)(TimeZoneInfo.GetSystemTimeZones().Count / 25);
+    private static int TopPage => (TimeZoneInfo.GetSystemTimeZones().Count - 1) / 25;
 
     private State CurrentState => _userStates[Context.User.Id];
 
@@ -177,7 +177,7 @@ public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
 
     private record State(Func<Action<MessageProperties>, Task<IUserMessage>> ModifyOriginalResponseAsync)
     {
-        public byte Page { get; set; }
+        public int Page { get; set; }
         public string? SelectedTimeZoneId { get; set; }
     }
 }
