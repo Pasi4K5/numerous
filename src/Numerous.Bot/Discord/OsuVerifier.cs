@@ -62,11 +62,6 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         return dbUser.OsuId is not null;
     }
 
-    public async Task<ulong?> GetOsuIdAsync(IUser discordUser)
-    {
-        return (await db.Users.FindOrInsertByIdAsync(discordUser.Id)).OsuId;
-    }
-
     public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
     {
         var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
