@@ -62,7 +62,7 @@ public partial class DiscordEventHandler
         var cmd = await cm.GetCommandMentionAsync<VerifyCommandModule>(nameof(VerifyCommandModule.Verify), user.Guild);
 
         var embed = new EmbedBuilder()
-            .WithTitle("Welcome to Numerus!")
+            .WithTitle($"Welcome to {user.Guild.Name}!")
             .WithDescription(
                 $"Use {cmd} to verify your osu! account and get your roles!"
             ).WithColor(Color.Green)
