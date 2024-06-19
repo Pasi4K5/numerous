@@ -193,16 +193,20 @@ public sealed class MapperCommandModule(IDbService db, OsuApi osu) : Interaction
             });
         }
 
-        await FollowupAsync(embed: new EmbedBuilder()
-            .WithTitle("Mapper Info")
-            .WithDescription(
-                $"# [:flag_{osuUser.CountryCode.ToLower()}:](https://osu.ppy.sh/rankings/osu/performance?country={osuUser.CountryCode}) "
-                + $"[{osuUser.Username}](https://osu.ppy.sh/u/{osuUser.Id})")
-            .WithFields(fields)
-            .WithThumbnailUrl(osuUser.AvatarUrl)
-            .WithImageUrl(osuUser.Cover.Url)
-            .WithColor(new(0x66ccff))
-            .Build()
+        await FollowupAsync(
+            embed: new EmbedBuilder()
+                .WithTitle("Mapper Info")
+                .WithDescription(
+                    $"# [:flag_{osuUser.CountryCode.ToLower()}:](https://osu.ppy.sh/rankings/osu/performance?country={osuUser.CountryCode}) "
+                    + $"[{osuUser.Username}](https://osu.ppy.sh/u/{osuUser.Id})")
+                .WithFields(fields)
+                .WithThumbnailUrl(osuUser.AvatarUrl)
+                .WithImageUrl(osuUser.Cover.Url)
+                .WithColor(new(0x66ccff))
+                .Build(),
+            components: new ComponentBuilder()
+                .WithButton("osu! profile", url: $"https://osu.ppy.sh/u/{osuUser.Id}", style: ButtonStyle.Link)
+                .Build()
         );
     }
 }
