@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
-using NsfwSpyNS;
 using Numerous.Bot.Configuration;
 using Numerous.Common.DependencyInjection;
 using Numerous.Web.Auth;
@@ -97,7 +96,6 @@ try
     services.AddSingleton<IConfigService>(cfgService);
     services.AddSingleton<InteractionService>();
     services.AddScheduler();
-    services.AddSingleton<INsfwSpy, NsfwSpy>();
     services.AddControllers();
     services.AddHttpClient();
     services.AddHttpContextAccessor();
