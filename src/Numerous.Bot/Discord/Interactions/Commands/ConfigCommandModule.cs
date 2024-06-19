@@ -80,15 +80,17 @@ public sealed class ConfigCommandModule : InteractionModule
                 x => x.JoinMessage, joinMessage
             );
 
+            var argsProvided = channel is not null && (title is not null || description is not null);
+
             await FollowupWithEmbedAsync(
-                message: channel is not null
-                    ? $"Set join message channel to {channel.Mention}.\n"
+                message: argsProvided
+                    ? $"Set join message channel to {channel!.Mention}.\n"
                       + $"Here is a preview of the message:"
                     : "Removed join message channel.",
                 type: ResponseType.Success
             );
 
-            if (channel is not null)
+            if (argsProvided)
             {
                 await eh.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
             }
