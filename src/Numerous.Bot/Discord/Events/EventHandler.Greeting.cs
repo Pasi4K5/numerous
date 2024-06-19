@@ -5,7 +5,7 @@
 
 using Discord;
 using Discord.WebSocket;
-using Numerous.Bot.Discord.Interactions.Commands;
+using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Util;
 
 namespace Numerous.Bot.Discord.Events;
@@ -22,7 +22,7 @@ public partial class DiscordEventHandler
     private async Task GreetAsync(Cacheable<SocketGuildUser, ulong> oldUser, SocketGuildUser newUser)
     {
         var options = await db.GuildOptions.FindOrInsertByIdAsync(newUser.Guild.Id);
-        var channelId = options.JoinMessageChannel;
+        var joinMsg = options.JoinMessage;
         var roleId = options.UnverifiedRole;
 
         if (roleId is null
@@ -35,13 +35,13 @@ public partial class DiscordEventHandler
             return;
         }
 
-        await GreetAsync(newUser, channelId);
+        await GreetAsync(newUser, joinMsg);
     }
 
     private async Task GreetAsync(SocketGuildUser user)
     {
         var options = await db.GuildOptions.FindOrInsertByIdAsync(user.Guild.Id);
-        var channelId = options.JoinMessageChannel;
+        var joinMsg = options.JoinMessage;
         var roleId = options.UnverifiedRole;
 
         if (roleId is not null)
@@ -49,26 +49,22 @@ public partial class DiscordEventHandler
             return;
         }
 
-        await GreetAsync(user, channelId);
+        await GreetAsync(user, joinMsg);
     }
 
-    private async Task GreetAsync(SocketGuildUser user, ulong? channelId)
+    public async Task GreetAsync(SocketGuildUser user, GuildOptions.DbJoinMessage? joinMsg, IMessageChannel? ch = null)
     {
-        if (user.IsBot || channelId is null)
+        if (user.IsBot || joinMsg is null)
         {
             return;
         }
 
-        var cmd = await cm.GetCommandMentionAsync<VerifyCommandModule>(nameof(VerifyCommandModule.Verify), user.Guild);
-
         var embed = new EmbedBuilder()
-            .WithTitle($"Welcome to {user.Guild.Name}!")
-            .WithDescription(
-                $"Use {cmd} to verify your osu! account and get your roles!"
-            ).WithColor(Color.Green)
+            .WithTitle(joinMsg.Title)
+            .WithDescription(joinMsg.Description).WithColor(Color.Green)
             .Build();
 
-        var channel = user.Guild.GetTextChannel(channelId.Value);
+        var channel = ch ?? user.Guild.GetTextChannel(joinMsg.ChannelId);
 
         await channel.SendMessageAsync(user.Mention, embed: embed);
     }

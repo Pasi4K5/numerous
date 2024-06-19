@@ -8,6 +8,8 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.Database;
+using Numerous.Bot.Database.Entities;
+using Numerous.Bot.Discord.Events;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
@@ -54,22 +56,42 @@ public sealed class ConfigCommandModule : InteractionModule
     }
 
     [Group("verify", "Verification configuration commands")]
-    public sealed class VerifyCommandModule(IDbService db) : InteractionModule
+    public sealed class VerifyCommandModule(IDbService db, DiscordEventHandler eh) : InteractionModule
     {
         [UsedImplicitly]
-        [SlashCommand("set_join_message_channel", "(Un-)Sets the channel to send join messages to.")]
+        [SlashCommand("set_join_message", "(Un-)Sets the channel and message to send to users as soon as they join.")]
         public async Task SetJoinMessageChannel(
-            [Summary("channel", "The channel to send join messages to.")] ITextChannel? channel = null
+            [Summary("channel", "The channel to send join messages to.")]
+            ITextChannel? channel = null,
+            [Summary("title", "The title of the join message.")]
+            string? title = null,
+            [Summary("description", "The description of the join message.")]
+            string? description = null
         )
         {
             await DeferAsync();
 
-            await db.GuildOptions.UpdateByIdAsync(Context.Guild.Id, x => x.JoinMessageChannel, channel?.Id);
+            var joinMessage = channel is not null
+                ? new GuildOptions.DbJoinMessage(channel.Id, title, description)
+                : null;
+
+            await db.GuildOptions.UpdateByIdAsync(
+                Context.Guild.Id,
+                x => x.JoinMessage, joinMessage
+            );
 
             await FollowupWithEmbedAsync(
-                $"Set join message channel to {channel?.Mention ?? "none"}.",
+                message: channel is not null
+                    ? $"Set join message channel to {channel.Mention}.\n"
+                      + $"Here is a preview of the message:"
+                    : "Removed join message channel.",
                 type: ResponseType.Success
             );
+
+            if (channel is not null)
+            {
+                await eh.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
+            }
         }
 
         [UsedImplicitly]
@@ -121,93 +143,6 @@ public sealed class ConfigCommandModule : InteractionModule
 
             await FollowupWithEmbedAsync(
                 "Removed deleted messages channel.",
-                type: ResponseType.Success
-            );
-        }
-    }
-
-    [Group("numod", "NuMod configuration commands")]
-    public sealed class NuModCommandModule(IDbService db) : InteractionModule
-    {
-        [UsedImplicitly]
-        [SlashCommand("setenabled", "Enables or disables NuMod.")]
-        public async Task SetEnabled(
-            [Summary("enabled", "Whether to enable or disable NuMod.")] bool enabled
-        )
-        {
-            await DeferAsync();
-
-            await db.GuildOptions.SetNuModEnabled(Context.Guild.Id, enabled);
-
-            await FollowupWithEmbedAsync(
-                "NuMod",
-                $"NuMod is now {(enabled ? "enabled" : "disabled")}.",
-                type: ResponseType.Success
-            );
-        }
-
-        [UsedImplicitly]
-        [SlashCommand("setchannel", "Sets the channel for NuMod reports.")]
-        public async Task SetChannel(
-            [Summary("channel", "The channel to log NuMod actions to.")] ITextChannel channel
-        )
-        {
-            await DeferAsync();
-
-            await db.GuildOptions.SetNuModChannel(Context.Guild.Id, channel.Id);
-
-            await FollowupWithEmbedAsync(
-                "NuMod",
-                $"Set NuMod channel to {channel.Mention}.",
-                type: ResponseType.Success
-            );
-        }
-
-        [UsedImplicitly]
-        [SlashCommand("unsetchannel", "Unsets the channel for NuMod reports.")]
-        public async Task RemoveChannel()
-        {
-            await DeferAsync();
-
-            await db.GuildOptions.SetNuModChannel(Context.Guild.Id, null);
-
-            await FollowupWithEmbedAsync(
-                "NuMod",
-                "Removed NuMod channel.",
-                type: ResponseType.Success
-            );
-        }
-
-        [UsedImplicitly]
-        [SlashCommand("adminsbypass", "Enables or disables admins bypassing NuMod.")]
-        public async Task SetAdminsBypass(
-            [Summary("enabled", "Whether admins should bypass NuMod.")] bool enabled
-        )
-        {
-            await DeferAsync();
-
-            await db.GuildOptions.SetAdminsBypassNuMod(Context.Guild.Id, enabled);
-
-            await FollowupWithEmbedAsync(
-                "NuMod",
-                $"Admins can now {(enabled ? "bypass" : "not bypass")} NuMod.",
-                type: ResponseType.Success
-            );
-        }
-
-        [UsedImplicitly]
-        [SlashCommand("set_nsfw_threshold", "Sets the NSFW threshold for NuMod (in percent).")]
-        public async Task SetNsfwThreshold(
-            [Summary("threshold", "The NSFW threshold for NuMod (in percent).")] int threshold
-        )
-        {
-            await DeferAsync();
-
-            await db.GuildOptions.UpdateByIdAsync(Context.Guild.Id, x => x.NuModNsfwThreshold, threshold / 100f);
-
-            await FollowupWithEmbedAsync(
-                "NuMod",
-                $"Set NSFW threshold to {threshold}%.",
                 type: ResponseType.Success
             );
         }

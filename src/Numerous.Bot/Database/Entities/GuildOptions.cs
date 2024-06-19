@@ -23,7 +23,7 @@ public sealed record GuildOptions : DbEntity<ulong>
     public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();
 
     public IList<ulong> ReadOnlyChannels { get; init; } = Array.Empty<ulong>();
-    public ulong? JoinMessageChannel { get; set; }
+    public DbJoinMessage? JoinMessage { get; set; }
     public ulong? UnverifiedRole { get; set; }
 
     public record struct TrackingOptions
@@ -37,4 +37,6 @@ public sealed record GuildOptions : DbEntity<ulong>
         public OsuUserGroup Group { get; init; }
         public ulong RoleId { get; init; }
     }
+
+    public sealed record DbJoinMessage(ulong ChannelId, string? Title, string? Description);
 }
