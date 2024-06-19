@@ -73,13 +73,4 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
             cancellationToken: cancellationToken
         );
     }
-
-    public async Task<ulong[]> GetMapfeedChannelsAsync(CancellationToken cancellationToken = default)
-    {
-        var options = await Collection
-            .Find(x => x.MapfeedChannel != null)
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        return options.Select(x => x.MapfeedChannel!.Value).ToArray();
-    }
 }
