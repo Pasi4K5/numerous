@@ -13,7 +13,6 @@ public interface IGuildOptionsRepository : IRepository<GuildOptions, ulong>
     Task<bool> ToggleReadOnlyAsync(ulong id, ulong channelId, CancellationToken cancellationToken = default);
     Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default);
     Task SetDeletedMessagesChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
-    Task<ulong[]> GetMapfeedChannelsAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionName)
@@ -73,5 +72,14 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
             Builders<GuildOptions>.Update.Set(x => x.AdminsBypassNuMod, enabled),
             cancellationToken: cancellationToken
         );
+    }
+
+    public async Task<ulong[]> GetMapfeedChannelsAsync(CancellationToken cancellationToken = default)
+    {
+        var options = await Collection
+            .Find(x => x.MapfeedChannel != null)
+            .ToListAsync(cancellationToken: cancellationToken);
+
+        return options.Select(x => x.MapfeedChannel!.Value).ToArray();
     }
 }
