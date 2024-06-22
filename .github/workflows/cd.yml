@@ -16,6 +16,8 @@ jobs:
       run: dotnet publish ./src/Numerous.Web/Numerous.Web.csproj -c Release --os linux -o ./dist
     - name: Deploy
       run: >
+        echo "Restarting service $SERVICE_NAME..." &&
         systemctl stop $SERVICE_NAME &&
+        echo "Moving files to $DEPLOYMENT_PATH..." &&
         mv -f ./dist/* $DEPLOYMENT_PATH &&
         systemctl start $SERVICE_NAME
