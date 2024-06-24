@@ -19,5 +19,5 @@ jobs:
         systemctl stop $SERVICE_NAME &&
         cd ./dist/ &&
         echo */ | sed -r -e "s|^|$DEPLOYMENT_PATH/|" -e "s|/ |/ $DEPLOYMENT_PATH/|g" | xargs rm -r &&
-        mv -f ./dist/* $DEPLOYMENT_PATH &&
+        mv -f ./* $DEPLOYMENT_PATH &&
         systemctl start $SERVICE_NAME
