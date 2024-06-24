@@ -12,7 +12,6 @@ public interface IUserRepository : IRepository<DbUser, ulong>
 {
     Task SetTimezoneAsync(ulong id, TimeZoneInfo? timeZone, CancellationToken cancellationToken = default);
     Task SetVerifiedAsync(ulong id, uint osuUserId, CancellationToken cancellationToken = default);
-    Task<List<DbUser>> GetVerifiedUsersAsync(CancellationToken ct = default);
 }
 
 public sealed class UserRepository(IMongoDatabase db, string collectionName)
@@ -36,10 +35,5 @@ public sealed class UserRepository(IMongoDatabase db, string collectionName)
             options: new() { IsUpsert = true },
             cancellationToken: cancellationToken
         );
-    }
-
-    public async Task<List<DbUser>> GetVerifiedUsersAsync(CancellationToken ct = default)
-    {
-        return await Collection.Find(x => x.OsuId != null).ToListAsync(ct);
     }
 }

@@ -24,13 +24,6 @@ public sealed class AttachmentService(IConfigService cfgService, IFileService fi
         await response.Content.CopyToAsync(fs);
     }
 
-    public async Task<Stream> GetStreamAsync(string url)
-    {
-        var response = await _httpClient.GetAsync(url);
-
-        return await response.Content.ReadAsStreamAsync();
-    }
-
     public string GetTargetPath(ulong msgId, IAttachment attachment, int index)
     {
         var imgDirPath = Config.AttachmentDirectory;

@@ -64,13 +64,4 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
             cancellationToken: cancellationToken
         );
     }
-
-    public async Task SetAdminsBypassNuMod(ulong id, bool enabled, CancellationToken cancellationToken = default)
-    {
-        await Collection.UpdateOneAsync(
-            x => x.Id == id,
-            Builders<GuildOptions>.Update.Set(x => x.AdminsBypassNuMod, enabled),
-            cancellationToken: cancellationToken
-        );
-    }
 }
