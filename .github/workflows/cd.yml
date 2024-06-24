@@ -17,5 +17,7 @@ jobs:
     - name: Deploy
       run: >
         systemctl stop $SERVICE_NAME &&
-        rsync -a --force --delete ./dist/ $DEPLOYMENT_PATH &&
+        cd ./dist/ &&
+        echo */ | sed -r -e "s/^/$DEPLOYMENT_PATH\//" -e "s/\/ /\/ $DEPLOYMENT_PATH\//g" | xargs rm -r &&
+        mv -f ./dist/* $DEPLOYMENT_PATH &&
         systemctl start $SERVICE_NAME
