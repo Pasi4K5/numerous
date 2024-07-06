@@ -13,6 +13,9 @@ public interface IGuildOptionsRepository : IRepository<GuildOptions, ulong>
     Task<bool> ToggleReadOnlyAsync(ulong id, ulong channelId, CancellationToken cancellationToken = default);
     Task UpdateRolesAsync(ulong id, ICollection<GuildOptions.OsuRole> roles, CancellationToken cancellationToken = default);
     Task SetDeletedMessagesChannel(ulong id, ulong? channelId, CancellationToken cancellationToken = default);
+    Task AddAutoPingOptionAsync(ulong id, GuildOptions.AutoPingOption option, CancellationToken cancellationToken = default);
+    Task RemoveAutoPingOptionAsync(ulong id, ulong channel, CancellationToken cancellationToken = default);
+    Task RemoveAutoPingOptionAsync(ulong id, ulong channel, ulong tag, CancellationToken cancellationToken = default);
 }
 
 public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionName)
@@ -61,6 +64,33 @@ public sealed class GuildOptionsRepository(IMongoDatabase db, string collectionN
         await Collection.UpdateOneAsync(
             x => x.Id == id,
             Builders<GuildOptions>.Update.Set(x => x.DeletedMessagesChannel, channelId),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task AddAutoPingOptionAsync(ulong id, GuildOptions.AutoPingOption option, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.Push(x => x.AutoPingOptions, option),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task RemoveAutoPingOptionAsync(ulong id, ulong channel, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.PullFilter(x => x.AutoPingOptions, x => x.ChannelId == channel),
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public async Task RemoveAutoPingOptionAsync(ulong id, ulong channel, ulong tag, CancellationToken cancellationToken = default)
+    {
+        await Collection.UpdateOneAsync(
+            x => x.Id == id,
+            Builders<GuildOptions>.Update.PullFilter(x => x.AutoPingOptions, x => x.ChannelId == channel && x.Tag == tag),
             cancellationToken: cancellationToken
         );
     }

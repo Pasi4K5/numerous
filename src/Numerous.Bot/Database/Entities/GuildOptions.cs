@@ -19,8 +19,9 @@ public sealed record GuildOptions : DbEntity<ulong>
     public ulong? VerificationLogChannel { get; init; } = null;
     public ulong? DeletedMessagesChannel { get; init; } = null;
     public bool AdminsBypassNuMod { get; init; } = true;
+    public AutoPingOption[] AutoPingOptions { get; init; } = [];
 
-    public TrackingOptions[] PlayerTrackingOptions { get; init; } = Array.Empty<TrackingOptions>();
+    public TrackingOptions[] PlayerTrackingOptions { get; init; } = [];
 
     public IList<ulong> ReadOnlyChannels { get; init; } = Array.Empty<ulong>();
     public DbJoinMessage? JoinMessage { get; set; }
@@ -36,6 +37,13 @@ public sealed record GuildOptions : DbEntity<ulong>
     {
         public OsuUserGroup Group { get; init; }
         public ulong RoleId { get; init; }
+    }
+
+    public record struct AutoPingOption
+    {
+        public ulong ChannelId { get; init; }
+        public ulong RoleId { get; init; }
+        public ulong? Tag { get; init; }
     }
 
     public sealed record DbJoinMessage(ulong ChannelId, string? Title, string? Description);
