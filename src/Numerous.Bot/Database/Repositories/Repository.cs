@@ -50,7 +50,7 @@ public class Repository<TEntity, TId>(IMongoDatabase db, string collectionName) 
 
         var newEntity = await CreateEntityAsync(id);
 
-        Collection.InsertOneAsync(newEntity, cancellationToken: ct).Start();
+        await Collection.InsertOneAsync(newEntity, cancellationToken: ct);
 
         return newEntity;
     }
