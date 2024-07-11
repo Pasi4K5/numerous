@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord.WebSocket;
+using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.Database;
 using Numerous.Common.DependencyInjection;
@@ -16,7 +17,9 @@ public sealed partial class DiscordEventHandler(
     IConfigService cfgService,
     DiscordSocketClient client,
     IDbService db,
-    AttachmentService attachmentService
+    AttachmentService attachmentService,
+    OsuVerifier verifier,
+    OsuApi osu
 )
 {
     public void Start()

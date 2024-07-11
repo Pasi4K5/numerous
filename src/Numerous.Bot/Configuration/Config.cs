@@ -10,6 +10,8 @@ namespace Numerous.Bot.Configuration;
 [JsonObject(MemberSerialization.OptOut)]
 public record struct Config()
 {
+    public ulong OwnerDiscordId { get; init; } = 0;
+    public string Prefix { get; init; } = "\\";
     public ulong DiscordClientId { get; init; } = 0;
     public string DiscordClientSecret { get; init; } = "";
     public string BotToken { get; init; } = "";
