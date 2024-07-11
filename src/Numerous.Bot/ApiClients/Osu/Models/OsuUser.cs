@@ -22,7 +22,7 @@ public record OsuUser
     public required string CountryCode { get; init; }
 
     [JsonProperty("groups")]
-    public OsuUserGroup[]? Groups { get; set; }
+    public Group[]? Groups { get; set; }
 
     [JsonProperty("avatar_url")]
     public required string AvatarUrl { get; init; }
@@ -56,7 +56,7 @@ public record OsuUser
 
     public OsuUserGroup[] GetGroups()
     {
-        return Groups ?? [];
+        return Groups?.Select(g => (OsuUserGroup)g.Id).ToArray() ?? [];
     }
 
     public sealed record UserCover
@@ -69,6 +69,12 @@ public record OsuUser
     {
         [JsonProperty("total")]
         public uint Total { get; init; }
+    }
+
+    public sealed record Group
+    {
+        [JsonProperty("id")]
+        public uint Id { get; init; }
     }
 }
 
