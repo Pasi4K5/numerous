@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Numerous.Bot.Configuration;
-using Numerous.Bot.Database;
 using Numerous.Bot.Discord;
 using Numerous.Web.Auth;
 
@@ -60,7 +59,6 @@ public class AuthController(IConfigService cfgService) : ControllerBase
         string code,
         string state,
         [FromServices] IHttpClientFactory clientFactory,
-        [FromServices] IDbService db,
         [FromServices] DiscordSocketClient discordClient,
         [FromServices] OsuVerifier verifier,
         [FromServices] IHttpContextAccessor httpContextAccessor
@@ -101,22 +99,14 @@ public class AuthController(IConfigService cfgService) : ControllerBase
         var profileData = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync())!;
         var osuId = profileData["id"]?.Value<uint>();
 
-        if (osuId is null)
+        var discordUser = await discordClient.GetUserAsync(userId.Value);
+
+        if (osuId is null || discordUser is null)
         {
             return Unauthorized();
         }
 
-        await db.Users.SetVerifiedAsync(userId.Value, osuId.Value);
-
-        foreach (var guild in discordClient.Guilds)
-        {
-            var guildUser = guild.GetUser(userId.Value);
-
-            if (guildUser is not null)
-            {
-                await verifier.AssignRolesAsync(guildUser);
-            }
-        }
+        await verifier.VerifyAsync(discordUser, osuId.Value);
 
         return Redirect("/");
     }

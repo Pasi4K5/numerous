@@ -55,6 +55,12 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         }
     }
 
+    public async Task VerifyAsync(IUser discordUser, uint osuUserId)
+    {
+        await db.Users.SetVerifiedAsync(discordUser.Id, osuUserId);
+        await AssignRolesAsync(discordUser);
+    }
+
     public async Task<bool> UserIsVerifiedAsync(IUser user)
     {
         var dbUser = await db.Users.FindOrInsertByIdAsync(user.Id);
@@ -85,73 +91,85 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         await db.GuildOptions.UpdateRolesAsync(guild.Id, guildConfig.OsuRoles);
     }
 
-    public async Task AssignRolesAsync(IGuildUser guildUser)
+    // TODO: Refactor
+    private async Task AssignRolesAsync(IUser user)
     {
-        var osuUser = await GetOsuUserAsync(guildUser);
-        var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guildUser.GuildId);
+        var osuUser = await GetOsuUserAsync(user);
 
-        await AssignRoleAsync(OsuUserGroup.Verified, osuUser is not null);
-
-        if (osuUser is null)
+        foreach (var guild in discord.Guilds)
         {
-            return;
-        }
+            var guildUser = (IGuildUser)guild.GetUser(user.Id);
 
-        foreach (var osuRole in guildConfig.OsuRoles.Where(osuRole => osuRole.Group > 0))
-        {
-            var role = guildUser.Guild.GetRole(osuRole.RoleId);
-
-            if (osuUser.GetGroups().Contains(osuRole.Group))
+            if (guildUser is null)
             {
-                if (role is not null && !guildUser.RoleIds.Contains(osuRole.RoleId))
-                {
-                    await guildUser.AddRoleAsync(role);
-                }
+                continue;
             }
-            else if (role is not null && guildUser.RoleIds.Contains(osuRole.RoleId))
-            {
-                await guildUser.RemoveRoleAsync(role);
-            }
-        }
 
-        await Task.WhenAll(
-            AssignRoleAsync(OsuUserGroup.UnrankedMapper, osuUser.IsUnrankedMapper()),
-            AssignRoleAsync(OsuUserGroup.RankedMapper, osuUser.IsRankedMapper()),
-            AssignRoleAsync(OsuUserGroup.ProjectLoved, osuUser.IsLovedMapper())
-        );
+            var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
 
-        return;
+            await AssignRoleAsync(OsuUserGroup.Verified, osuUser is not null);
 
-        async Task AssignRoleAsync(OsuUserGroup group, bool add)
-        {
-            var roleId = guildConfig.OsuRoles.FirstOrDefault(osuRole => osuRole.Group == group).RoleId;
-
-            if (roleId == default)
+            if (osuUser is null)
             {
                 return;
             }
 
-            var role = guildUser.Guild.GetRole(roleId);
-
-            if (role is not null)
+            foreach (var osuRole in guildConfig.OsuRoles.Where(osuRole => osuRole.Group > 0))
             {
-                await (add ? AddRoleAsync(role) : RemoveRoleAsync(role));
+                var role = guildUser.Guild.GetRole(osuRole.RoleId);
+
+                if (osuUser.GetGroups().Contains(osuRole.Group))
+                {
+                    if (role is not null && !guildUser.RoleIds.Contains(osuRole.RoleId))
+                    {
+                        await guildUser.AddRoleAsync(role);
+                    }
+                }
+                else if (role is not null && guildUser.RoleIds.Contains(osuRole.RoleId))
+                {
+                    await guildUser.RemoveRoleAsync(role);
+                }
             }
-        }
 
-        async Task AddRoleAsync(IRole role)
-        {
-            if (!guildUser.RoleIds.Contains(role.Id))
+            await Task.WhenAll(
+                AssignRoleAsync(OsuUserGroup.UnrankedMapper, osuUser.IsUnrankedMapper()),
+                AssignRoleAsync(OsuUserGroup.RankedMapper, osuUser.IsRankedMapper()),
+                AssignRoleAsync(OsuUserGroup.ProjectLoved, osuUser.IsLovedMapper())
+            );
+
+            return;
+
+            async Task AssignRoleAsync(OsuUserGroup group, bool add)
             {
-                await guildUser.AddRoleAsync(role);
+                var roleId = guildConfig.OsuRoles.FirstOrDefault(osuRole => osuRole.Group == group).RoleId;
+
+                if (roleId == default)
+                {
+                    return;
+                }
+
+                var role = guildUser.Guild.GetRole(roleId);
+
+                if (role is not null)
+                {
+                    await (add ? AddRoleAsync(role) : RemoveRoleAsync(role));
+                }
             }
-        }
 
-        async Task RemoveRoleAsync(IRole role)
-        {
-            if (guildUser.RoleIds.Contains(role.Id))
+            async Task AddRoleAsync(IRole role)
             {
-                await guildUser.RemoveRoleAsync(role);
+                if (!guildUser.RoleIds.Contains(role.Id))
+                {
+                    await guildUser.AddRoleAsync(role);
+                }
+            }
+
+            async Task RemoveRoleAsync(IRole role)
+            {
+                if (guildUser.RoleIds.Contains(role.Id))
+                {
+                    await guildUser.RemoveRoleAsync(role);
+                }
             }
         }
     }

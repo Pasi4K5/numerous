@@ -14,7 +14,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands;
 public sealed class VerifyCommandModule(IConfigService cfg, IDbService db, OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
-    [SlashCommand("verify", "Verifies your osu! account.")]
+    [SlashCommand("verify", "Links your osu! account to your Discord account.")]
     public async Task Verify()
     {
         await DeferAsync();
