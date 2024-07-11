@@ -22,14 +22,16 @@ public partial class ConfigCommandModule
             [Summary("role", "The role to assign to users in the group.")] IRole role
         )
         {
+            await DeferAsync();
+
             await verifier.LinkRoleAsync(Context.Guild, group, role);
 
-            await RespondWithEmbedAsync(
-                $"Set role for group {group} to {role.Mention}.",
+            await FollowupWithEmbedAsync(
+                message: $"Set role for group {group} to {role.Mention}.",
                 type: ResponseType.Success
             );
 
-            await verifier.AssignAllRolesAsync();
+            await verifier.AssignAllRolesAsync(Context.Guild);
         }
 
         [UsedImplicitly]
@@ -45,7 +47,7 @@ public partial class ConfigCommandModule
                 type: ResponseType.Success
             );
 
-            await verifier.AssignAllRolesAsync();
+            await verifier.AssignAllRolesAsync(Context.Guild);
         }
     }
 }

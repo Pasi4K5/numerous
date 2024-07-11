@@ -29,28 +29,25 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         return Task.CompletedTask;
     }
 
-    public async Task AssignAllRolesAsync(CancellationToken ct = default)
+    public async Task AssignAllRolesAsync(SocketGuild guild, CancellationToken ct = default)
     {
-        foreach (var guild in discord.Guilds)
+        foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync(cancellationToken: ct))
         {
-            foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync(cancellationToken: ct))
+            try
             {
-                try
-                {
-                    await AssignRolesInGuildAsync(guildUser);
-                }
-                catch (Exception e)
-                {
-                    Log.Warning(e,
-                        "Failed to assign roles to user {User} in guild {Guild}",
-                        guildUser.Id, guild.Id
-                    );
-                }
+                await AssignRolesInGuildAsync(guildUser);
+            }
+            catch (Exception e)
+            {
+                Log.Warning(e,
+                    "Failed to assign roles to user {User} in guild {Guild}",
+                    guildUser.Id, guild.Id
+                );
+            }
 
-                if (await UserIsVerifiedAsync(guildUser))
-                {
-                    await Task.Delay(2000, ct);
-                }
+            if (await UserIsVerifiedAsync(guildUser))
+            {
+                await Task.Delay(2000, ct);
             }
         }
     }
@@ -68,16 +65,20 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         return dbUser.OsuId is not null;
     }
 
-    public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
+    public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole? role)
     {
         var guildConfig = await db.GuildOptions.FindOrInsertByIdAsync(guild.Id);
 
         guildConfig.OsuRoles.Remove(guildConfig.OsuRoles.FirstOrDefault(x => x.Group == group));
-        guildConfig.OsuRoles.Add(new GuildOptions.OsuRole
+
+        if (role is not null)
         {
-            Group = group,
-            RoleId = role.Id,
-        });
+            guildConfig.OsuRoles.Add(new GuildOptions.OsuRole
+            {
+                Group = group,
+                RoleId = role.Id,
+            });
+        }
 
         await db.GuildOptions.UpdateRolesAsync(guild.Id, guildConfig.OsuRoles);
     }
@@ -89,6 +90,14 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
         guildConfig.OsuRoles.Remove(guildConfig.OsuRoles.FirstOrDefault(x => x.Group == group));
 
         await db.GuildOptions.UpdateRolesAsync(guild.Id, guildConfig.OsuRoles);
+    }
+
+    private async Task AssignAllRolesAsync(CancellationToken ct = default)
+    {
+        foreach (var guild in discord.Guilds)
+        {
+            await AssignAllRolesAsync(guild, ct);
+        }
     }
 
     private async Task AssignRolesAsync(IUser user)
@@ -117,18 +126,24 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
             return;
         }
 
-        foreach (var osuRole in guildConfig.OsuRoles.Where(osuRole => osuRole.Group > 0))
+        var guildRoles = guildConfig.OsuRoles;
+
+        foreach (var osuRole in guildRoles.Where(osuRole => osuRole.Group > 0))
         {
             var role = guildUser.Guild.GetRole(osuRole.RoleId);
+            var userGroups = osuUser.GetGroups();
 
-            if (osuUser.GetGroups().Contains(osuRole.Group))
+            if (userGroups.Contains(osuRole.Group))
             {
                 if (role is not null && !guildUser.RoleIds.Contains(osuRole.RoleId))
                 {
                     await guildUser.AddRoleAsync(role);
                 }
             }
-            else if (role is not null && guildUser.RoleIds.Contains(osuRole.RoleId))
+            else if (
+                role is not null
+                && guildUser.RoleIds.Contains(osuRole.RoleId)
+                && userGroups.All(g => guildRoles.FirstOrDefault(r => r.Group == g).RoleId != role.Id))
             {
                 await guildUser.RemoveRoleAsync(role);
             }
