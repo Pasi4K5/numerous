@@ -23,4 +23,5 @@ public record struct Config()
     public ulong[] GuildIds { get; init; } = [];
     public string AttachmentDirectory { get; init; } = "./attachments/";
     public string BaseUrl { get; init; } = "https://localhost:44333";
+    public string SauceNaoApiKey { get; set; } = "";
 }

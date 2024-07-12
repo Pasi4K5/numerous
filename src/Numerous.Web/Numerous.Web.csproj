@@ -14,12 +14,8 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.2.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.4" />
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <None Remove="logs\log2024-05-03_23-27-37-812_20240503.txt" />
-	  <None Remove="logs\log2024-05-03_21-23-20-674_20240503.txt" />
-	  <None Remove="logs\log2024-05-09_23-25-59-624_20240509.txt" />
+	  <PackageReference Include="Refit.HttpClientFactory" Version="7.1.2" />
+	  <PackageReference Include="Refit.Newtonsoft.Json" Version="7.1.2" />
 	</ItemGroup>
 
 </Project>

@@ -10,12 +10,13 @@ namespace Numerous.Bot.Discord.Interactions;
 
 public abstract class InteractionModule : InteractionModuleBase<SocketInteractionContext>
 {
-    private static Color GetTypeColor(ResponseType type)
+    protected static Color GetTypeColor(ResponseType type)
     {
         return type switch
         {
             ResponseType.Info => Color.Blue,
             ResponseType.Success => Color.Green,
+            ResponseType.Special => Color.Gold,
             ResponseType.Warning => Color.Orange,
             ResponseType.Error => Color.DarkRed,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
@@ -48,6 +49,7 @@ public abstract class InteractionModule : InteractionModuleBase<SocketInteractio
     {
         Info,
         Success,
+        Special,
         Warning,
         Error,
     }

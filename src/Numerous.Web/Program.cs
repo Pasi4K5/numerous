@@ -9,10 +9,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Numerous.Bot.ApiClients.SauceNao;
 using Numerous.Bot.Configuration;
 using Numerous.Common.DependencyInjection;
 using Numerous.Web.Auth;
 using Numerous.Web.Components;
+using Refit;
 using Serilog;
 using Serilog.Exceptions;
 using DiHelper = Numerous.Web.DependencyInjection.DiHelper;
@@ -145,6 +147,14 @@ try
     services.Configure<HttpsRedirectionOptions>(opt =>
     {
         opt.HttpsPort = 443;
+    });
+    // TODO: Services only used in Numerous.Bot should be added in the Numerus.Bot project instead.
+    services.AddRefitClient<ISauceNaoApi>(new RefitSettings
+    {
+        ContentSerializer = new NewtonsoftJsonContentSerializer(),
+    }).ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri(ISauceNaoApi.BaseUrl);
     });
 
     var app = builder.Build();
