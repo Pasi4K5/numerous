@@ -7,6 +7,7 @@ using Coravel;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Numerous.Bot.Database;
 using Numerous.Bot.Database.Entities;
@@ -20,7 +21,7 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 {
     private static readonly TimeSpan _cacheInterval = TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1);
 
-    private readonly Dictionary<Guid, Timer> _timerCache = new();
+    private readonly Dictionary<ObjectId, Timer> _timerCache = new();
 
     public void StartAsync(CancellationToken ct)
     {

@@ -4,6 +4,7 @@
 
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.Database.Entities;
@@ -17,7 +18,7 @@ public interface IDbService
     IGuildOptionsRepository GuildOptions { get; }
     IDiscordMessageRepository DiscordMessages { get; }
     IUserRepository Users { get; }
-    IRepository<Reminder, Guid> Reminders { get; }
+    IRepository<Reminder, ObjectId> Reminders { get; }
 }
 
 [SingletonService<IDbService>]
@@ -28,7 +29,7 @@ public sealed class DbService : IDbService
     public IGuildOptionsRepository GuildOptions => new GuildOptionsRepository(_db, "guildOptions");
     public IDiscordMessageRepository DiscordMessages => new DiscordMessageRepository(_db, "discordMessages");
     public IUserRepository Users => new UserRepository(_db, "users");
-    public IRepository<Reminder, Guid> Reminders => new Repository<Reminder, Guid>(_db, "reminders");
+    public IRepository<Reminder, ObjectId> Reminders => new Repository<Reminder, ObjectId>(_db, "reminders");
 
     public DbService(IConfigService configManager)
     {

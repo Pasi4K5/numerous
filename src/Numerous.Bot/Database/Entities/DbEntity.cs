@@ -3,6 +3,7 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Numerous.Bot.Database.Entities;
@@ -18,7 +19,7 @@ public record DbEntity<TId> : IDbEntity<TId> where TId : struct, IEquatable<TId>
     public virtual TId Id { get; init; }
 }
 
-public record DbEntity : DbEntity<Guid>
+public record DbEntity : DbEntity<ObjectId>
 {
-    public override Guid Id { get; init; } = Guid.NewGuid();
+    public override ObjectId Id { get; init; } = ObjectId.GenerateNewId();
 }
