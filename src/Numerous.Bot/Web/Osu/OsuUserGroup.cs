@@ -6,7 +6,7 @@
 using Discord.Interactions;
 using JetBrains.Annotations;
 
-namespace Numerous.Bot.ApiClients.Osu;
+namespace Numerous.Bot.Web.Osu;
 
 public enum OsuUserGroup
 {

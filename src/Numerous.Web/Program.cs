@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Numerous.Bot.ApiClients.SauceNao;
+using Numerous.Bot.Web.SauceNao;
 using Numerous.Bot.Configuration;
 using Numerous.Common.DependencyInjection;
 using Numerous.Web.Auth;

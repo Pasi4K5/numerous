@@ -6,7 +6,7 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.ApiClients.SauceNao;
+using Numerous.Bot.Web.SauceNao;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 

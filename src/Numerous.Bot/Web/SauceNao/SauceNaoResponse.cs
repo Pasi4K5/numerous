@@ -5,7 +5,7 @@
 
 using Newtonsoft.Json;
 
-namespace Numerous.Bot.ApiClients.SauceNao;
+namespace Numerous.Bot.Web.SauceNao;
 
 public readonly record struct SauceNaoResponse
 {

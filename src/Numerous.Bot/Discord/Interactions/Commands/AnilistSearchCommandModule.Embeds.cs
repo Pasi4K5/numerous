@@ -58,12 +58,12 @@ public partial class AnilistSearchCommandModule
 
         if (media.Description is not null)
         {
-            builder.AddField("Description", AnilistSearchCommandModule.ReplaceHtml(media.Description).LimitLength(MaxFieldLength));
+            builder.AddField("Description", ReplaceHtml(media.Description).LimitLength(MaxFieldLength));
         }
 
         if (media.Format is not null)
         {
-            builder.AddField("Format", AnilistSearchCommandModule.MakeReadable(media.Format), true);
+            builder.AddField("Format", MakeReadable(media.Format), true);
         }
 
         var date = media.StartDate.ToString();
@@ -75,7 +75,7 @@ public partial class AnilistSearchCommandModule
 
         if (media.Status is not null)
         {
-            builder.AddField("Status", AnilistSearchCommandModule.ToTitleCase(media.Status), true);
+            builder.AddField("Status", ToTitleCase(media.Status), true);
         }
 
         if (media.AverageScore > 0)

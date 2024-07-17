@@ -9,8 +9,8 @@ using F23.StringSimilarity;
 using GraphQL.Client.Http;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
-using Numerous.Bot.ApiClients;
 using Numerous.Bot.Util;
+using Numerous.Bot.Web;
 using Color = Discord.Color;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
@@ -28,7 +28,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
     public async Task RespondToCommandAsync(IMessage msg)
     {
         var embed = msg.Embeds.FirstOrDefault();
-        var mediaTitle = AnilistSearchCommandModule.ExtractMediaTitle(embed?.Description);
+        var mediaTitle = ExtractMediaTitle(embed?.Description);
 
         if (mediaTitle is null)
         {
@@ -51,7 +51,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
             }
 
             var character = embed?.Author is not null
-                ? await FindCharacterAsync(AnilistSearchCommandModule.ExtractCharName(embed.Author.Value.Name), media)
+                ? await FindCharacterAsync(ExtractCharName(embed.Author.Value.Name), media)
                 : null;
 
             if (media.IsAdult == true)
@@ -120,7 +120,7 @@ public sealed partial class AnilistSearchCommandModule(AnilistClient anilist) : 
         {
             var response = await anilist.Client.SendQueryAsync<JObject>(new GraphQLHttpRequest
             {
-                Query = AnilistSearchCommandModule.CharQuery,
+                Query = CharQuery,
                 Variables = new
                 {
                     charName,

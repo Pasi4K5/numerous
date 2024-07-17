@@ -6,9 +6,9 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.ApiClients.Osu;
-using Numerous.Bot.ApiClients.Osu.Models;
 using Numerous.Bot.Database;
+using Numerous.Bot.Web.Osu.Models;
+using OsuApi = Numerous.Bot.Web.Osu.OsuApi;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 

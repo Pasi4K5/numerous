@@ -3,27 +3,20 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Numerous.Bot.ApiClients.Osu.Models;
+using Refit;
 
-namespace Numerous.Bot.ApiClients.Osu;
+namespace Numerous.Bot.Web.SauceNao;
 
-public static class Extensions
+public interface ISauceNaoApi
 {
-    public static bool IsRankedMapper(this OsuUser user)
-    {
-        return user.RankedBeatmapsetCount > 0
-               || user.GuestBeatmapsetCount > 0;
-    }
+    public const string BaseUrl = "https://saucenao.com";
 
-    public static bool IsLovedMapper(this OsuUser user)
-    {
-        return user.LovedBeatmapsetCount > 0;
-    }
-
-    public static bool IsUnrankedMapper(this OsuUser user)
-    {
-        return
-            (user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0)
-            && !user.IsRankedMapper();
-    }
+    [Post("/search.php")]
+    Task<SauceNaoResponse> SearchAsync(
+        [AliasAs("api_key")] string apiKey,
+        [AliasAs("output_type")] int outputType,
+        int db,
+        int hidden,
+        string url
+    );
 }

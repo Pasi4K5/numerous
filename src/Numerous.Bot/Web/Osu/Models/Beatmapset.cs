@@ -5,7 +5,7 @@
 
 using Newtonsoft.Json;
 
-namespace Numerous.Bot.ApiClients.Osu.Models;
+namespace Numerous.Bot.Web.Osu.Models;
 
 [JsonObject(MemberSerialization.OptIn)]
 public record Beatmapset

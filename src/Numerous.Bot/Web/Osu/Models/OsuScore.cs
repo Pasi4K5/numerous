@@ -3,20 +3,18 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Refit;
+using Newtonsoft.Json;
 
-namespace Numerous.Bot.ApiClients.SauceNao;
+namespace Numerous.Bot.Web.Osu.Models;
 
-public interface ISauceNaoApi
+public record struct OsuScore
 {
-    public const string BaseUrl = "https://saucenao.com";
+    [JsonProperty("id")]
+    public ulong Id { get; init; }
 
-    [Post("/search.php")]
-    Task<SauceNaoResponse> SearchAsync(
-        [AliasAs("api_key")] string apiKey,
-        [AliasAs("output_type")] int outputType,
-        int db,
-        int hidden,
-        string url
-    );
+    [JsonProperty("rank")]
+    public uint Rank { get; init; }
+
+    [JsonProperty("mode_int")]
+    public byte Mode { get; init; }
 }

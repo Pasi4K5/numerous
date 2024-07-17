@@ -3,18 +3,27 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
+using Numerous.Bot.Web.Osu.Models;
 
-namespace Numerous.Bot.ApiClients.Osu.Models;
+namespace Numerous.Bot.Web.Osu;
 
-public record struct OsuScore
+public static class Extensions
 {
-    [JsonProperty("id")]
-    public ulong Id { get; init; }
+    public static bool IsRankedMapper(this OsuUser user)
+    {
+        return user.RankedBeatmapsetCount > 0
+               || user.GuestBeatmapsetCount > 0;
+    }
 
-    [JsonProperty("rank")]
-    public uint Rank { get; init; }
+    public static bool IsLovedMapper(this OsuUser user)
+    {
+        return user.LovedBeatmapsetCount > 0;
+    }
 
-    [JsonProperty("mode_int")]
-    public byte Mode { get; init; }
+    public static bool IsUnrankedMapper(this OsuUser user)
+    {
+        return
+            (user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0)
+            && !user.IsRankedMapper();
+    }
 }

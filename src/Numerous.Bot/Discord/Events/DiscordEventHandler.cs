@@ -4,11 +4,11 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord.WebSocket;
-using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.Database;
 using Numerous.Common.DependencyInjection;
 using Numerous.Bot.Util;
+using OsuApi = Numerous.Bot.Web.Osu.OsuApi;
 
 namespace Numerous.Bot.Discord.Events;
 

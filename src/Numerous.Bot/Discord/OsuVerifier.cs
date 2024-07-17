@@ -7,12 +7,13 @@ using Coravel;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Bot.ApiClients.Osu;
-using Numerous.Bot.ApiClients.Osu.Models;
 using Numerous.Bot.Database;
 using Numerous.Bot.Database.Entities;
+using Numerous.Bot.Web.Osu;
+using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.DependencyInjection;
 using Serilog;
+using OsuApi = Numerous.Bot.Web.Osu.OsuApi;
 
 namespace Numerous.Bot.Discord;
 

@@ -6,7 +6,7 @@
 using Numerous.Bot.Configuration;
 using Numerous.Common.DependencyInjection;
 
-namespace Numerous.Bot.ApiClients.SauceNao;
+namespace Numerous.Bot.Web.SauceNao;
 
 public interface ISauceNaoClient
 {

@@ -5,9 +5,9 @@
 
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.ApiClients.Osu;
 using Numerous.Bot.Configuration;
 using Numerous.Bot.Database;
+using Numerous.Bot.Web.Osu;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 

@@ -3,9 +3,27 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
+using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
+using Numerous.Common.DependencyInjection;
 
-namespace Numerous.Bot.ApiClients.Osu.Models;
+namespace Numerous.Bot.Web;
 
-[JsonObject(MemberSerialization.OptIn)]
-public record struct BeatmapDifficulty;
+[SingletonService]
+public sealed class AnilistClient : IDisposable
+{
+    private const string AnilistEndpoint = "https://graphql.anilist.co";
+
+    public GraphQLHttpClient Client { get; } = new(AnilistEndpoint, new NewtonsoftJsonSerializer());
+
+    ~AnilistClient()
+    {
+        Dispose();
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Client.Dispose();
+    }
+}

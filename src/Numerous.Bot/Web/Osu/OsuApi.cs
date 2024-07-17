@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 using Numerous.Bot.Configuration;
 using Numerous.Common.DependencyInjection;
 
-namespace Numerous.Bot.ApiClients.Osu;
+namespace Numerous.Bot.Web.Osu;
 
 [SingletonService]
 public sealed partial class OsuApi(IConfigService config)
