@@ -22,36 +22,24 @@ public sealed class InteractionHandler(
     IConfigService cfgService
 ) : IHostedService
 {
+    private Config Cfg => cfgService.Get();
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var cfg = cfgService.Get();
-
-        interactions.SlashCommandExecuted += (info, _, result) =>
-        {
-            if (result is ExecuteResult exRes)
-            {
-                Log.Error(
-                    "Error executing command {CommandName}: {Error}",
-                    info.Name,
-                    exRes.Exception.ToString()
-                );
-            }
-
-            return Task.CompletedTask;
-        };
+        interactions.InteractionExecuted += HandleInteractionErrorAsync;
 
         client.Ready += async () =>
         {
             await interactions.AddModulesAsync(Assembly.GetExecutingAssembly(), services);
 
-            if (cfg.GuildMode)
+            if (Cfg.GuildMode)
             {
                 foreach (var cmd in await client.GetGlobalApplicationCommandsAsync())
                 {
                     await cmd.DeleteAsync();
                 }
 
-                foreach (var guildId in cfg.GuildIds)
+                foreach (var guildId in Cfg.GuildIds)
                 {
                     await interactions.RegisterCommandsToGuildAsync(guildId);
                 }
@@ -76,6 +64,54 @@ public sealed class InteractionHandler(
         interactions.Dispose();
 
         return Task.CompletedTask;
+    }
+
+    private async Task HandleInteractionErrorAsync(ICommandInfo cmd, IInteractionContext ctx, IResult result)
+    {
+        if (result is not ExecuteResult exRes)
+        {
+            return;
+        }
+
+        Log.Error(
+            "Error executing command {CommandName}: {Error}",
+            cmd.Name,
+            exRes.Exception.ToString()
+        );
+
+        if (result.IsSuccess || exRes.Exception is NullReferenceException)
+        {
+            // Ignore NullReferenceExceptions because they get thrown every time for some reason.
+            return;
+        }
+
+        var interaction = ctx.Interaction;
+        var errorEmbed = new EmbedBuilder()
+            .WithTitle(":warning: Error :warning:")
+            .WithDescription(
+                "An unhandled exception occurred while executing this command.\n"
+                + "This error has been reported to the developer and will be fixed as soon as possible."
+            ).WithColor(0x000)
+            .Build();
+
+        if (interaction.HasResponded)
+        {
+            await interaction.FollowupAsync(embed: errorEmbed, ephemeral: true);
+        }
+        else
+        {
+            await interaction.RespondAsync(embed: errorEmbed, ephemeral: true);
+        }
+
+        var owner = await client.Rest.GetUserAsync(Cfg.OwnerDiscordId);
+        var dm = owner.CreateDMChannelAsync();
+        await dm.Result.SendMessageAsync(
+            $":warning: An error occurred while executing command `{cmd.Name}` "
+            + $"in channel <#{interaction.ChannelId}> "
+            + $"(Guild ID: {interaction.GuildId}).\n"
+            + $"Timestamp: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n"
+            + $"Error: \n```{exRes.Exception}```"
+        );
     }
 
     private async Task OnInteractionCreatedAsync(SocketInteraction interaction)
