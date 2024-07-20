@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Numerous.Bot;
 using Numerous.Bot.Web.SauceNao;
 using Numerous.Bot.Configuration;
 using Numerous.Common.DependencyInjection;
@@ -148,14 +149,8 @@ try
     {
         opt.HttpsPort = 443;
     });
-    // TODO: Services only used in Numerous.Bot should be added in the Numerus.Bot project instead.
-    services.AddRefitClient<ISauceNaoApi>(new RefitSettings
-    {
-        ContentSerializer = new NewtonsoftJsonContentSerializer(),
-    }).ConfigureHttpClient(c =>
-    {
-        c.BaseAddress = new Uri(ISauceNaoApi.BaseUrl);
-    });
+
+    Bot.RegisterServices(services);
 
     var app = builder.Build();
 

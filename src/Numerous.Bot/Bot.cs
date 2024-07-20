@@ -3,20 +3,22 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.DependencyInjection;
+using Numerous.Bot.Web.SauceNao;
 using Refit;
 
-namespace Numerous.Bot.Web.SauceNao;
+namespace Numerous.Bot;
 
-public interface ISauceNaoApi
+public static class Bot
 {
-    internal const string BaseUrl = "https://saucenao.com";
-
-    [Post("/search.php")]
-    Task<SauceNaoResponse> SearchAsync(
-        [AliasAs("api_key")] string apiKey,
-        [AliasAs("output_type")] int outputType,
-        int db,
-        int hidden,
-        string url
-    );
+    public static void RegisterServices(IServiceCollection services)
+    {
+        services.AddRefitClient<ISauceNaoApi>(new RefitSettings
+        {
+            ContentSerializer = new NewtonsoftJsonContentSerializer(),
+        }).ConfigureHttpClient(c =>
+        {
+            c.BaseAddress = new Uri(ISauceNaoApi.BaseUrl);
+        });
+    }
 }
