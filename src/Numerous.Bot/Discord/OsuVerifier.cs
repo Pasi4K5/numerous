@@ -13,12 +13,11 @@ using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.DependencyInjection;
 using Serilog;
-using OsuApi = Numerous.Bot.Web.Osu.OsuApi;
 
 namespace Numerous.Bot.Discord;
 
 [SingletonService]
-public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbService db, OsuApi osu)
+public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbService db, IOsuApiRepository osuApi)
 {
     public Task StartAsync(CancellationToken ct)
     {
@@ -201,7 +200,7 @@ public sealed class OsuVerifier(IHost host, DiscordSocketClient discord, IDbServ
             return null;
         }
 
-        var osuUser = await osu.GetUserAsync(user.OsuId.Value.ToString());
+        var osuUser = await osuApi.GetUserByIdAsync(user.OsuId.Value);
 
         if (osuUser is null)
         {

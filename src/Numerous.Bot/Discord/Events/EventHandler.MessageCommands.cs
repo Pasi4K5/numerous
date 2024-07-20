@@ -3,8 +3,10 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Net;
 using Discord;
 using Numerous.Bot.Util;
+using Refit;
 
 namespace Numerous.Bot.Discord.Events;
 
@@ -63,20 +65,20 @@ public partial class DiscordEventHandler
                 return;
             }
 
-            var osuUser = await osu.GetUserAsync(args[1]);
+            try
+            {
+                var osuUser = await osuApi.GetUserAsync(args[1]);
 
-            if (osuUser is null)
+                await verifier.VerifyAsync(user, osuUser.Id);
+
+                await msg.ReplyAsync(
+                    $"{user.Mention} has been manually verified as *[{osuUser.Username}](https://osu.ppy.sh/users/{osuUser.Id})*."
+                );
+            }
+            catch (ApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 await msg.ReplyAsync("osu! user not found.");
-
-                return;
             }
-
-            await verifier.VerifyAsync(user, osuUser.Id);
-
-            await msg.ReplyAsync(
-                $"{user.Mention} has been manually verified as *[{osuUser.Username}](https://osu.ppy.sh/users/{osuUser.Id})*."
-            );
         }
     }
 }

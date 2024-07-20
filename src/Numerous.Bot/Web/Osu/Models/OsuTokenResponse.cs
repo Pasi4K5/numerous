@@ -3,11 +3,18 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Common.DependencyInjection;
+using Newtonsoft.Json;
 
-public enum ServiceType
+namespace Numerous.Bot.Web.Osu.Models;
+
+/// <summary>
+/// https://osu.ppy.sh/docs/index.html#client-credentials-grant
+/// </summary>
+public sealed record OsuTokenResponse
 {
-    Singleton,
-    Hosted,
-    Transient,
+    [JsonProperty("expires_in")]
+    public required int ExpiresInSeconds { get; init; }
+
+    [JsonProperty("access_token")]
+    public required string AccessToken { get; init; }
 }

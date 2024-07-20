@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.DependencyInjection;
+using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.SauceNao;
 using Refit;
 
@@ -11,14 +12,27 @@ namespace Numerous.Bot;
 
 public static class Bot
 {
-    public static void RegisterServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
-        services.AddRefitClient<ISauceNaoApi>(new RefitSettings
-        {
-            ContentSerializer = new NewtonsoftJsonContentSerializer(),
-        }).ConfigureHttpClient(c =>
-        {
-            c.BaseAddress = new Uri(ISauceNaoApi.BaseUrl);
-        });
+        // TODO: Consider switching to System.Text.Json (for everything)
+        services
+            .AddRefitClient<ISauceNaoApi>(new RefitSettings
+            {
+                ContentSerializer = new NewtonsoftJsonContentSerializer(),
+            })
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(ISauceNaoApi.BaseUrl);
+            });
+
+        services.AddRefitClient<IOsuApi>(new RefitSettings
+            {
+                ContentSerializer = new NewtonsoftJsonContentSerializer(),
+            })
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(IOsuApi.BaseUrl);
+            })
+            .AddHttpMessageHandler<OsuAuthHandler>();
     }
 }

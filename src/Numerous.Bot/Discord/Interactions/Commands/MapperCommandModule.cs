@@ -3,26 +3,28 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Net;
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Database;
+using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
-using OsuApi = Numerous.Bot.Web.Osu.OsuApi;
+using Refit;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class MapperCommandModule(IDbService db, OsuApi osu) : InteractionModule
+public sealed class MapperCommandModule(IDbService db, IOsuApiRepository osuApi) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("mapper", "Shows mapping-related information about a user")]
     public async Task MapperSlashCommand(
         [Summary("member", "The Discord user to display information about. Must be verified.")]
         IUser? discordUser = null,
-        [Summary("osu_user", "The osu! user to display information about. Can be either a username or user ID.")]
+        [Summary("osu_user", "The osu! username of the user to display information about. If left empty, it will display your own.")]
         string? osuUserStr = null)
     {
-        await Execute(discordUser, osuUserStr, false);
+        await Execute(discordUser, true, osuUserStr, false);
     }
 
     [UsedImplicitly]
@@ -39,7 +41,7 @@ public sealed class MapperCommandModule(IDbService db, OsuApi osu) : Interaction
         await Execute(msg.Author);
     }
 
-    private async Task Execute(IUser? discordUser, string? osuUserStr = null, bool ephemeral = true)
+    private async Task Execute(IUser? discordUser, bool prioritizeUsername = false, string? osuUserStr = null, bool ephemeral = true)
     {
         if (discordUser is not null && osuUserStr is not null)
         {
@@ -70,143 +72,134 @@ public sealed class MapperCommandModule(IDbService db, OsuApi osu) : Interaction
             return;
         }
 
-        var osuUser = await osu.GetUserAsync(osuUserStr);
+        try
+        {
+            var osuUser = await osuApi.GetUserAsync(osuUserStr, prioritizeUsername);
 
-        CheckUserFound:
+            var rankedMaps = await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Ranked);
+            var pendingMaps = await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Pending);
+            var graveyardMaps = await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Graveyard);
 
-        if (osuUser is null)
+            var allMaps = rankedMaps.Concat(pendingMaps).Concat(graveyardMaps).ToArray();
+
+            var blankField = new EmbedFieldBuilder
+            {
+                Name = "\u200b",
+                Value = "\u200b",
+                IsInline = true,
+            };
+
+            List<EmbedFieldBuilder> fields =
+            [
+                new()
+                {
+                    Name = ":bust_in_silhouette: Followers",
+                    Value = osuUser.FollowerCount,
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":bell: Subscribers",
+                    Value = osuUser.MappingFollowerCount,
+                    IsInline = true,
+                },
+                blankField,
+                new()
+                {
+                    Name = ":white_check_mark: Ranked",
+                    Value = osuUser.RankedBeatmapsetCount,
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":heart: Loved",
+                    Value = osuUser.LovedBeatmapsetCount,
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":busts_in_silhouette: GDs",
+                    Value = osuUser.GuestBeatmapsetCount,
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":hourglass: Pending",
+                    Value = osuUser.PendingBeatmapsetCount,
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":headstone: Graveyard",
+                    Value = osuUser.GraveyardBeatmapsetCount,
+                    IsInline = true,
+                },
+                blankField,
+                new()
+                {
+                    Name = ":arrow_forward: Playcount",
+                    Value = allMaps.Sum(m => m.PlayCount).ToString("N0"),
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":white_heart: Favourites",
+                    Value = allMaps.Sum(m => m.FavouriteCount).ToString("N0"),
+                    IsInline = true,
+                },
+                new()
+                {
+                    Name = ":thumbs_up: Kudosu",
+                    Value = osuUser.Kudosu.Total,
+                    IsInline = true,
+                },
+            ];
+
+            if (rankedMaps.Length > 0)
+            {
+                var map = rankedMaps[0];
+
+                fields.Add(new()
+                {
+                    Name = "Latest Ranked Map",
+                    Value = $"[{map.Artist} - {map.Title}](https://osu.ppy.sh/s/{map.Id})",
+                });
+            }
+
+            if (pendingMaps.Length > 0)
+            {
+                var map = pendingMaps[0];
+
+                fields.Add(new()
+                {
+                    Name = "Latest Pending Map",
+                    Value = $"[{map.Artist} - {map.Title}](https://osu.ppy.sh/s/{map.Id})",
+                });
+            }
+
+            await FollowupAsync(
+                embed: new EmbedBuilder()
+                    .WithTitle("Mapper Info")
+                    .WithDescription(
+                        $"# [:flag_{osuUser.CountryCode.ToLower()}:](https://osu.ppy.sh/rankings/osu/performance?country={osuUser.CountryCode}) "
+                        + $"[{osuUser.Username}](https://osu.ppy.sh/u/{osuUser.Id})")
+                    .WithFields(fields)
+                    .WithThumbnailUrl(osuUser.AvatarUrl)
+                    .WithImageUrl(osuUser.Cover.Url)
+                    .WithColor(new(0x66ccff))
+                    .Build(),
+                components: new ComponentBuilder()
+                    .WithButton("osu! profile", url: $"https://osu.ppy.sh/u/{osuUser.Id}", style: ButtonStyle.Link)
+                    .Build()
+            );
+        }
+        catch (ApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
         {
             await FollowupWithEmbedAsync(
                 "User not found",
                 "The specified user could not be found.",
                 ResponseType.Error
             );
-
-            return;
         }
-
-        var rankedMaps = await osu.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Ranked);
-        var pendingMaps = await osu.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Pending);
-        var graveyardMaps = await osu.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Graveyard);
-
-        if (rankedMaps is null || pendingMaps is null || graveyardMaps is null)
-        {
-            osuUser = null;
-
-            goto CheckUserFound;
-        }
-
-        var allMaps = rankedMaps.Concat(pendingMaps).Concat(graveyardMaps).ToArray();
-
-        var blankField = new EmbedFieldBuilder
-        {
-            Name = "\u200b",
-            Value = "\u200b",
-            IsInline = true,
-        };
-
-        List<EmbedFieldBuilder> fields =
-        [
-            new()
-            {
-                Name = ":bust_in_silhouette: Followers",
-                Value = osuUser.FollowerCount,
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":bell: Subscribers",
-                Value = osuUser.MappingFollowerCount,
-                IsInline = true,
-            },
-            blankField,
-            new()
-            {
-                Name = ":white_check_mark: Ranked",
-                Value = osuUser.RankedBeatmapsetCount,
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":heart: Loved",
-                Value = osuUser.LovedBeatmapsetCount,
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":busts_in_silhouette: GDs",
-                Value = osuUser.GuestBeatmapsetCount,
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":hourglass: Pending",
-                Value = osuUser.PendingBeatmapsetCount,
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":headstone: Graveyard",
-                Value = osuUser.GraveyardBeatmapsetCount,
-                IsInline = true,
-            },
-            blankField,
-            new()
-            {
-                Name = ":arrow_forward: Playcount",
-                Value = allMaps.Sum(m => m.PlayCount).ToString("N0"),
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":white_heart: Favourites",
-                Value = allMaps.Sum(m => m.FavouriteCount).ToString("N0"),
-                IsInline = true,
-            },
-            new()
-            {
-                Name = ":thumbs_up: Kudosu",
-                Value = osuUser.Kudosu.Total,
-                IsInline = true,
-            },
-        ];
-
-        if (rankedMaps.Length > 0)
-        {
-            var map = rankedMaps[0];
-
-            fields.Add(new()
-            {
-                Name = "Latest Ranked Map",
-                Value = $"[{map.Artist} - {map.Title}](https://osu.ppy.sh/s/{map.Id})",
-            });
-        }
-
-        if (pendingMaps.Length > 0)
-        {
-            var map = pendingMaps[0];
-
-            fields.Add(new()
-            {
-                Name = "Latest Pending Map",
-                Value = $"[{map.Artist} - {map.Title}](https://osu.ppy.sh/s/{map.Id})",
-            });
-        }
-
-        await FollowupAsync(
-            embed: new EmbedBuilder()
-                .WithTitle("Mapper Info")
-                .WithDescription(
-                    $"# [:flag_{osuUser.CountryCode.ToLower()}:](https://osu.ppy.sh/rankings/osu/performance?country={osuUser.CountryCode}) "
-                    + $"[{osuUser.Username}](https://osu.ppy.sh/u/{osuUser.Id})")
-                .WithFields(fields)
-                .WithThumbnailUrl(osuUser.AvatarUrl)
-                .WithImageUrl(osuUser.Cover.Url)
-                .WithColor(new(0x66ccff))
-                .Build(),
-            components: new ComponentBuilder()
-                .WithButton("osu! profile", url: $"https://osu.ppy.sh/u/{osuUser.Id}", style: ButtonStyle.Link)
-                .Build()
-        );
     }
 }

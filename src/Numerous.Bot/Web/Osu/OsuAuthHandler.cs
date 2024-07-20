@@ -3,11 +3,19 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Common.DependencyInjection;
+using System.Net.Http.Headers;
+using Numerous.Common.DependencyInjection;
 
-public enum ServiceType
+namespace Numerous.Bot.Web.Osu;
+
+[TransientService]
+public sealed class OsuAuthHandler(IOsuTokenProvider tokenProvider) : DelegatingHandler
 {
-    Singleton,
-    Hosted,
-    Transient,
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var token = await tokenProvider.GetTokenAsync();
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
 }

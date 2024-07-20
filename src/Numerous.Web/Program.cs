@@ -82,6 +82,10 @@ try
                     .Invoke(services, [services]);
 
                 break;
+            case ServiceType.Transient:
+                services.AddTransient(serviceTuple.type, serviceTuple.impl);
+
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(serviceTuple.serviceType));
         }
@@ -150,7 +154,7 @@ try
         opt.HttpsPort = 443;
     });
 
-    Bot.RegisterServices(services);
+    Bot.ConfigureServices(services);
 
     var app = builder.Build();
 

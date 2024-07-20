@@ -8,7 +8,7 @@ using Numerous.Bot.Configuration;
 using Numerous.Bot.Database;
 using Numerous.Common.DependencyInjection;
 using Numerous.Bot.Util;
-using OsuApi = Numerous.Bot.Web.Osu.OsuApi;
+using Numerous.Bot.Web.Osu;
 
 namespace Numerous.Bot.Discord.Events;
 
@@ -19,7 +19,7 @@ public sealed partial class DiscordEventHandler(
     IDbService db,
     AttachmentService attachmentService,
     OsuVerifier verifier,
-    OsuApi osu
+    IOsuApiRepository osuApi
 )
 {
     public void Start()
