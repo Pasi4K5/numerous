@@ -6,19 +6,17 @@
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Bot.Configuration;
-using Numerous.Bot.Database;
-using Numerous.Common.DependencyInjection;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
+using Numerous.Common.Services;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Services;
 
-[HostedService]
 public sealed class Startup(
     DiscordSocketClient discordClient,
     IConfigService cfgService,
-    IDbService dbService,
+    IUnitOfWorkFactory uowFactory,
     ReminderService reminderService,
     OsuVerifier verifier,
     DiscordEventHandler eventHandler
@@ -33,10 +31,20 @@ public sealed class Startup(
         await discordClient.LoginAsync(TokenType.Bot, Cfg.BotToken);
         await discordClient.StartAsync();
 
+        await using var uow = uowFactory.Create();
+
         foreach (var guild in await discordClient.Rest.GetGuildsAsync())
         {
-            await dbService.GuildOptions.FindOrInsertByIdAsync(guild.Id, ct);
+            if (!await uow.Guilds.ExistsAsync(guild.Id, ct))
+            {
+                await uow.Guilds.InsertAsync(new()
+                {
+                    Id = guild.Id,
+                }, ct);
+            }
         }
+
+        await uow.CommitAsync(ct);
 
         reminderService.StartAsync(ct);
         await verifier.StartAsync(ct);

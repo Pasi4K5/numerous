@@ -7,14 +7,14 @@ using System.Net;
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Database;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
+using Numerous.Database.Context;
 using Refit;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class MapperCommandModule(IDbService db, IOsuApiRepository osuApi) : InteractionModule
+public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuApi) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("mapper", "Shows mapping-related information about a user")]
@@ -59,7 +59,7 @@ public sealed class MapperCommandModule(IDbService db, IOsuApiRepository osuApi)
 
         await DeferAsync(ephemeral);
 
-        osuUserStr ??= (await db.Users.FindByIdAsync(discordUser.Id))?.OsuId.ToString();
+        osuUserStr ??= (await uow.OsuUsers.FindByDiscordUserIdAsync(discordUser.Id))?.Id.ToString();
 
         if (string.IsNullOrEmpty(osuUserStr))
         {
@@ -76,11 +76,18 @@ public sealed class MapperCommandModule(IDbService db, IOsuApiRepository osuApi)
         {
             var osuUser = await osuApi.GetUserAsync(osuUserStr, prioritizeUsername);
 
-            var rankedMaps = await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Ranked);
-            var pendingMaps = await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Pending);
-            var graveyardMaps = await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Graveyard);
+            var tasks = new[]
+            {
+                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Ranked),
+                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Pending),
+                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Graveyard),
+            };
 
-            var allMaps = rankedMaps.Concat(pendingMaps).Concat(graveyardMaps).ToArray();
+            var results = await Task.WhenAll(tasks);
+
+            var rankedMaps = results[0];
+            var pendingMaps = results[1];
+            var allMaps = results.SelectMany(m => m).ToArray();
 
             var blankField = new EmbedFieldBuilder
             {

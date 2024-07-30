@@ -4,19 +4,18 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord.WebSocket;
-using Numerous.Bot.Configuration;
-using Numerous.Bot.Database;
-using Numerous.Common.DependencyInjection;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
+using Numerous.Common.Services;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Events;
 
-[SingletonService]
+// TODO: This whole class fucking sucks.
 public sealed partial class DiscordEventHandler(
     IConfigService cfgService,
     DiscordSocketClient client,
-    IDbService db,
+    IUnitOfWorkFactory uowFactory,
     AttachmentService attachmentService,
     OsuVerifier verifier,
     IOsuApiRepository osuApi

@@ -10,15 +10,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Numerous.Bot;
-using Numerous.Bot.Web.SauceNao;
-using Numerous.Bot.Configuration;
-using Numerous.Common.DependencyInjection;
+using Numerous.Common.Services;
+using Numerous.Database;
 using Numerous.Web.Auth;
 using Numerous.Web.Components;
-using Refit;
 using Serilog;
 using Serilog.Exceptions;
-using DiHelper = Numerous.Web.DependencyInjection.DiHelper;
 
 const string copyrightNotice =
     """
@@ -63,34 +60,6 @@ try
 
     var services = builder.Services;
 
-    foreach (var serviceTuple in DiHelper.GetServices())
-    {
-        switch (serviceTuple.serviceType)
-        {
-            case ServiceType.Singleton:
-                services.AddSingleton(serviceTuple.type, serviceTuple.impl);
-
-                break;
-            case ServiceType.Hosted:
-                typeof(ServiceCollectionHostedServiceExtensions).GetMethods()
-                    .First(m => m is
-                        {
-                            Name: nameof(ServiceCollectionHostedServiceExtensions.AddHostedService),
-                            IsGenericMethodDefinition: true,
-                        }
-                    ).MakeGenericMethod(serviceTuple.impl)
-                    .Invoke(services, [services]);
-
-                break;
-            case ServiceType.Transient:
-                services.AddTransient(serviceTuple.type, serviceTuple.impl);
-
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(serviceTuple.serviceType));
-        }
-    }
-
     var discordClient = new DiscordSocketClient(new()
     {
         GatewayIntents = GatewayIntents.All,
@@ -101,7 +70,7 @@ try
 
     services.AddSingleton(discordClient);
     services.AddSingleton<IConfigService>(cfgService);
-    services.AddSingleton<InteractionService>();
+    services.AddSingleton(new InteractionService(discordClient));
     services.AddScheduler();
     services.AddControllers();
     services.AddHttpClient();
@@ -154,7 +123,8 @@ try
         opt.HttpsPort = 443;
     });
 
-    Bot.ConfigureServices(services);
+    DbServiceConfiguration.Configure(services);
+    BotServiceConfiguration.Configure(services);
 
     var app = builder.Build();
 

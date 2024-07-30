@@ -4,9 +4,8 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Newtonsoft.Json;
-using Numerous.Bot.Configuration;
 using Numerous.Bot.Web.Osu.Models;
-using Numerous.Common.DependencyInjection;
+using Numerous.Common.Services;
 
 namespace Numerous.Bot.Web.Osu;
 
@@ -15,8 +14,7 @@ public interface IOsuTokenProvider
     Task<string> GetTokenAsync();
 }
 
-[SingletonService<IOsuTokenProvider>]
-public class OsuTokenProvider(IConfigService cfgService, IHttpClientFactory clientFactory) : IOsuTokenProvider
+public sealed class OsuTokenProvider(IConfigService cfgService, IHttpClientFactory clientFactory) : IOsuTokenProvider
 {
     private static readonly TimeSpan _tokenExpirationBuffer = TimeSpan.FromSeconds(10);
 

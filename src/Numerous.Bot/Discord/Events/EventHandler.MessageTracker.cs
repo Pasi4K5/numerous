@@ -4,16 +4,13 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord;
-using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Util;
+using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Events;
 
 public partial class DiscordEventHandler
 {
-    public List<ulong> SuperdeletedMessages { get; } = new();
-    public object SuperdeletedMessagesLock { get; } = new();
-
     [Init]
     private void MessageTracker_Init()
     {
@@ -23,41 +20,72 @@ public partial class DiscordEventHandler
         client.MessageUpdated += (_, after, channel) => MessageTracker_UpdateAsync(after, channel);
     }
 
-    private Task MessageTracker_StoreAsync(IMessage msg)
+    private async Task MessageTracker_StoreAsync(IMessage msg)
     {
-        Task.Run(async () =>
+        if (msg.Channel is not IGuildChannel channel)
         {
-            if (msg.Channel is not IGuildChannel channel
-                || !(await db.GuildOptions.FindOrInsertByIdAsync(channel.GuildId)).TrackMessages)
+            return;
+        }
+
+        await using var uow = uowFactory.Create();
+
+        if (!(await uow.Guilds.GetAsync(channel.GuildId)).TrackMessages)
+        {
+            return;
+        }
+
+        var referenceMsg = msg.Reference?.MessageId;
+        var referenceMsgId = referenceMsg?.IsSpecified == true ? referenceMsg.Value.Value : (ulong?)null;
+
+        if (referenceMsgId is not null && await uow.DiscordMessages.FindAsync(referenceMsgId.Value) is null)
+        {
+            var refMsg = await msg.Channel.GetMessageAsync(referenceMsgId.Value);
+
+            if (refMsg is null)
             {
-                return;
+                referenceMsgId = null;
             }
-
-            var insertTask = db.DiscordMessages.InsertAsync(new DiscordMessage(msg)
+            else
             {
-                Id = msg.Id,
-                GuildId = channel.GuildId,
-            });
-
-            var imgDirPath = cfgService.Get().AttachmentDirectory;
-
-            if (!Directory.Exists(imgDirPath))
-            {
-                Directory.CreateDirectory(imgDirPath);
+                await MessageTracker_StoreAsync(refMsg);
             }
+        }
 
-            var attachments = msg.Attachments.ToList();
-
-            var storeAttachmentsTask = Task.WhenAll(attachments.Select(async attachment =>
-            {
-                var filePath = attachmentService.GetTargetPath(msg.Id, attachment, attachments.IndexOf(attachment));
-                await attachmentService.SaveAttachmentAsync(attachment.Url, filePath);
-            }));
-
-            await Task.WhenAll(insertTask, storeAttachmentsTask);
+        await uow.DiscordMessages.InsertAsync(new DiscordMessageDto
+        {
+            Id = msg.Id,
+            AuthorId = msg.Author.Id,
+            GuildId = channel.GuildId,
+            ChannelId = msg.Channel.Id,
+            ReferenceMessageId = referenceMsgId,
+            Versions =
+            [
+                new()
+                {
+                    MessageId = msg.Id,
+                    RawContent = msg.Content,
+                    CleanContent = msg.CleanContent,
+                    Timestamp = msg.Timestamp,
+                },
+            ],
         });
 
-        return Task.CompletedTask;
+        await uow.CommitAsync();
+
+        var imgDirPath = cfgService.Get().AttachmentDirectory;
+
+        if (!Directory.Exists(imgDirPath))
+        {
+            Directory.CreateDirectory(imgDirPath);
+        }
+
+        var attachments = msg.Attachments.ToList();
+
+        await Task.WhenAll(attachments.Select(async attachment =>
+        {
+            var filePath = attachmentService.GetTargetPath(msg.Id, attachment, attachments.IndexOf(attachment));
+            await attachmentService.SaveAttachmentAsync(attachment.Url, filePath);
+        }));
     }
 
     private async Task MessageTracker_DeleteAsync(ulong msgId, IMessageChannel channel)
@@ -67,69 +95,33 @@ public partial class DiscordEventHandler
             return;
         }
 
-        await db.DiscordMessages.SetDeleted(msgId);
+        await using var uow = uowFactory.Create();
 
-        lock (SuperdeletedMessagesLock)
-        {
-            if (SuperdeletedMessages.Remove(msgId))
-            {
-                return;
-            }
-        }
+        await uow.DiscordMessages.SetDeletedAsync(msgId);
 
-        if (channel is not IGuildChannel guildChannel)
-        {
-            return;
-        }
-
-        var deletedMessagesChannelId = (await db.GuildOptions.FindByIdAsync(guildChannel.GuildId))?.DeletedMessagesChannel;
-
-        if (deletedMessagesChannelId is null)
-        {
-            return;
-        }
-
-        var message = await db.DiscordMessages.FindByIdAsync(msgId);
-
-        if (message is null)
-        {
-            return;
-        }
-
-        var deletedMessagesChannel = await guildChannel.Guild.GetTextChannelAsync(deletedMessagesChannelId.Value);
-
-        if (deletedMessagesChannel is null)
-        {
-            return;
-        }
-
-        var author = await client.Rest.GetUserAsync(message.AuthorId);
-
-        var embed = new EmbedBuilder()
-            .WithAuthor("\u2800", author.GetAvatarUrl())
-            .WithDescription($"Message by {author.Mention} in <#{message.ChannelId}> was deleted.")
-            .WithFields([
-                new()
-                {
-                    Name = "Message",
-                    Value = message.CleanContents.Last(),
-                },
-            ])
-            .WithFooter($"Message ID: {msgId}")
-            .WithTimestamp(message.Timestamps.First())
-            .Build();
-
-        await deletedMessagesChannel.SendMessageAsync(embed: embed);
+        await uow.CommitAsync();
     }
 
     private async Task MessageTracker_UpdateAsync(IMessage newMsg, IMessageChannel channel)
     {
+        var now = DateTimeOffset.UtcNow;
+
         if (!await ShouldUpdateMessagesAsync(channel) || newMsg.Channel is not IGuildChannel || newMsg.Content is null)
         {
             return;
         }
 
-        await db.DiscordMessages.AddVersionAsync(newMsg.Id, newMsg.Content, newMsg.CleanContent);
+        await using var uow = uowFactory.Create();
+
+        await uow.DiscordMessageVersions.InsertAsync(new()
+        {
+            MessageId = newMsg.Id,
+            RawContent = newMsg.Content,
+            CleanContent = newMsg.CleanContent,
+            Timestamp = now,
+        });
+
+        await uow.CommitAsync();
     }
 
     private async Task<bool> ShouldUpdateMessagesAsync(IMessageChannel channel)
@@ -139,6 +131,8 @@ public partial class DiscordEventHandler
             return false;
         }
 
-        return (await db.GuildOptions.FindByIdAsync(guildChannel.GuildId))?.TrackMessages == true;
+        await using var uow = uowFactory.Create();
+
+        return (await uow.Guilds.FindAsync(guildChannel.GuildId))?.TrackMessages == true;
     }
 }

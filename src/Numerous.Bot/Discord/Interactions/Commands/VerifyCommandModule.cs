@@ -5,13 +5,13 @@
 
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Configuration;
-using Numerous.Bot.Database;
-using Numerous.Bot.Web.Osu;
+using Numerous.Common.Enums;
+using Numerous.Common.Services;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class VerifyCommandModule(IConfigService cfg, IDbService db, OsuVerifier verifier) : InteractionModule
+public sealed class VerifyCommandModule(IConfigService cfg, IUnitOfWork uow, OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("verify", "Links your osu! account to your Discord account.")]
@@ -20,12 +20,12 @@ public sealed class VerifyCommandModule(IConfigService cfg, IDbService db, OsuVe
         await DeferAsync();
 
         var config = cfg.Get();
-        var roles = (await db.GuildOptions.FindByIdAsync(Context.Guild.Id))?.OsuRoles;
-        var unrankedMapper = roles?.FirstOrDefault(x => x.Group == OsuUserGroup.UnrankedMapper).RoleId;
-        var rankedMapper = roles?.FirstOrDefault(x => x.Group == OsuUserGroup.RankedMapper).RoleId;
-        var bn = roles?.FirstOrDefault(x => x.Group == OsuUserGroup.BeatmapNominators).RoleId;
+        var roles = (await uow.GroupRoleMappings.GetByGuildAsync(Context.Guild.Id));
+        var unrankedMapper = roles.FirstOrDefault(x => x.Group == OsuUserGroup.UnrankedMapper)?.RoleId;
+        var rankedMapper = roles.FirstOrDefault(x => x.Group == OsuUserGroup.RankedMapper)?.RoleId;
+        var bn = roles.FirstOrDefault(x => x.Group == OsuUserGroup.BeatmapNominators)?.RoleId;
         var rolesExist = new[] { unrankedMapper, rankedMapper, bn }.All(x => x is not null && x.Value != default);
-        var verifiedRole = roles?.FirstOrDefault(x => x.Group == OsuUserGroup.Verified);
+        var verifiedRole = roles.FirstOrDefault(x => x.Group == OsuUserGroup.Verified)?.RoleId;
 
         var isVerified = await verifier.UserIsVerifiedAsync(Context.User);
 
@@ -33,7 +33,7 @@ public sealed class VerifyCommandModule(IConfigService cfg, IDbService db, OsuVe
             message:
             $"## Click [here]({config.BaseUrl}) to verify your osu! account!\n"
             + "If you are verified...\n"
-            + (verifiedRole is not null && verifiedRole.Value != default ? $"* you will receive the <@&{verifiedRole.Value.RoleId}> role as well as the associated badge (role icon).\n" : "")
+            + (verifiedRole is not null && verifiedRole.Value != default ? $"* you will receive the <@&{verifiedRole.Value}> role as well as the associated badge (role icon).\n" : "")
             + $"* you will automatically receive osu!-related roles{(rolesExist ? $" (like <@&{rankedMapper}>/<@&{unrankedMapper}>, <@&{bn}>, etc.)" : "")}\n"
             + "* you will be able to participate in more events and activities.\n"
             + "* you will be able to use more osu!-related features here on this Discord server.\n"

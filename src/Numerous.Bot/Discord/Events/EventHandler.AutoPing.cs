@@ -36,13 +36,12 @@ public partial class DiscordEventHandler
 
         _alreadyPinged.Add(thread.Id);
 
-        var options = await db.GuildOptions.FindOrInsertByIdAsync(thread.Guild.Id);
-        var autoPingOptions = options.AutoPingOptions
-            .Where(x => x.ChannelId == thread.ParentChannel.Id)
-            .ToArray();
+        await using var uow = uowFactory.Create();
 
-        if (autoPingOptions.Any(o => o.Tag is null)
-            || autoPingOptions.Any(o => thread.AppliedTags.Any(t => t == o.Tag)))
+        var autoPingOptions = await uow.AutoPingMappings.GetByChannelIdAsync(thread.ParentChannel.Id);
+
+        if (autoPingOptions.Any(o => o.TagId is null)
+            || autoPingOptions.Any(o => thread.AppliedTags.Any(t => t == o.TagId)))
         {
             var msg = string.Join(' ', autoPingOptions.Select(o => $"<@&{o.RoleId}>"));
             await thread.SendMessageAsync(msg);

@@ -1,7 +1,7 @@
 using Discord;
-using Numerous.Bot.Configuration;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Services;
+using Numerous.Common.Services;
 using Numerous.Tests.Stubs;
 
 namespace Numerous.Tests;

@@ -6,20 +6,19 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using MongoDB.Driver;
-using Numerous.Bot.Database;
-using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Util;
+using Numerous.Database.Context;
+using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [UsedImplicitly]
-public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attachmentService) : InteractionModule
+public sealed class UnDeleteCommandModule(IUnitOfWork uow, AttachmentService attachmentService) : InteractionModule
 {
     private const string PreviousButtonId = "cmd:undelete:previous";
     private const string NextButtonId = "cmd:undelete:next";
 
-    private static readonly Dictionary<ulong, IList<DiscordMessage>> _messageCache = new();
+    private static readonly Dictionary<ulong, List<DiscordMessageDto>> _messageCache = new();
 
     [UsedImplicitly]
     [SlashCommand("undelete", "Reveals the last deleted message in this channel.")]
@@ -29,9 +28,8 @@ public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attac
 
         var channelId = channel?.Id ?? Context.Channel.Id;
 
-        var messages = (await (await db.DiscordMessages
-                .FindManyAsync(m => m.ChannelId == channelId && m.DeletedAt != null && !m.IsHidden))
-            .ToListAsync()).OrderByDescending(m => m.DeletedAt).ToList();
+        var messages = await uow.DiscordMessages.GetOrderedDeletedMessagesWithLastVersionAsync(channelId);
+        messages.Reverse();
 
         await RemoveForbiddenMessages(messages);
 
@@ -51,11 +49,11 @@ public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attac
         await AddComponentsToMessage(followupMsg, message);
     }
 
-    private async Task AddComponentsToMessage(IUserMessage target, DiscordMessage msg)
+    private async Task AddComponentsToMessage(IUserMessage target, DiscordMessageDto msg)
     {
         var user = await Context.Client.Rest.GetUserAsync(msg.AuthorId);
 
-        var msgContent = msg.Contents.LastOrDefault();
+        var msgContent = msg.Versions.LastOrDefault()?.RawContent;
 
         var embed = new EmbedBuilder()
             .WithAuthor(user.Username, user.GetAvatarUrl())
@@ -68,11 +66,11 @@ public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attac
                     .WithValue(
                         string.IsNullOrEmpty(msgContent)
                             ? "*(No message content)*"
-                            : msgContent + "\n*(edited)*".OnlyIf(msg.Contents.Count > 1)
+                            : msgContent + "\n-# (edited)".OnlyIf(msg.Versions.Count > 1)
                     ),
                 new EmbedFieldBuilder()
                     .WithName("Sent")
-                    .WithValue($"<t:{msg.Timestamps.First().ToUnixTimeSeconds()}:R>")
+                    .WithValue($"<t:{msg.Versions.First().Timestamp.ToUnixTimeSeconds()}:R>")
                     .WithIsInline(true),
                 new EmbedFieldBuilder()
                     .WithName("Deleted")
@@ -146,11 +144,20 @@ public sealed class UnDeleteCommandModule(IDbService db, AttachmentService attac
         await RespondAsync();
     }
 
-    private async Task RemoveForbiddenMessages(IList<DiscordMessage> messages, int index = 0)
+    private async Task RemoveForbiddenMessages(List<DiscordMessageDto> messages, int index = 0)
     {
+        var bannedUserIds = new List<ulong>();
+
+        var banCollections = Context.Guild.GetBansAsync();
+
+        await foreach (var bans in banCollections)
+        {
+            bannedUserIds.AddRange(bans.Select(b => b.User.Id));
+        }
+
         for (var i = index; i <= index + 1; i++)
         {
-            while (messages.Count > i && await Context.Guild.GetBanAsync(messages[i].AuthorId) is not null)
+            while (messages.Count > i && bannedUserIds.Contains(messages[i].AuthorId))
             {
                 messages.RemoveAt(i);
             }

@@ -6,12 +6,13 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Database;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
+// TODO: Use argument with autocomplete handler instead of this abomination.
 [UsedImplicitly]
-public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
+public sealed class SetTimeZoneCommandModule(IUnitOfWork uow) : InteractionModule
 {
     private const string SelectMenuId = "cmd:settimezone:select:menu";
     private const string FirstButtonId = "cmd:settimezone:select:first";
@@ -69,7 +70,7 @@ public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
             async msg => await ModifyOriginalResponseAsync(msg)
         );
 
-        await RespondAsync("", components: Component, ephemeral: true);
+        await RespondAsync(components: Component, ephemeral: true);
     }
 
     [UsedImplicitly]
@@ -100,13 +101,6 @@ public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
 
             await UpdateSelectMenu();
         }
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(PageButtonId)]
-    public async Task Page()
-    {
-        await RespondAsync();
     }
 
     [UsedImplicitly]
@@ -152,7 +146,9 @@ public sealed class SetTimeZoneCommandModule(IDbService db) : InteractionModule
     {
         await DeferAsync(true);
 
-        await db.Users.SetTimezoneAsync(Context.User.Id, SelectedTimeZone);
+        await uow.DiscordUsers.SetTimezoneAsync(Context.User.Id, SelectedTimeZone);
+
+        await uow.CommitAsync();
 
         await CurrentState.ModifyOriginalResponseAsync(msg =>
         {

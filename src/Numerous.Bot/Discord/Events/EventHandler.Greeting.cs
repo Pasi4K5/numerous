@@ -5,8 +5,8 @@
 
 using Discord;
 using Discord.WebSocket;
-using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Util;
+using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Events;
 
@@ -21,9 +21,10 @@ public partial class DiscordEventHandler
 
     private async Task GreetAsync(Cacheable<SocketGuildUser, ulong> oldUser, SocketGuildUser newUser)
     {
-        var options = await db.GuildOptions.FindOrInsertByIdAsync(newUser.Guild.Id);
-        var joinMsg = options.JoinMessage;
-        var roleId = options.UnverifiedRole;
+        await using var uow = uowFactory.Create();
+
+        var joinMsg = await uow.JoinMessages.FindAsync(newUser.Guild.Id);
+        var roleId = (await uow.Guilds.FindAsync(newUser.Guild.Id))?.UnverifiedRole;
 
         if (roleId is null
             || !oldUser.HasValue
@@ -40,9 +41,10 @@ public partial class DiscordEventHandler
 
     private async Task GreetAsync(SocketGuildUser user)
     {
-        var options = await db.GuildOptions.FindOrInsertByIdAsync(user.Guild.Id);
-        var joinMsg = options.JoinMessage;
-        var roleId = options.UnverifiedRole;
+        await using var uow = uowFactory.Create();
+
+        var joinMsg = await uow.JoinMessages.FindAsync(user.Guild.Id);
+        var roleId = (await uow.Guilds.FindAsync(user.Guild.Id))?.UnverifiedRole;
 
         if (roleId is not null)
         {
@@ -52,7 +54,7 @@ public partial class DiscordEventHandler
         await GreetAsync(user, joinMsg);
     }
 
-    public async Task GreetAsync(SocketGuildUser user, GuildOptions.DbJoinMessage? joinMsg, IMessageChannel? ch = null)
+    public async Task GreetAsync(SocketGuildUser user, JoinMessageDto? joinMsg, IMessageChannel? ch = null)
     {
         if (user.IsBot || joinMsg is null)
         {

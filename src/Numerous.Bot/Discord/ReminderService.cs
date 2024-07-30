@@ -7,30 +7,26 @@ using Coravel;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using Numerous.Bot.Database;
-using Numerous.Bot.Database.Entities;
-using Numerous.Common.DependencyInjection;
+using Numerous.Database.Context;
+using Numerous.Database.Dtos;
 using Timer = System.Timers.Timer;
 
 namespace Numerous.Bot.Discord;
 
-[SingletonService]
-public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClient client)
+public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, DiscordSocketClient client)
 {
     private static readonly TimeSpan _cacheInterval = TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1);
 
-    private readonly Dictionary<ObjectId, Timer> _timerCache = new();
+    private readonly Dictionary<uint, Timer> _timerCache = new();
 
     public void StartAsync(CancellationToken ct)
     {
         host.Services.UseScheduler(s =>
-            s.ScheduleAsync(async () => await CacheRemindersAsync(ct)).Hourly().RunOnceAtStart().PreventOverlapping(nameof(ReminderService))
+            s.ScheduleAsync(() => CacheRemindersAsync(ct)).Hourly().RunOnceAtStart().PreventOverlapping(nameof(ReminderService))
         );
     }
 
-    public async Task AddReminderAsync(Reminder reminder, bool insertIntoDb = true, CancellationToken ct = default)
+    public async Task AddReminderAsync(ReminderDto reminder, bool insertIntoDb = true, CancellationToken ct = default)
     {
         if (reminder.Timestamp < DateTimeOffset.Now + _cacheInterval)
         {
@@ -49,11 +45,15 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 
         if (insertIntoDb)
         {
-            await db.Reminders.InsertAsync(reminder, ct);
+            await using var uow = uowFactory.Create();
+
+            await uow.Reminders.InsertAsync(reminder, ct);
+
+            await uow.CommitAsync(ct);
         }
     }
 
-    public async Task RemoveReminderAsync(Reminder reminder)
+    public async Task RemoveReminderAsync(ReminderDto reminder)
     {
         if (_timerCache.TryGetValue(reminder.Id, out var timer))
         {
@@ -61,20 +61,25 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
             timer.Dispose();
         }
 
-        await db.Reminders.DeleteByIdAsync(reminder.Id);
+        await using var uow = uowFactory.Create();
+
+        await uow.Reminders.DeleteByIdAsync(reminder.Id);
+
+        await uow.CommitAsync();
     }
 
     private async Task CacheRemindersAsync(CancellationToken ct)
     {
-        await (await db.Reminders.FindManyAsync(ct: ct)).ForEachAsync(async reminder =>
+        await using var uow = uowFactory.Create();
+
+        foreach (var reminder in await uow.Reminders.GetRemindersBeforeAsync(DateTimeOffset.UtcNow + _cacheInterval, ct))
         {
-            if (reminder.Timestamp > DateTimeOffset.Now + _cacheInterval
-                || _timerCache.ContainsKey(reminder.Id))
+            if (_timerCache.ContainsKey(reminder.Id))
             {
                 return;
             }
 
-            if (reminder.Timestamp < DateTimeOffset.Now)
+            if (reminder.Timestamp <= DateTimeOffset.Now)
             {
                 await TriggerReminderAsync(reminder, ct);
             }
@@ -82,10 +87,10 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
             {
                 await AddReminderAsync(reminder, false, ct);
             }
-        }, cancellationToken: ct);
+        }
     }
 
-    private async Task TriggerReminderAsync(Reminder reminder, CancellationToken ct)
+    private async Task TriggerReminderAsync(ReminderDto reminder, CancellationToken ct)
     {
         if (await client.GetChannelAsync(reminder.ChannelId) is not IMessageChannel channel)
         {
@@ -101,7 +106,11 @@ public sealed class ReminderService(IHost host, IDbService db, DiscordSocketClie
 
         await channel.SendMessageAsync($"<@{reminder.UserId}>", embed: embed);
 
-        await db.Reminders.DeleteByIdAsync(reminder.Id, ct);
+        await using var uow = uowFactory.Create();
+
+        await uow.Reminders.DeleteByIdAsync(reminder.Id, ct);
+
+        await uow.CommitAsync(ct);
 
         _timerCache.Remove(reminder.Id);
     }

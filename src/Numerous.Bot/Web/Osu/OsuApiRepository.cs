@@ -6,7 +6,6 @@
 using System.Diagnostics;
 using System.Net;
 using Numerous.Bot.Web.Osu.Models;
-using Numerous.Common.DependencyInjection;
 using Refit;
 
 namespace Numerous.Bot.Web.Osu;
@@ -15,11 +14,9 @@ public interface IOsuApiRepository
 {
     Task<OsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false);
     Task<OsuUserExtended> GetUserByIdAsync(uint userId);
-    Task<OsuUserExtended> GetUserByUsernameAsync(string username);
     Task<BeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, BeatmapType type);
 }
 
-[SingletonService<IOsuApiRepository>]
 public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
 {
     public async Task<OsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false)
@@ -43,11 +40,6 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return await api.GetUserAsync(userId.ToString(), "id");
     }
 
-    public async Task<OsuUserExtended> GetUserByUsernameAsync(string username)
-    {
-        return await api.GetUserAsync(username, "username");
-    }
-
     public async Task<BeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, BeatmapType type)
     {
         var typeStr = type switch
@@ -64,5 +56,10 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         };
 
         return await api.GetUserBeatmapsetsAsync(userId, typeStr, "10000");
+    }
+
+    private async Task<OsuUserExtended> GetUserByUsernameAsync(string username)
+    {
+        return await api.GetUserAsync(username, "username");
     }
 }

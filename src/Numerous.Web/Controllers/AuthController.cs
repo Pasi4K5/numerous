@@ -12,14 +12,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Numerous.Bot.Configuration;
 using Numerous.Bot.Discord;
+using Numerous.Common.Services;
 using Numerous.Web.Auth;
 
 namespace Numerous.Web.Controllers;
 
 [Route("[action]")]
-public class AuthController(IConfigService cfgService) : ControllerBase
+public sealed class AuthController(IConfigService cfgService) : ControllerBase
 {
     private static readonly Dictionary<ulong, string> _states = new();
 

@@ -6,23 +6,17 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Database;
-using Numerous.Bot.Discord.Events;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class SuperDeleteCommandModule(IDbService db, DiscordEventHandler eventHandler) : InteractionModule
+public sealed class SuperDeleteCommandModule(IUnitOfWork uow) : InteractionModule
 {
     [UsedImplicitly]
     [MessageCommand("Superdelete")]
     [DefaultMemberPermissions(GuildPermission.ManageMessages)]
     public async Task SuperDelete(IMessage msg)
     {
-        lock (eventHandler.SuperdeletedMessagesLock)
-        {
-            eventHandler.SuperdeletedMessages.Add(msg.Id);
-        }
-
         var hideTask = HideMessageAsync(msg.Id);
         var deleteTask = msg.DeleteAsync();
 
@@ -54,17 +48,12 @@ public sealed class SuperDeleteCommandModule(IDbService db, DiscordEventHandler 
 
         if (msg is not null)
         {
-            lock (eventHandler.SuperdeletedMessagesLock)
-            {
-                eventHandler.SuperdeletedMessages.Add(msgId.Value);
-            }
-
             tasks.Add(msg.DeleteAsync());
         }
 
         await Task.WhenAll(tasks);
 
-        if (msg is not null || await db.DiscordMessages.AnyAsync(m => m.Id == msgId.Value))
+        if (msg is not null || await uow.DiscordMessages.ExistsAsync(msgId.Value))
         {
             await FollowupAsync($"Message `{msgId}` fully deleted.");
         }
@@ -74,11 +63,13 @@ public sealed class SuperDeleteCommandModule(IDbService db, DiscordEventHandler 
         }
     }
 
-    private Task HideMessageAsync(ulong msgId)
+    private async Task HideMessageAsync(ulong msgId)
     {
-        return Task.WhenAll(
+        await Task.WhenAll(
             DeferAsync(true),
-            db.DiscordMessages.SetHiddenAsync(msgId)
+            uow.DiscordMessages.HideAsync(msgId)
         );
+
+        await uow.CommitAsync();
     }
 }

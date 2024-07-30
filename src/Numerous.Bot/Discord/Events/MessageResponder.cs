@@ -5,11 +5,9 @@
 
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.Discord.Events;
 
-[HostedService]
 public sealed partial class MessageResponder(DiscordSocketClient client) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)

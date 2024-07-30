@@ -9,6 +9,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Numerous.Bot\Numerous.Bot.csproj" />
 	  <ProjectReference Include="..\Numerous.Common\Numerous.Common.csproj" />
+	  <ProjectReference Include="..\Numerous.Database\Numerous.Database.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>

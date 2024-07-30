@@ -1,8 +1,8 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@using Numerous.Bot.Database
+@using Numerous.Database.Context
 @using Numerous.Web.Auth
-@inject IDbService Db
+@inject IUnitOfWork Db
 @inject NavigationManager Nav
 
 <PageTitle>Numerous Verification</PageTitle>
@@ -36,7 +36,7 @@
 
         var userId = authState.GetUserId();
 
-        if (userId is null || (await Db.Users.FindOrInsertByIdAsync(userId.Value)).OsuId is null)
+        if (userId is null || (await Db.OsuUsers.FindByDiscordUserIdAsync(userId.Value))?.Id is null)
         {
             Nav.NavigateTo("/Connect");
         }

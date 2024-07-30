@@ -4,11 +4,9 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Net.Http.Headers;
-using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.Web.Osu;
 
-[TransientService]
 public sealed class OsuAuthHandler(IOsuTokenProvider tokenProvider) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

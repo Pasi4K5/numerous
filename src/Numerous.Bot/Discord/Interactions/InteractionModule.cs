@@ -5,11 +5,32 @@
 
 using Discord;
 using Discord.Interactions;
+using Discord.Net;
 
 namespace Numerous.Bot.Discord.Interactions;
 
 public abstract class InteractionModule : InteractionModuleBase<SocketInteractionContext>
 {
+    protected override async Task RespondAsync(
+        string? text = null,
+        Embed[]? embeds = null,
+        bool isTts = false,
+        bool ephemeral = false,
+        AllowedMentions? allowedMentions = null,
+        RequestOptions? options = null,
+        MessageComponent? components = null,
+        Embed? embed = null,
+        PollProperties? poll = null)
+    {
+        try
+        {
+            await base.RespondAsync(text, embeds, isTts, ephemeral, allowedMentions, options, components, embed, poll);
+        }
+        catch (HttpException e) when (e.DiscordCode == DiscordErrorCode.CannotSendEmptyMessage)
+        {
+        }
+    }
+
     protected static Color GetTypeColor(ResponseType type)
     {
         return type switch

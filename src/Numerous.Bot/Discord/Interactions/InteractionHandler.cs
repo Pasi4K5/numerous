@@ -8,13 +8,12 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Bot.Configuration;
-using Numerous.Common.DependencyInjection;
+using Numerous.Common.Services;
+using Numerous.Common.Util;
 using Serilog;
 
 namespace Numerous.Bot.Discord.Interactions;
 
-[HostedService]
 public sealed class InteractionHandler(
     DiscordSocketClient client,
     InteractionService interactions,
@@ -68,8 +67,9 @@ public sealed class InteractionHandler(
 
     private async Task HandleInteractionErrorAsync(ICommandInfo cmd, IInteractionContext ctx, IResult result)
     {
-        if (result is not ExecuteResult exRes)
+        if (result is not ExecuteResult exRes || exRes.Exception.StackTrace?.Contains("at Discord.Interactions.CommandInfo`1.ExecuteInternalAsync") == true)
         {
+            // For some reason a NullReferenceException containing the above string is always thrown
             return;
         }
 
@@ -79,9 +79,8 @@ public sealed class InteractionHandler(
             exRes.Exception.ToString()
         );
 
-        if (result.IsSuccess || exRes.Exception is NullReferenceException)
+        if (result.IsSuccess)
         {
-            // Ignore NullReferenceExceptions because they get thrown every time for some reason.
             return;
         }
 
@@ -105,13 +104,20 @@ public sealed class InteractionHandler(
 
         var owner = await client.Rest.GetUserAsync(Cfg.OwnerDiscordId);
         var dm = owner.CreateDMChannelAsync();
-        await dm.Result.SendMessageAsync(
-            $":warning: An error occurred while executing command `{cmd.Name}` "
-            + $"in channel <#{interaction.ChannelId}> "
-            + $"(Guild ID: {interaction.GuildId}).\n"
-            + $"Timestamp: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n"
-            + $"Error: \n```{exRes.Exception}```"
-        );
+
+        var msg =
+            $":warning: Unhandled error in channel <#{interaction.ChannelId}>\n"
+            + $"User: {interaction.User.Mention}\n"
+            + $"Guild ID: `{interaction.GuildId}`\n"
+            + $"Timestamp: {DateTimeOffset.Now.ToDiscordTimestampLong()}\n"
+            + $"Error: \n```{exRes.Exception}```";
+
+        if (msg.Length > CharacterLimit.DiscordMessageDefault)
+        {
+            msg = msg[..(CharacterLimit.DiscordMessageDefault - 4)] + "…```";
+        }
+
+        await dm.Result.SendMessageAsync(msg);
     }
 
     private async Task OnInteractionCreatedAsync(SocketInteraction interaction)

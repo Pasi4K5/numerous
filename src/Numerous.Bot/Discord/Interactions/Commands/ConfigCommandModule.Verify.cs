@@ -6,22 +6,23 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Database;
-using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Discord.Events;
+using Numerous.Database.Context;
+using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
 public partial class ConfigCommandModule
 {
     [Group("verify", "Verification configuration commands")]
-    public sealed class VerifyCommandModule(IDbService db, DiscordEventHandler eh) : InteractionModule
+    public sealed class VerifyCommandModule(IUnitOfWork uow, DiscordEventHandler eh) : InteractionModule
     {
+        // TODO: Add command to remove join message
         [UsedImplicitly]
         [SlashCommand("set_join_message", "(Un-)Sets the channel and message to send to users as soon as they join.")]
         public async Task SetJoinMessageChannel(
             [Summary("channel", "The channel to send join messages to.")]
-            ITextChannel? channel = null,
+            ITextChannel channel,
             [Summary("title", "The title of the join message.")]
             string? title = null,
             [Summary("description", "The description of the join message.")]
@@ -30,29 +31,35 @@ public partial class ConfigCommandModule
         {
             await DeferAsync();
 
-            var joinMessage = channel is not null
-                ? new GuildOptions.DbJoinMessage(channel.Id, title, description)
-                : null;
+            var joinMessage = new JoinMessageDto
+            {
+                GuildId = Context.Guild.Id,
+                ChannelId = channel.Id,
+                Title = title,
+                Description = description,
+            };
 
-            await db.GuildOptions.UpdateByIdAsync(
-                Context.Guild.Id,
-                x => x.JoinMessage, joinMessage
-            );
+            await uow.Guilds.SetJoinMessageAsync(joinMessage);
 
-            var argsProvided = channel is not null && (title is not null || description is not null);
+            await uow.CommitAsync();
+
+            if (title is null && description is null)
+            {
+                await FollowupWithEmbedAsync(
+                    message: "Please provide a title and/or description for the join message embed.",
+                    type: ResponseType.Error
+                );
+
+                return;
+            }
 
             await FollowupWithEmbedAsync(
-                message: argsProvided
-                    ? $"Set join message channel to {channel!.Mention}.\n"
-                      + $"Here is a preview of the message:"
-                    : "Removed join message channel.",
+                message: $"Set join message channel to {channel.Mention}.\n"
+                         + $"Here is a preview of the message:",
                 type: ResponseType.Success
             );
 
-            if (argsProvided)
-            {
-                await eh.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
-            }
+            await eh.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
         }
 
         [UsedImplicitly]
@@ -64,7 +71,9 @@ public partial class ConfigCommandModule
         {
             await DeferAsync();
 
-            await db.GuildOptions.UpdateByIdAsync(Context.Guild.Id, x => x.UnverifiedRole, role?.Id);
+            await uow.Guilds.SetUnverifiedRoleAsync(Context.Guild.Id, role?.Id);
+
+            await uow.CommitAsync();
 
             await FollowupWithEmbedAsync(
                 message: role is not null

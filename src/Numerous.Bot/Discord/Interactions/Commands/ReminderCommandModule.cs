@@ -6,20 +6,19 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using MongoDB.Driver;
-using Numerous.Bot.Database;
-using Numerous.Bot.Database.Entities;
 using Numerous.Bot.Util;
+using Numerous.Database.Context;
+using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [UsedImplicitly]
 [Group("reminder", "Reminds you.")]
-public sealed class ReminderCommandModule(ReminderService reminderService, IDbService db) : InteractionModule
+public sealed class ReminderCommandModule(ReminderService reminderService, IUnitOfWork uow) : InteractionModule
 {
     [UsedImplicitly]
     [Group("set", "Sets a reminder.")]
-    public sealed class Set(ReminderService reminderService, IDbService db) : InteractionModule
+    public sealed class Set(ReminderService reminderService, IUnitOfWork uow) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("in", "Sets a reminder after the specified time.")]
@@ -63,9 +62,10 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
 
             await DeferAsync();
 
-            await reminderService.AddReminderAsync(new Reminder
+            await reminderService.AddReminderAsync(new ReminderDto
             {
                 UserId = Context.User.Id,
+                GuildId = Context.Guild.Id,
                 ChannelId = Context.Channel.Id,
                 Timestamp = timestamp,
                 Message = message,
@@ -104,9 +104,9 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
 
             await DeferAsync();
 
-            var timeZoneId = (await db.Users.FindOrInsertByIdAsync(Context.User.Id)).TimeZone;
+            var timeZone = (await uow.DiscordUsers.GetAsync(Context.User.Id)).TimeZone;
 
-            if (timeZoneId is null)
+            if (timeZone is null)
             {
                 await FollowupWithEmbedAsync(
                     message: "To use this command, please set your time zone with `/settimezone` first.",
@@ -118,7 +118,6 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
 
             try
             {
-                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
                 var now = Context.Interaction.CreatedAt;
 
                 var timestamp = TimeUtil.ParametersToDateTime(
@@ -136,9 +135,10 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
                     throw new ArgumentOutOfRangeException();
                 }
 
-                await reminderService.AddReminderAsync(new Reminder
+                await reminderService.AddReminderAsync(new ReminderDto
                 {
                     UserId = Context.User.Id,
+                    GuildId = Context.Guild.Id,
                     ChannelId = Context.Channel.Id,
                     Timestamp = timestamp,
                     Message = message,
@@ -185,13 +185,13 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
     {
         await DeferAsync();
 
-        var reminders = await GetOrderedRemindersByUserId();
+        var reminders = await uow.Reminders.GetOrderedRemindersAsync(Context.User.Id);
 
         var embed = new EmbedBuilder()
             .WithTitle("Your Reminders")
             .WithColor(Color.Blue);
 
-        if (reminders.Count <= 0)
+        if (reminders.Length <= 0)
         {
             await FollowupAsync(embed: embed.WithDescription("You don't have any reminders.").Build());
 
@@ -219,9 +219,9 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
     {
         await DeferAsync();
 
-        var reminders = await GetOrderedRemindersByUserId();
+        var reminders = await uow.Reminders.GetOrderedRemindersAsync(Context.User.Id);
 
-        if (index < 1 || index > reminders.Count)
+        if (index < 1 || index > reminders.Length)
         {
             await FollowupWithEmbedAsync("There is no reminder with that index.", type: ResponseType.Error);
 
@@ -242,14 +242,5 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IDbSe
                 )
                 .Build()
         );
-    }
-
-    private async Task<IList<Reminder>> GetOrderedRemindersByUserId()
-    {
-        return (await (await db.Reminders
-                    .FindManyAsync(x => x.UserId == Context.User.Id)
-                ).ToListAsync()
-            ).OrderBy(x => x.Timestamp)
-            .ToList();
     }
 }

@@ -14,10 +14,10 @@ namespace Numerous.Bot.Discord.Events;
 public partial class MessageResponder
 {
     private static readonly string[] _banPhrases =
-    {
+    [
         "chat kill {user} with hammers",
         "chat impregnate {user}",
-    };
+    ];
 
     private async Task<bool> RespondToBanMessageAsync(SocketMessage msg)
     {

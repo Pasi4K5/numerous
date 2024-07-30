@@ -6,12 +6,10 @@
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Common.DependencyInjection;
 
 namespace Numerous.Bot.Discord.Events;
 
-[HostedService]
-public class MudaeMessageHandler(DiscordSocketClient client) : IHostedService
+public sealed class MudaeMessageHandler(DiscordSocketClient client) : IHostedService
 {
     private readonly TimeSpan _timeBetweenRollGroups = TimeSpan.FromSeconds(10);
 

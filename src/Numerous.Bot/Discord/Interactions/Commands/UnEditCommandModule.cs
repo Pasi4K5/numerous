@@ -7,11 +7,11 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using JetBrains.Annotations;
-using Numerous.Bot.Database;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient client) : InteractionModule
+public sealed class UnEditCommandModule(IUnitOfWork uow, DiscordSocketClient client) : InteractionModule
 {
     [UsedImplicitly]
     [MessageCommand("Unedit")]
@@ -44,7 +44,7 @@ public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient clien
             return;
         }
 
-        var discordMessage = await db.DiscordMessages.FindByIdAsync(messageId.Value);
+        var discordMessage = await uow.DiscordMessages.FindWithVersionsInOrderAsync(messageId.Value);
 
         if (discordMessage is null || discordMessage.IsHidden)
         {
@@ -54,16 +54,17 @@ public sealed class UnEditCommandModule(IDbService db, DiscordSocketClient clien
         }
 
         var user = await client.Rest.GetUserAsync(discordMessage.AuthorId);
+        var versions = discordMessage.Versions.ToList();
 
         var embed = new EmbedBuilder()
             .WithAuthor(user.Username, user.GetAvatarUrl())
             .WithDescription($"**User ID:** {discordMessage.AuthorId}")
             .WithColor(new(0xff0000))
             .WithFields(
-                discordMessage.Contents.Zip(discordMessage.Timestamps)
-                    .Select((x, i) => new EmbedFieldBuilder()
-                        .WithName($"Version {i + 1}")
-                        .WithValue(x.First + $"\n<t:{x.Second.ToUnixTimeSeconds()}:R>"))
+                versions
+                    .Select(v => new EmbedFieldBuilder()
+                        .WithName($"Version {versions.IndexOf(v) + 1}")
+                        .WithValue(v.RawContent + '\n' + v.Timestamp.ToDiscordTimestampRel()))
             ).Build();
 
         await FollowupAsync(embed: embed);

@@ -6,11 +6,11 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Database;
+using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class ToggleReadOnlyCommandModule(IDbService db) : InteractionModule
+public sealed class ToggleReadOnlyCommandModule(IUnitOfWork uow) : InteractionModule
 {
     [UsedImplicitly]
     [DefaultMemberPermissions(GuildPermission.Administrator)]
@@ -19,7 +19,9 @@ public sealed class ToggleReadOnlyCommandModule(IDbService db) : InteractionModu
         [Summary("channel", "The channel to make read-only.")] ITextChannel channel
     )
     {
-        var isReadOnly = await db.GuildOptions.ToggleReadOnlyAsync(channel.GuildId, channel.Id);
+        var isReadOnly = await uow.MessageChannels.ToggleReadOnlyAsync(channel.GuildId, channel.Id);
+
+        await uow.CommitAsync();
 
         await RespondWithEmbedAsync(
             $"Channel {channel.Mention} is now {(isReadOnly ? "read-only" : "writable")}.",

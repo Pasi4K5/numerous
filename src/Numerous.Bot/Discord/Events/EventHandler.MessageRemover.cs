@@ -17,25 +17,20 @@ public partial class DiscordEventHandler
         client.MessageReceived += RemoveMessage;
     }
 
-    private Task RemoveMessage(SocketMessage msg)
+    private async Task RemoveMessage(SocketMessage msg)
     {
         var guild = (msg.Channel as IGuildChannel)?.Guild;
 
         if (msg.Author.IsBot || guild is null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        Task.Run(async () =>
+        await using var uow = uowFactory.Create();
+
+        if (await uow.MessageChannels.IsReadOnlyAsync(msg.Channel.Id))
         {
-            var options = await db.GuildOptions.FindByIdAsync(guild.Id);
-
-            if (options?.ReadOnlyChannels.Contains(msg.Channel.Id) == true)
-            {
-                await msg.DeleteAsync();
-            }
-        });
-
-        return Task.CompletedTask;
+            await msg.DeleteAsync();
+        }
     }
 }

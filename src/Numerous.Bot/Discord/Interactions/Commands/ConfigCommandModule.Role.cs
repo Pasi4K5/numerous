@@ -6,7 +6,7 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Web.Osu;
+using Numerous.Common.Enums;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 

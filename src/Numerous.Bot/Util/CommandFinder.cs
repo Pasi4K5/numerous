@@ -5,13 +5,11 @@
 
 using Discord.Interactions;
 using Discord.WebSocket;
-using Numerous.Bot.Configuration;
-using Numerous.Common.DependencyInjection;
+using Numerous.Common.Services;
 
 namespace Numerous.Bot.Util;
 
-[SingletonService]
-public class CommandFinder(InteractionService interactions, IConfigService cfg)
+public sealed class CommandFinder(InteractionService interactions, IConfigService cfg)
 {
     public async Task<string> GetCommandMentionAsync<TModule>(
         string methodName,
