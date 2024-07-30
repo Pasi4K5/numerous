@@ -7,3 +7,5 @@ obj/
 bin/
 dist/
 config.json
+
+**/DesignTimeNumerousDbContextFactory.cs
