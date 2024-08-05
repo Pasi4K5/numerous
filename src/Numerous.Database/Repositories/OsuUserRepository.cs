@@ -14,13 +14,29 @@ namespace Numerous.Database.Repositories;
 public interface IOsuUserRepository : IIdRepository<OsuUserDto, uint>
 {
     Task<OsuUserDto?> FindByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
+    Task<uint?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
 }
 
 public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
     : IdRepository<DbOsuUser, OsuUserDto, uint>(context, mapper), IOsuUserRepository
 {
+    public override async Task InsertAsync(OsuUserDto dto, CancellationToken ct = default)
+    {
+        await EnsureDiscordUserExistsAsync(dto.DiscordUserId, ct);
+        await base.InsertAsync(dto, ct);
+    }
+
     public async Task<OsuUserDto?> FindByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default)
     {
         return Mapper.Map<OsuUserDto>(await Set.FirstOrDefaultAsync(u => u.DiscordUserId == discordUserId, ct));
+    }
+
+    public async Task<uint?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default)
+    {
+        var result = await Set.Where(u => u.DiscordUserId == discordUserId)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(ct);
+
+        return result == default ? null : result;
     }
 }

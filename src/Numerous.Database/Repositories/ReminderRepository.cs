@@ -25,6 +25,8 @@ public sealed class ReminderRepository(NumerousDbContext context, IMapper mapper
         await EnsureDiscordUserExistsAsync(dto.UserId, ct);
         await EnsureChannelExistsAsync<DbMessageChannel>(dto.GuildId, dto.ChannelId, ct);
 
+        dto.Timestamp = dto.Timestamp.ToUniversalTime();
+
         await base.InsertAsync(dto, ct);
     }
 
