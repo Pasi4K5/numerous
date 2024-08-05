@@ -8,5 +8,5 @@ namespace Numerous.Database.Dtos;
 public sealed class GuildDto : IdDto<ulong>
 {
     public bool TrackMessages { get; set; }
-    public ulong? UnverifiedRole { get; set; }
+    public ulong? UnverifiedRoleId { get; set; }
 }

@@ -19,39 +19,35 @@ public partial class DiscordEventHandler
         client.GuildMemberUpdated += GreetAsync;
     }
 
-    private async Task GreetAsync(Cacheable<SocketGuildUser, ulong> oldUser, SocketGuildUser newUser)
-    {
-        await using var uow = uowFactory.Create();
-
-        var joinMsg = await uow.JoinMessages.FindAsync(newUser.Guild.Id);
-        var roleId = (await uow.Guilds.FindAsync(newUser.Guild.Id))?.UnverifiedRole;
-
-        if (roleId is null
-            || !oldUser.HasValue
-            || oldUser.Value.Roles.All(r => r.Id != roleId)
-            || newUser.Roles.Any(r => r.Id == roleId)
-            // "1 hour" magic number could be replaced with a configurable option
-            /*|| (newUser.JoinedAt is not null && newUser.JoinedAt.Value.AddHours(1) > DateTimeOffset.UtcNow)*/)
-        {
-            return;
-        }
-
-        await GreetAsync(newUser, joinMsg);
-    }
-
     private async Task GreetAsync(SocketGuildUser user)
     {
         await using var uow = uowFactory.Create();
 
         var joinMsg = await uow.JoinMessages.FindAsync(user.Guild.Id);
-        var roleId = (await uow.Guilds.FindAsync(user.Guild.Id))?.UnverifiedRole;
+        var roleId = (await uow.Guilds.FindAsync(user.Guild.Id))?.UnverifiedRoleId;
 
-        if (roleId is not null)
+        if (roleId is null)
         {
-            return;
+            await GreetAsync(user, joinMsg);
         }
+    }
 
-        await GreetAsync(user, joinMsg);
+    private async Task GreetAsync(Cacheable<SocketGuildUser, ulong> oldUser, SocketGuildUser newUser)
+    {
+        await using var uow = uowFactory.Create();
+
+        var joinMsg = await uow.JoinMessages.FindAsync(newUser.Guild.Id);
+        var roleId = (await uow.Guilds.FindAsync(newUser.Guild.Id))?.UnverifiedRoleId;
+
+        if (
+            roleId is not null
+            && oldUser.HasValue
+            && oldUser.Value.Roles.Any(r => r.Id == roleId)
+            && newUser.Roles.All(r => r.Id != roleId)
+        )
+        {
+            await GreetAsync(newUser, joinMsg);
+        }
     }
 
     public async Task GreetAsync(SocketGuildUser user, JoinMessageDto? joinMsg, IMessageChannel? ch = null)
