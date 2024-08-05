@@ -19,6 +19,12 @@ public interface IOsuUserRepository : IIdRepository<OsuUserDto, uint>
 public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
     : IdRepository<DbOsuUser, OsuUserDto, uint>(context, mapper), IOsuUserRepository
 {
+    public override async Task InsertAsync(OsuUserDto dto, CancellationToken ct = default)
+    {
+        await EnsureDiscordUserExistsAsync(dto.DiscordUserId!.Value, ct);
+        await base.InsertAsync(dto, ct);
+    }
+
     public async Task<OsuUserDto?> FindByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default)
     {
         return Mapper.Map<OsuUserDto>(await Set.FirstOrDefaultAsync(u => u.DiscordUserId == discordUserId, ct));
