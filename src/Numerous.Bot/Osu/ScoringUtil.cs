@@ -3,18 +3,19 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
+using osu.Game.Beatmaps;
+using osu.Game.Database;
+using osu.Game.Scoring;
 
-namespace Numerous.Bot.Web.Osu.Models;
+namespace Numerous.Bot.Osu;
 
-/// <summary>
-/// https://osu.ppy.sh/docs/index.html#client-credentials-grant
-/// </summary>
-public sealed record OsuTokenResponse
+public static class ScoringUtil
 {
-    [JsonProperty("expires_in")]
-    public required int ExpiresInSeconds { get; init; }
-
-    [JsonProperty("access_token")]
-    public required string AccessToken { get; init; }
+    public static void ToStandardisedScore(ScoreInfo score, WorkingBeatmap beatmap)
+    {
+        if (StandardisedScoreMigrationTools.ShouldMigrateToNewStandardised(score))
+        {
+            StandardisedScoreMigrationTools.UpdateFromLegacy(score, beatmap);
+        }
+    }
 }

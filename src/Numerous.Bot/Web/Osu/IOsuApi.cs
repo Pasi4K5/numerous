@@ -8,6 +8,7 @@ using Refit;
 
 namespace Numerous.Bot.Web.Osu;
 
+[Headers("x-api-version: 20240529")]
 public interface IOsuApi
 {
     internal const string BaseUrl = "https://osu.ppy.sh";
@@ -18,11 +19,33 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-user
     /// </summary>
     [Get(Api + "/users/{user}")]
-    Task<OsuUserExtended> GetUserAsync(string user, [Query] string? key = null);
+    Task<ApiOsuUserExtended> GetUserAsync(string user, [Query] string? key = null);
+
+    /// <summary>
+    /// https://osu.ppy.sh/docs/index.html#get-user-scores
+    /// </summary>
+    [Get(Api + "/users/{user}/scores/{type}")]
+    Task<ApiScore[]> GetUserScoresAsync(
+        uint user,
+        string type,
+        [Query] uint limit
+    );
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-user-beatmaps
     /// </summary>
     [Get(Api + "/users/{user}/beatmapsets/{type}")]
-    Task<BeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint user, string type, [Query] string limit);
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint user, string type, [Query] string limit);
+
+    /// <summary>
+    /// https://osu.ppy.sh/docs/index.html#get-apiv2beatmapsetsbeatmapset
+    /// </summary>
+    [Get(Api + "/beatmapsets/{beatmapsetId}")]
+    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint beatmapsetId);
+
+    /// <summary>
+    /// https://osu.ppy.sh/docs/index.html#get-beatmap
+    /// </summary>
+    [Get(Api + "/beatmaps/{beatmapId}")]
+    Task<ApiBeatmapExtended> GetBeatmapAsync(uint beatmapId);
 }

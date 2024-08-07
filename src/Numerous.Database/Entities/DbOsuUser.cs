@@ -4,12 +4,17 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
 [Table("OsuUser")]
+[Index(nameof(DiscordUserId), IsUnique = true)]
 public sealed class DbOsuUser : DbEntity<uint>
 {
-    public DbDiscordUser DiscordUser { get; set; } = null!;
-    public ulong DiscordUserId { get; set; }
+    public DbDiscordUser? DiscordUser { get; set; }
+    public ulong? DiscordUserId { get; set; }
+
+    public ICollection<DbOnlineBeatmap> OnlineBeatmaps { get; set; } = [];
+    public ICollection<DbOnlineBeatmapset> OnlineBeatmapsets { get; set; } = [];
 }

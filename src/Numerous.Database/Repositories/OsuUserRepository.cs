@@ -22,7 +22,7 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
 {
     public override async Task InsertAsync(OsuUserDto dto, CancellationToken ct = default)
     {
-        await EnsureDiscordUserExistsAsync(dto.DiscordUserId, ct);
+        await EnsureDiscordUserExistsAsync(dto.DiscordUserId!.Value, ct);
         await base.InsertAsync(dto, ct);
     }
 

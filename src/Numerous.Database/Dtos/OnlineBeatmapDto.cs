@@ -3,18 +3,13 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
+namespace Numerous.Database.Dtos;
 
-namespace Numerous.Bot.Web.Osu.Models;
-
-public record struct OsuScore
+public sealed class OnlineBeatmapDto : IdDto<uint>
 {
-    [JsonProperty("id")]
-    public ulong Id { get; init; }
+    public OnlineBeatmapsetDto OnlineBeatmapset { get; set; } = null!;
+    public uint OnlineBeatmapsetId { get; set; }
 
-    [JsonProperty("rank")]
-    public uint Rank { get; init; }
-
-    [JsonProperty("mode_int")]
-    public byte Mode { get; init; }
+    public OsuUserDto Creator { get; set; } = null!;
+    public uint CreatorId { get; set; }
 }

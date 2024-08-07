@@ -54,7 +54,7 @@ public sealed class OsuTokenProvider(IConfigService cfgService, IHttpClientFacto
         }
 
         var responseText = await response.Content.ReadAsStringAsync();
-        var responseJson = JsonConvert.DeserializeObject<OsuTokenResponse>(responseText);
+        var responseJson = JsonConvert.DeserializeObject<ApiOsuTokenResponse>(responseText);
 
         if (responseJson is null)
         {

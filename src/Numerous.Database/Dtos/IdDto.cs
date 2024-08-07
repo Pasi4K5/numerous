@@ -8,5 +8,5 @@ namespace Numerous.Database.Dtos;
 public class IdDto<TId> : IHasId<TId>
     where TId : struct
 {
-    public virtual TId Id { get; set; }
+    public virtual TId Id { get; init; }
 }

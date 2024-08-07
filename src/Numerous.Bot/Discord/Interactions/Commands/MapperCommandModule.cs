@@ -78,9 +78,9 @@ public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuAp
 
             var tasks = new[]
             {
-                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Ranked),
-                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Pending),
-                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, BeatmapType.Graveyard),
+                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Ranked),
+                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Pending),
+                osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Graveyard),
             };
 
             var results = await Task.WhenAll(tasks);

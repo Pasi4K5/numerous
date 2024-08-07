@@ -5,7 +5,7 @@
 
 namespace Numerous.Database;
 
-public interface IHasId<TId> where TId : struct
+public interface IHasId<TId>
 {
-    TId Id { get; set; }
+    TId Id { get; init; }
 }

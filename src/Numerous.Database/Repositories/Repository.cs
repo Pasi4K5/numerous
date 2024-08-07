@@ -48,6 +48,17 @@ public class Repository<TEntity, TDto>(NumerousDbContext context, IMapper mapper
         return user;
     }
 
+    protected async Task EnsureOsuUserExistsAsync(uint userId, CancellationToken ct)
+    {
+        var user = await Context.OsuUsers.FindAsync([userId], ct);
+
+        if (user is null)
+        {
+            user = new DbOsuUser { Id = userId };
+            await Context.OsuUsers.AddAsync(user, ct);
+        }
+    }
+
     protected async Task EnsureChannelExistsAsync<TChannel>(ulong guildId, ulong channelId, CancellationToken ct)
         where TChannel : DbChannel, new()
     {

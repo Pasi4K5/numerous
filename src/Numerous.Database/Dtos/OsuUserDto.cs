@@ -7,5 +7,5 @@ namespace Numerous.Database.Dtos;
 
 public sealed class OsuUserDto : IdDto<uint>
 {
-    public required ulong DiscordUserId { get; set; }
+    public ulong? DiscordUserId { get; set; }
 }

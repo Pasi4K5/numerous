@@ -17,6 +17,7 @@ public interface IIdRepository<TDto, in TId> : IRepository<TDto>
     Task<TDto?> FindAsync(TId id, CancellationToken ct = default);
     Task<TDto> GetAsync(TId id, CancellationToken ct = default);
     Task<bool> ExistsAsync(TId id, CancellationToken ct = default);
+    Task EnsureExistsAsync(TDto dto, CancellationToken ct = default);
     Task DeleteByIdAsync(TId id, CancellationToken ct = default);
 }
 
@@ -44,6 +45,16 @@ public class IdRepository<TEntity, TDto, TId>(NumerousDbContext context, IMapper
     public async Task<bool> ExistsAsync(TId id, CancellationToken ct = default)
     {
         return await Set.AnyAsync(x => x.Id.Equals(id), ct);
+    }
+
+    public virtual async Task EnsureExistsAsync(TDto dto, CancellationToken ct = default)
+    {
+        var entity = Mapper.Map<TEntity>(dto);
+
+        if (!await Set.AnyAsync(x => x.Id.Equals(entity.Id), ct))
+        {
+            await Set.AddAsync(entity, ct);
+        }
     }
 
     public async Task DeleteByIdAsync(TId id, CancellationToken ct = default)

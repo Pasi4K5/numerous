@@ -26,21 +26,21 @@ public sealed class CommandFinder(InteractionService interactions, IConfigServic
         SocketGuild guild
     ) where TModule : class
     {
-        var verifyCmd = interactions.GetSlashCommandInfo<TModule>(methodName);
+        var cmdInfo = interactions.GetSlashCommandInfo<TModule>(methodName);
 
         var cmdId = (await guild.GetApplicationCommandsAsync()).FirstOrDefault(cmd =>
             // TODO: Try to find a better way than this.
-            cmd.Name == verifyCmd.Name
+            cmd.Name == cmdInfo.Name
             && (!cmd.IsGlobalCommand || cmd.Guild.Id == guild.Id)
-            && cmd.IsNsfw == verifyCmd.IsNsfw
-            && cmd.IsDefaultPermission == verifyCmd.DefaultPermission
-            && cmd.Description == verifyCmd.Description
+            && cmd.IsNsfw == cmdInfo.IsNsfw
+            && cmd.IsDefaultPermission == cmdInfo.DefaultPermission
+            && cmd.Description == cmdInfo.Description
             && cmd.ApplicationId == cfg.Get().DiscordClientId
-            && cmd.Type == verifyCmd.CommandType
-            && cmd.ContextTypes?.SequenceEqual(verifyCmd.ContextTypes) != false
-            && cmd.Options.Count == verifyCmd.Parameters.Count
+            && cmd.Type == cmdInfo.CommandType
+            && cmd.ContextTypes?.SequenceEqual(cmdInfo.ContextTypes) != false
+            && cmd.Options.Count == cmdInfo.Parameters.Count
         )?.Id;
 
-        return (verifyCmd.Name, cmdId);
+        return (cmdInfo.Name, cmdId);
     }
 }

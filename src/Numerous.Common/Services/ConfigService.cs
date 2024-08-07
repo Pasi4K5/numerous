@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 
 namespace Numerous.Common.Services;
 
+// TODO: Rename to IConfigProvider.
 public interface IConfigService
 {
     Config Get();
@@ -44,7 +45,7 @@ public sealed class ConfigService : IConfigService
             }
         }
 
-        return _config.Value;
+        return _config;
     }
 
     private static void Save(Config obj)

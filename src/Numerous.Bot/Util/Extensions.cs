@@ -22,18 +22,18 @@ public static class Extensions
         return condition ? s : "";
     }
 
+    public static string BoldIf(this string s, bool condition)
+    {
+        return condition ? $"**{s}**" : s;
+    }
+
     public static string LimitLength(this string s, int maxLength)
     {
         return s.Length > maxLength ? s[..(maxLength - 1)] + "…" : s;
     }
 
-    public static string RemoveAll(this string s, string oldChars)
+    public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
     {
-        foreach (var oldChar in oldChars)
-        {
-            s = s.Replace(oldChar.ToString(), "");
-        }
-
-        return s;
+        return dictionary.TryGetValue(key, out var value) ? value : defaultValue;
     }
 }

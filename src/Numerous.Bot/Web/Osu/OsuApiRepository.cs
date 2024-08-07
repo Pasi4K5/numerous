@@ -12,14 +12,17 @@ namespace Numerous.Bot.Web.Osu;
 
 public interface IOsuApiRepository
 {
-    Task<OsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false);
-    Task<OsuUserExtended> GetUserByIdAsync(uint userId);
-    Task<BeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, BeatmapType type);
+    Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false);
+    Task<ApiOsuUserExtended> GetUserByIdAsync(uint userId);
+    Task<ApiScore[]> GetRecentScoresAsync(uint userId);
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type);
+    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id);
+    Task<ApiBeatmapExtended> GetBeatmapAsync(uint id);
 }
 
 public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
 {
-    public async Task<OsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false)
+    public async Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false)
     {
         if (prioritizeUsername)
         {
@@ -35,30 +38,45 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return await api.GetUserAsync(query);
     }
 
-    public async Task<OsuUserExtended> GetUserByIdAsync(uint userId)
+    public async Task<ApiOsuUserExtended> GetUserByIdAsync(uint userId)
     {
         return await api.GetUserAsync(userId.ToString(), "id");
     }
 
-    public async Task<BeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, BeatmapType type)
+    public async Task<ApiScore[]> GetRecentScoresAsync(uint userId)
+    {
+        return await api.GetUserScoresAsync(userId, "recent", 1000);
+    }
+
+    public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type)
     {
         var typeStr = type switch
         {
-            BeatmapType.Favourite => "favourite",
-            BeatmapType.Graveyard => "graveyard",
-            BeatmapType.Guest => "guest",
-            BeatmapType.Loved => "loved",
-            BeatmapType.Nominated => "nominated",
-            BeatmapType.Pending => "pending",
-            BeatmapType.Ranked => "ranked",
-            BeatmapType.MostPlayed => throw new NotSupportedException($"{nameof(BeatmapType.MostPlayed)} is not supported"),
+            ApiBeatmapType.Favourite => "favourite",
+            ApiBeatmapType.Graveyard => "graveyard",
+            ApiBeatmapType.Guest => "guest",
+            ApiBeatmapType.Loved => "loved",
+            ApiBeatmapType.Nominated => "nominated",
+            ApiBeatmapType.Pending => "pending",
+            ApiBeatmapType.Ranked => "ranked",
+            ApiBeatmapType.MostPlayed => throw new NotSupportedException($"{nameof(ApiBeatmapType.MostPlayed)} is not supported"),
             _ => throw new UnreachableException(),
         };
 
         return await api.GetUserBeatmapsetsAsync(userId, typeStr, "10000");
     }
 
-    private async Task<OsuUserExtended> GetUserByUsernameAsync(string username)
+    public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id)
+    {
+        return await api.GetBeatmapsetAsync(id);
+    }
+
+    public async Task<ApiBeatmapExtended> GetBeatmapAsync(uint id)
+    {
+        return await api.GetBeatmapAsync(id);
+    }
+
+    private async Task<ApiOsuUserExtended> GetUserByUsernameAsync(string username)
     {
         return await api.GetUserAsync(username, "username");
     }

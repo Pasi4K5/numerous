@@ -59,7 +59,7 @@ public partial class ConfigCommandModule
                 type: ResponseType.Success
             );
 
-            await eh.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
+            await DiscordEventHandler.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
         }
 
         [UsedImplicitly]
