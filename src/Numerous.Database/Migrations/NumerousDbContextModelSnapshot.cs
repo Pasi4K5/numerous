@@ -47,6 +47,89 @@ namespace Numerous.Database.Migrations
                     b.ToTable("AutoPingMapping");
                 });
 
+            modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetition", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<DateTimeOffset>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LocalBeatmapId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("GuildId", "StartTime");
+
+                    b.HasIndex("LocalBeatmapId");
+
+                    b.ToTable("BeatmapCompetition", t =>
+                        {
+                            t.HasCheckConstraint("CK_BeatmapCompetition_ValidTime", "\"StartTime\" < \"EndTime\"");
+                        });
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetitionScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Md5Hash");
+
+                    b.Property<double>("Accuracy")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTimeOffset>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("GreatCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<long>("MaxCombo")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MehCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MissCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<string[]>("Mods")
+                        .IsRequired()
+                        .HasColumnType("char(2)[]");
+
+                    b.Property<long>("OkCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal?>("OnlineId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("TotalScore")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OnlineId")
+                        .IsUnique();
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("GuildId", "StartTime");
+
+                    b.ToTable("BeatmapCompetitionScore");
+                });
+
             modelBuilder.Entity("Numerous.Database.Entities.DbChannel", b =>
                 {
                     b.Property<decimal>("Id")
@@ -198,6 +281,78 @@ namespace Numerous.Database.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Numerous.Database.Entities.DbLocalBeatmap", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Md5Hash");
+
+                    b.Property<long>("MaxCombo")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("OnlineBeatmapId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OsuText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("OszHash")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OnlineBeatmapId");
+
+                    b.ToTable("LocalBeatmap", t =>
+                        {
+                            t.HasCheckConstraint("CK_LocalBeatmap_ValidSha256", "length(\"OszHash\") = 256 / 8");
+                        });
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmap", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CreatorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("OnlineBeatmapsetId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("OnlineBeatmapsetId");
+
+                    b.ToTable("OnlineBeatmap");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmapset", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CreatorId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.ToTable("OnlineBeatmapset");
+                });
+
             modelBuilder.Entity("Numerous.Database.Entities.DbOsuUser", b =>
                 {
                     b.Property<long>("Id")
@@ -206,7 +361,7 @@ namespace Numerous.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("DiscordUserId")
+                    b.Property<decimal?>("DiscordUserId")
                         .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
@@ -247,6 +402,21 @@ namespace Numerous.Database.Migrations
                     b.ToTable("Reminder");
                 });
 
+            modelBuilder.Entity("Numerous.Database.Entities.DbReplay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Md5Hash");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Replay");
+                });
+
             modelBuilder.Entity("Numerous.Database.Entities.DbForumChannel", b =>
                 {
                     b.HasBaseType("Numerous.Database.Entities.DbChannel");
@@ -273,6 +443,44 @@ namespace Numerous.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetition", b =>
+                {
+                    b.HasOne("Numerous.Database.Entities.DbGuild", "Guild")
+                        .WithMany("BeatmapCompetitions")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Numerous.Database.Entities.DbLocalBeatmap", "LocalBeatmap")
+                        .WithMany("BeatmapCompetitions")
+                        .HasForeignKey("LocalBeatmapId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("LocalBeatmap");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetitionScore", b =>
+                {
+                    b.HasOne("Numerous.Database.Entities.DbOsuUser", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Numerous.Database.Entities.DbBeatmapCompetition", "Competition")
+                        .WithMany("Scores")
+                        .HasForeignKey("GuildId", "StartTime")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Competition");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbChannel", b =>
@@ -352,13 +560,52 @@ namespace Numerous.Database.Migrations
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("Numerous.Database.Entities.DbLocalBeatmap", b =>
+                {
+                    b.HasOne("Numerous.Database.Entities.DbOnlineBeatmap", "OnlineBeatmap")
+                        .WithMany("LocalBeatmaps")
+                        .HasForeignKey("OnlineBeatmapId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OnlineBeatmap");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmap", b =>
+                {
+                    b.HasOne("Numerous.Database.Entities.DbOsuUser", "Creator")
+                        .WithMany("OnlineBeatmaps")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Numerous.Database.Entities.DbOnlineBeatmapset", "OnlineBeatmapset")
+                        .WithMany("Beatmaps")
+                        .HasForeignKey("OnlineBeatmapsetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("OnlineBeatmapset");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmapset", b =>
+                {
+                    b.HasOne("Numerous.Database.Entities.DbOsuUser", "Creator")
+                        .WithMany("OnlineBeatmapsets")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
             modelBuilder.Entity("Numerous.Database.Entities.DbOsuUser", b =>
                 {
                     b.HasOne("Numerous.Database.Entities.DbDiscordUser", "DiscordUser")
                         .WithOne("OsuUser")
-                        .HasForeignKey("Numerous.Database.Entities.DbOsuUser", "DiscordUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Numerous.Database.Entities.DbOsuUser", "DiscordUserId");
 
                     b.Navigation("DiscordUser");
                 });
@@ -382,6 +629,17 @@ namespace Numerous.Database.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Numerous.Database.Entities.DbReplay", b =>
+                {
+                    b.HasOne("Numerous.Database.Entities.DbBeatmapCompetitionScore", "Score")
+                        .WithOne("Replay")
+                        .HasForeignKey("Numerous.Database.Entities.DbReplay", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Score");
+                });
+
             modelBuilder.Entity("Numerous.Database.Entities.DbForumChannel", b =>
                 {
                     b.HasOne("Numerous.Database.Entities.DbChannel", null)
@@ -398,6 +656,16 @@ namespace Numerous.Database.Migrations
                         .HasForeignKey("Numerous.Database.Entities.DbMessageChannel", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetition", b =>
+                {
+                    b.Navigation("Scores");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetitionScore", b =>
+                {
+                    b.Navigation("Replay");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbDiscordMessage", b =>
@@ -417,11 +685,35 @@ namespace Numerous.Database.Migrations
 
             modelBuilder.Entity("Numerous.Database.Entities.DbGuild", b =>
                 {
+                    b.Navigation("BeatmapCompetitions");
+
                     b.Navigation("Channels");
 
                     b.Navigation("GroupRoleMappings");
 
                     b.Navigation("JoinMessage");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbLocalBeatmap", b =>
+                {
+                    b.Navigation("BeatmapCompetitions");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmap", b =>
+                {
+                    b.Navigation("LocalBeatmaps");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmapset", b =>
+                {
+                    b.Navigation("Beatmaps");
+                });
+
+            modelBuilder.Entity("Numerous.Database.Entities.DbOsuUser", b =>
+                {
+                    b.Navigation("OnlineBeatmaps");
+
+                    b.Navigation("OnlineBeatmapsets");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbForumChannel", b =>
