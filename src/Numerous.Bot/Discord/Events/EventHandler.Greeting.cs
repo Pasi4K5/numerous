@@ -50,7 +50,7 @@ public partial class DiscordEventHandler
         }
     }
 
-    public async Task GreetAsync(SocketGuildUser user, JoinMessageDto? joinMsg, IMessageChannel? ch = null)
+    public static async Task GreetAsync(SocketGuildUser user, JoinMessageDto? joinMsg, IMessageChannel? ch = null)
     {
         if (user.IsBot || joinMsg is null)
         {

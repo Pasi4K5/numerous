@@ -15,7 +15,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands;
 public partial class ConfigCommandModule
 {
     [Group("verify", "Verification configuration commands")]
-    public sealed class VerifyCommandModule(IUnitOfWork uow, DiscordEventHandler eh) : InteractionModule
+    public sealed class VerifyCommandModule(IUnitOfWork uow) : InteractionModule
     {
         // TODO: Add command to remove join message
         [UsedImplicitly]
@@ -59,7 +59,7 @@ public partial class ConfigCommandModule
                 type: ResponseType.Success
             );
 
-            await eh.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
+            await DiscordEventHandler.GreetAsync(Context.Guild.GetUser(Context.User.Id), joinMessage, Context.Channel);
         }
 
         [UsedImplicitly]

@@ -20,7 +20,7 @@ public sealed class VerifyCommandModule(IConfigService cfg, IUnitOfWork uow, Osu
         await DeferAsync();
 
         var config = cfg.Get();
-        var roles = (await uow.GroupRoleMappings.GetByGuildAsync(Context.Guild.Id));
+        var roles = await uow.GroupRoleMappings.GetByGuildAsync(Context.Guild.Id);
         var unrankedMapper = roles.FirstOrDefault(x => x.Group == OsuUserGroup.UnrankedMapper)?.RoleId;
         var rankedMapper = roles.FirstOrDefault(x => x.Group == OsuUserGroup.RankedMapper)?.RoleId;
         var bn = roles.FirstOrDefault(x => x.Group == OsuUserGroup.BeatmapNominators)?.RoleId;

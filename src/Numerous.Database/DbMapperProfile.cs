@@ -17,6 +17,15 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbAutoPingMapping, AutoPingMappingDto>();
         CreateMap<AutoPingMappingDto, DbAutoPingMapping>();
 
+        CreateMap<DbBeatmapCompetition, BeatmapCompetitionDto>();
+        CreateMap<BeatmapCompetitionDto, DbBeatmapCompetition>();
+
+        CreateMap<DbBeatmapCompetitionScore, BeatmapCompetitionScoreDto>();
+        CreateMap<BeatmapCompetitionScoreDto, DbBeatmapCompetitionScore>();
+
+        CreateMap<DbBeatmapCompetitionScore, BeatmapCompetitionScoreDto>();
+        CreateMap<BeatmapCompetitionScoreDto, DbBeatmapCompetitionScore>();
+
         CreateMap<DbChannel, ChannelDto>();
         CreateMap<ChannelDto, DbChannel>();
 
@@ -57,13 +66,25 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbJoinMessage, JoinMessageDto>();
         CreateMap<JoinMessageDto, DbJoinMessage>();
 
+        CreateMap<DbLocalBeatmap, LocalBeatmapDto>();
+        CreateMap<LocalBeatmapDto, DbLocalBeatmap>();
+
         CreateMap<DbMessageChannel, MessageChannelDto>();
         CreateMap<MessageChannelDto, DbMessageChannel>();
+
+        CreateMap<DbOnlineBeatmap, OnlineBeatmapDto>();
+        CreateMap<OnlineBeatmapDto, DbOnlineBeatmap>();
+
+        CreateMap<DbOnlineBeatmapset, OnlineBeatmapsetDto>();
+        CreateMap<OnlineBeatmapsetDto, DbOnlineBeatmapset>();
 
         CreateMap<DbOsuUser, OsuUserDto>();
         CreateMap<OsuUserDto, DbOsuUser>();
 
         CreateMap<DbReminder, ReminderDto>();
         CreateMap<ReminderDto, DbReminder>();
+
+        CreateMap<DbReplay, ReplayDto>();
+        CreateMap<ReplayDto, DbReplay>();
     }
 }

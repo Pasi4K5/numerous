@@ -13,7 +13,7 @@ namespace Numerous.Database.Entities;
 public sealed class DbReminder : DbEntity<uint>
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public override uint Id { get; set; }
+    public override uint Id { get; init; }
 
     public DateTimeOffset Timestamp { get; set; }
 

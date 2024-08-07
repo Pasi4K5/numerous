@@ -70,7 +70,14 @@ try
 
     services.AddSingleton(discordClient);
     services.AddSingleton<IConfigService>(cfgService);
-    services.AddSingleton(new InteractionService(discordClient));
+    services.AddSingleton(new InteractionService(
+        discordClient,
+        new()
+        {
+            DefaultRunMode = RunMode.Async,
+            UseCompiledLambda = true,
+        })
+    );
     services.AddScheduler();
     services.AddControllers();
     services.AddHttpClient();

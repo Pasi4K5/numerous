@@ -158,7 +158,7 @@ public sealed class OsuVerifier(
         }
     }
 
-    private async Task AssignRolesInGuildAsync(IGuildUser guildUser, OsuUserDto[] osuUsers, GroupRoleMappingDto[] mappings, OsuUser? osuUser = null)
+    private async Task AssignRolesInGuildAsync(IGuildUser guildUser, OsuUserDto[] osuUsers, GroupRoleMappingDto[] mappings, ApiOsuUser? osuUser = null)
     {
         osuUser ??= await GetOsuUserAsync(guildUser, osuUsers);
 
@@ -232,7 +232,7 @@ public sealed class OsuVerifier(
         }
     }
 
-    private async Task<OsuUserExtended?> GetOsuUserAsync(IUser discordUser, OsuUserDto[] osuUsers)
+    private async Task<ApiOsuUserExtended?> GetOsuUserAsync(IUser discordUser, OsuUserDto[] osuUsers)
     {
         var user = osuUsers.FirstOrDefault(x => x.DiscordUserId == discordUser.Id);
 

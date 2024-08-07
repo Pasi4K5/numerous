@@ -14,12 +14,17 @@ namespace Numerous.Database.Context;
 public interface IUnitOfWork : IDisposable, IAsyncDisposable
 {
     IAutoPingMappingRepository AutoPingMappings { get; }
+    IBeatmapCompetitionRepository BeatmapCompetitions { get; }
+    IBeatmapCompetitionScoreRepository BeatmapCompetitionScores { get; }
     IDiscordMessageRepository DiscordMessages { get; }
     IDiscordMessageVersionRepository DiscordMessageVersions { get; }
     IDiscordUserRepository DiscordUsers { get; }
     IGroupRoleMappingRepository GroupRoleMappings { get; }
     IGuildRepository Guilds { get; }
+    IIdRepository<LocalBeatmapDto, Guid> LocalBeatmaps { get; }
     IIdRepository<JoinMessageDto, ulong> JoinMessages { get; }
+    IOnlineBeatmapRepository OnlineBeatmaps { get; }
+    IOnlineBeatmapsetRepository OnlineBeatmapsets { get; }
     IMessageChannelRepository MessageChannels { get; }
     IOsuUserRepository OsuUsers { get; }
     IReminderRepository Reminders { get; }
@@ -30,6 +35,8 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
 public sealed class UnitOfWork(IDbContextFactory<NumerousDbContext> contextProvider, IMapper mapper) : IUnitOfWork
 {
     public IAutoPingMappingRepository AutoPingMappings => new AutoPingMappingRepository(_context, mapper);
+    public IBeatmapCompetitionRepository BeatmapCompetitions => new BeatmapCompetitionRepository(_context, mapper);
+    public IBeatmapCompetitionScoreRepository BeatmapCompetitionScores => new BeatmapCompetitionScoreRepository(_context, mapper);
     public IDiscordMessageRepository DiscordMessages => new DiscordMessageRepository(_context, mapper);
 
     public IDiscordMessageVersionRepository DiscordMessageVersions =>
@@ -38,7 +45,10 @@ public sealed class UnitOfWork(IDbContextFactory<NumerousDbContext> contextProvi
     public IDiscordUserRepository DiscordUsers => new DiscordUserRepository(_context, mapper);
     public IGroupRoleMappingRepository GroupRoleMappings => new GroupRoleMappingRepository(_context, mapper);
     public IGuildRepository Guilds => new GuildRepository(_context, mapper);
+    public IIdRepository<LocalBeatmapDto, Guid> LocalBeatmaps => new IdRepository<DbLocalBeatmap, LocalBeatmapDto, Guid>(_context, mapper);
     public IIdRepository<JoinMessageDto, ulong> JoinMessages => new IdRepository<DbJoinMessage, JoinMessageDto, ulong>(_context, mapper);
+    public IOnlineBeatmapRepository OnlineBeatmaps => new OnlineBeatmapRepository(_context, mapper);
+    public IOnlineBeatmapsetRepository OnlineBeatmapsets => new OnlineBeatmapsetRepository(_context, mapper);
     public IMessageChannelRepository MessageChannels => new MessageChannelRepository(_context, mapper);
     public IOsuUserRepository OsuUsers => new OsuUserRepository(_context, mapper);
     public IReminderRepository Reminders => new ReminderRepository(_context, mapper);

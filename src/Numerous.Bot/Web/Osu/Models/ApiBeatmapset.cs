@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace Numerous.Bot.Web.Osu.Models;
 
 [JsonObject(MemberSerialization.OptIn)]
-public record Beatmapset
+public record ApiBeatmapset
 {
     private readonly ICollection<string> _tags = new List<string>();
 
@@ -20,6 +20,9 @@ public record Beatmapset
 
     [JsonProperty("title")]
     public required string Title { get; init; }
+
+    [JsonProperty("user_id")]
+    public uint UserId { get; set; }
 
     [JsonProperty("creator")]
     public required string Creator { get; init; }
@@ -34,6 +37,9 @@ public record Beatmapset
         init => _tags = value.Split(' ');
     }
 
+    [JsonProperty("covers")]
+    public required ApiCovers Covers { get; init; }
+
     [JsonProperty("play_count")]
     public uint PlayCount { get; init; }
 
@@ -41,8 +47,21 @@ public record Beatmapset
     public uint FavouriteCount { get; init; }
 
     [JsonProperty("beatmaps")]
-    public required IReadOnlyCollection<BeatmapDifficulty> Difficulties { get; init; }
+    public required IReadOnlyCollection<ApiBeatmap> Beatmaps { get; init; }
 }
 
 [JsonObject(MemberSerialization.OptIn)]
-public record BeatmapsetExtended : Beatmapset;
+public record ApiBeatmapsetExtended : ApiBeatmapset
+{
+    [JsonProperty("submitted_date")]
+    public DateTimeOffset? SubmittedDate { get; init; }
+
+    [JsonProperty("ranked_date")]
+    public DateTimeOffset? RankedDate { get; init; }
+
+    [JsonProperty("user")]
+    public required ApiOsuUser User { get; init; }
+
+    [JsonProperty("related_users")]
+    public required IReadOnlyCollection<ApiOsuUser> RelatedUsers { get; init; }
+}

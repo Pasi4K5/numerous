@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
 using Numerous.Bot.Discord.Interactions;
+using Numerous.Bot.Discord.Util;
+using Numerous.Bot.Osu;
 using Numerous.Bot.Services;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
@@ -20,8 +22,10 @@ public static class BotServiceConfiguration
     public static void Configure(IServiceCollection services)
     {
         services.AddSingleton<AttachmentService>();
+        services.AddTransient<BeatmapService>();
         services.AddSingleton<CommandFinder>();
         services.AddSingleton<DiscordEventHandler>();
+        services.AddTransient<EmbedBuilders>();
         services.AddSingleton<IFileService, FileService>();
         services.AddHostedService<InteractionHandler>();
         services.AddHostedService<MessageResponder>();
@@ -32,6 +36,7 @@ public static class BotServiceConfiguration
         services.AddSingleton<IOsuTokenProvider, OsuTokenProvider>();
         services.AddSingleton<ReminderService>();
         services.AddSingleton<ISauceNaoClient, SauceNaoClient>();
+        services.AddTransient<ScoreValidator>();
         services.AddHostedService<Startup>();
 
         // TODO: Consider switching to System.Text.Json (for everything)

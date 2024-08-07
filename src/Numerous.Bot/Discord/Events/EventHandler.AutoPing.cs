@@ -12,7 +12,7 @@ namespace Numerous.Bot.Discord.Events;
 public partial class DiscordEventHandler
 {
     // This is a workaround because the ThreadCreated event is always raised twice for some reason.
-    private readonly List<ulong> _alreadyPinged = new();
+    private readonly List<ulong> _alreadyPinged = [];
 
     [Init]
     private void AutoPing_Init()

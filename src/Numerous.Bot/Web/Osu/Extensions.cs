@@ -9,18 +9,18 @@ namespace Numerous.Bot.Web.Osu;
 
 public static class Extensions
 {
-    public static bool IsRankedMapper(this OsuUser user)
+    public static bool IsRankedMapper(this ApiOsuUser user)
     {
         return user.RankedBeatmapsetCount > 0
                || user.GuestBeatmapsetCount > 0;
     }
 
-    public static bool IsLovedMapper(this OsuUser user)
+    public static bool IsLovedMapper(this ApiOsuUser user)
     {
         return user.LovedBeatmapsetCount > 0;
     }
 
-    public static bool IsUnrankedMapper(this OsuUser user)
+    public static bool IsUnrankedMapper(this ApiOsuUser user)
     {
         return
             (user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0)

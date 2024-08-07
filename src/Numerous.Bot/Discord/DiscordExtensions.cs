@@ -81,4 +81,9 @@ public static partial class DiscordExtensions
     {
         return $"<t:{timestamp.ToUnixTimeSeconds()}:D> <t:{timestamp.ToUnixTimeSeconds()}:T>";
     }
+
+    public static string WithLink(this string s, string url)
+    {
+        return $"[{s}]({url})";
+    }
 }

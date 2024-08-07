@@ -4,10 +4,12 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
 [Table("AutoPingMapping")]
+[Index(nameof(ChannelId), nameof(TagId), nameof(RoleId), IsUnique = true)]
 public sealed class DbAutoPingMapping
 {
     public DbForumChannel Channel { get; set; } = null!;

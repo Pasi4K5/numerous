@@ -6,6 +6,8 @@ namespace Numerous.Database.Context;
 public sealed class NumerousDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<DbAutoPingMapping> AutoPingMappings { get; set; }
+    public DbSet<DbBeatmapCompetition> BeatmapCompetitions { get; set; }
+    public DbSet<DbBeatmapCompetitionScore> BeatmapCompetitionScores { get; set; }
     public DbSet<DbChannel> Channels { get; set; }
     public DbSet<DbDiscordMessage> DiscordMessages { get; set; }
     public DbSet<DbDiscordMessageVersion> DiscordMessageVersions { get; set; }
@@ -14,9 +16,13 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbGroupRoleMapping> GroupRoleMappings { get; set; }
     public DbSet<DbGuild> Guilds { get; set; }
     public DbSet<DbJoinMessage> JoinMessages { get; set; }
+    public DbSet<DbLocalBeatmap> LocalBeatmaps { get; set; }
     public DbSet<DbMessageChannel> MessageChannels { get; set; }
+    public DbSet<DbOnlineBeatmap> OnlineBeatmaps { get; set; }
+    public DbSet<DbOnlineBeatmapset> OnlineBeatmapsets { get; set; }
     public DbSet<DbOsuUser> OsuUsers { get; set; }
     public DbSet<DbReminder> Reminders { get; set; }
+    public DbSet<DbReplay> Replays { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -24,22 +30,19 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
 
         builder.UseSerialColumns();
 
+        builder.Entity<DbBeatmapCompetition>(e =>
+        {
+            e.ToTable(t => t.HasCheckConstraint(
+                "CK_BeatmapCompetition_ValidTime",
+                $"\"{nameof(DbBeatmapCompetition.StartTime)}\" < \"{nameof(DbBeatmapCompetition.EndTime)}\""
+            ));
+        });
+
         builder.Entity<DbAutoPingMapping>(e =>
         {
             const string idName = "Id";
             e.Property<uint>(idName).ValueGeneratedOnAdd();
             e.HasKey(idName);
-
-            e.HasIndex(
-                nameof(DbAutoPingMapping.ChannelId),
-                nameof(DbAutoPingMapping.TagId),
-                nameof(DbAutoPingMapping.RoleId)
-            ).IsUnique();
-        });
-
-        builder.Entity<DbGuild>(e =>
-        {
-            e.HasIndex(nameof(DbGuild.UnverifiedRoleId)).IsUnique();
         });
 
         builder.Entity<DbJoinMessage>(e =>
@@ -50,9 +53,12 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
             ));
         });
 
-        builder.Entity<DbOsuUser>(e =>
+        builder.Entity<DbLocalBeatmap>(e =>
         {
-            e.HasIndex(nameof(DbOsuUser.DiscordUserId)).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint(
+                "CK_LocalBeatmap_ValidSha256",
+                $"length(\"{nameof(DbLocalBeatmap.OszHash)}\") = 256 / 8"
+            ));
         });
     }
 }

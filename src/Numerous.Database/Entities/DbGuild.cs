@@ -5,10 +5,12 @@
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
 [Table("Guild")]
+[Index(nameof(UnverifiedRoleId), IsUnique = true)]
 public sealed class DbGuild : DbEntity<ulong>
 {
     [DefaultValue(false)]
@@ -19,4 +21,5 @@ public sealed class DbGuild : DbEntity<ulong>
 
     public ICollection<DbChannel> Channels { get; set; } = [];
     public ICollection<DbGroupRoleMapping> GroupRoleMappings { get; set; } = [];
+    public ICollection<DbBeatmapCompetition> BeatmapCompetitions { get; set; } = [];
 }

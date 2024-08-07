@@ -8,5 +8,5 @@ namespace Numerous.Database.Entities;
 public class DbEntity<TId> : IHasId<TId>
     where TId : struct
 {
-    public virtual TId Id { get; set; }
+    public virtual TId Id { get; init; }
 }

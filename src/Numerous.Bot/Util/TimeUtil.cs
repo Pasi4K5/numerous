@@ -117,8 +117,10 @@ public static class TimeUtil
         }
     }
 
-    public static DateTimeOffset ToOffset(this DateTime dt, TimeZoneInfo tz)
+    public static DateTimeOffset ToOffset(this DateTime dt, TimeZoneInfo? tz = null)
     {
+        tz ??= TimeZoneInfo.Utc;
+
         return new DateTimeOffset(dt, tz.GetUtcOffset(dt));
     }
 

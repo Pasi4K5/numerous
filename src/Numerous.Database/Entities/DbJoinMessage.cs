@@ -13,9 +13,9 @@ namespace Numerous.Database.Entities;
 public sealed class DbJoinMessage : DbEntity<ulong>
 {
     [NotMapped]
-    public override ulong Id { get => GuildId; set => GuildId = value; }
+    public override ulong Id { get => GuildId; init => GuildId = value; }
 
-    public DbGuild Guild { get; set; } = null!;
+    public DbGuild Guild { get; init; } = null!;
 
     [Key]
     public ulong GuildId { get; set; }

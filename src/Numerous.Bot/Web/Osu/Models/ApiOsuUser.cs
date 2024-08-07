@@ -8,7 +8,7 @@ using Numerous.Common.Enums;
 
 namespace Numerous.Bot.Web.Osu.Models;
 
-public record OsuUser
+public record ApiOsuUser
 {
     [JsonProperty("id")]
     public uint Id { get; init; }
@@ -79,7 +79,7 @@ public record OsuUser
     }
 }
 
-public sealed record OsuUserExtended : OsuUser
+public sealed record ApiOsuUserExtended : ApiOsuUser
 {
     [JsonProperty("discord")]
     public required string DiscordUsername { get; init; }
