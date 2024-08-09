@@ -74,7 +74,7 @@ public sealed partial class CompetitionCommandModule
             return;
         }
 
-        ScoringUtil.ToStandardisedScore(score, beatmap);
+        score.ToStandardisedScore(beatmap);
 
         var (result, scoreId) = await scoreValidator.ValidateAsync(competition, osuUserId.Value, score, beatmap);
 

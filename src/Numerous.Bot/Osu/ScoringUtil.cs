@@ -11,7 +11,7 @@ namespace Numerous.Bot.Osu;
 
 public static class ScoringUtil
 {
-    public static void ToStandardisedScore(ScoreInfo score, WorkingBeatmap beatmap)
+    public static void ToStandardisedScore(this ScoreInfo score, WorkingBeatmap beatmap)
     {
         if (StandardisedScoreMigrationTools.ShouldMigrateToNewStandardised(score))
         {
