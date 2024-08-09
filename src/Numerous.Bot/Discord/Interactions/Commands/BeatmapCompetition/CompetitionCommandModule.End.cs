@@ -20,6 +20,15 @@ public sealed partial class CompetitionCommandModule
     [SlashCommand("end", "Ends the current beatmap competition now.")]
     public async Task End()
     {
+        if (!Context.Guild.GetUser(Context.User.Id).GuildPermissions.Administrator)
+        {
+            await RespondWithEmbedAsync(
+                title: "Insufficient permissions.",
+                message: "You must be an administrator to start a competition.",
+                ResponseType.Error
+            );
+        }
+
         await DeferAsync();
 
         if (!await uow.BeatmapCompetitions.HasActiveCompetitionAsync(Context.Guild.Id))
