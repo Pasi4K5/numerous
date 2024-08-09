@@ -119,11 +119,4 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
 
         return Set.Where(x => x.GuildId == guildId && x.StartTime < now && x.EndTime > now);
     }
-
-    private IQueryable<DbBeatmapCompetition> GetLastCompetitionQuery(ulong guildId)
-    {
-        return Set.Where(x => x.GuildId == guildId)
-            .OrderByDescending(x => x.EndTime)
-            .Take(1);
-    }
 }
