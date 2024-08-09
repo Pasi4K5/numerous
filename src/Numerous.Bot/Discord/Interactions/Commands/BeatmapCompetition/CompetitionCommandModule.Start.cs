@@ -38,6 +38,15 @@ public sealed partial class CompetitionCommandModule
         string endTimeStr
     )
     {
+        if (!Context.Guild.GetUser(Context.User.Id).GuildPermissions.Administrator)
+        {
+            await RespondWithEmbedAsync(
+                title: "Insufficient permissions.",
+                message: "You must be an administrator to start a competition.",
+                ResponseType.Error
+            );
+        }
+
         var match = BeatmapRegex().Match(beatmapStr);
 
         if (!DateTime.TryParse(startTimeStr, out var startTime))
