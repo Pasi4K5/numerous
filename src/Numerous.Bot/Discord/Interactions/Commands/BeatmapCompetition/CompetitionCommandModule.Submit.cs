@@ -15,7 +15,7 @@ using osu.Game.Scoring;
 
 namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
 
-public sealed partial class CompetitionCommandModule
+partial class CompetitionCommandModule
 {
     [UsedImplicitly]
     [SlashCommand("submit", "Submit a score by uploading a replay file.")]

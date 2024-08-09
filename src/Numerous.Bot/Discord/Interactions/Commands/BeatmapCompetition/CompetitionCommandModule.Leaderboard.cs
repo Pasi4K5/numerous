@@ -10,7 +10,7 @@ using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
 
-public sealed partial class CompetitionCommandModule
+partial class CompetitionCommandModule
 {
     private const int PageSize = 5;
 
