@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Numerous.Bot.Osu;
 using Numerous.Database.Dtos;
 using osu.Game.Beatmaps;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 
 namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
@@ -133,14 +134,15 @@ partial class CompetitionCommandModule
                 "Failed score",
                 "You cannot submit failed scores."
             ),
+            ScoreValidator.ValidationResult.ForbiddenModCombination => (
+                "Forbidden mod combination",
+                "The following mods are not allowed:\n"
+                + string.Join(", ", ScoreValidator.ForbiddenMods.Select(t => ((Mod?)Activator.CreateInstance(t))?.Acronym))
+            ),
             ScoreValidator.ValidationResult.ScoreNotFound => (
                 "Score not found",
                 "The score you are trying to submit was not found in your recent scores.\n"
                 + "Please note that you can only submit scores from the last 24 hours."
-            ),
-            ScoreValidator.ValidationResult.ScoreV2 => (
-                "Invalid score",
-                "You are not allowed to use ScoreV2."
             ),
             ScoreValidator.ValidationResult.TooEarly => (
                 "Invalid score",
