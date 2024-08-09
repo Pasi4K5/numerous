@@ -23,7 +23,6 @@ public interface IBeatmapCompetitionRepository : IRepository<BeatmapCompetitionD
     );
 
     Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAndCreatorAsync(ulong guildId, CancellationToken ct = default);
-    Task<int> GetNumScoresAsync(ulong guildId, CancellationToken ct = default);
 
     Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
         ulong guildId,
@@ -72,14 +71,6 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
             .FirstOrDefaultAsync(cancellationToken: ct);
 
         return Mapper.Map<BeatmapCompetitionDto?>(entity);
-    }
-
-    public async Task<int> GetNumScoresAsync(ulong guildId, CancellationToken ct = default)
-    {
-        return await GetLastCompetitionQuery(guildId)
-            .Include(x => x.Scores)
-            .SelectMany(x => x.Scores)
-            .CountAsync(ct);
     }
 
     public async Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
