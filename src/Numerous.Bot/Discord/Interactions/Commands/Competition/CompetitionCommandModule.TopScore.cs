@@ -8,7 +8,7 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Osu;
 
-namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
+namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
 partial class CompetitionCommandModule
 {

@@ -10,7 +10,7 @@ using Numerous.Bot.Osu;
 using Numerous.Bot.Web.Osu;
 using Numerous.Database.Context;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
 
 [UsedImplicitly]
 [Group("admin", "Admin commands.")]

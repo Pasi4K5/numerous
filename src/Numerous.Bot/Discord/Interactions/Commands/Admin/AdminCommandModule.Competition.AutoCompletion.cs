@@ -7,7 +7,7 @@ using System.Globalization;
 using Discord;
 using Discord.Interactions;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
 
 partial class AdminCommandModule
 {

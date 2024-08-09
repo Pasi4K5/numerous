@@ -12,7 +12,7 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu.Models;
 using Refit;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
 
 partial class AdminCommandModule
 {

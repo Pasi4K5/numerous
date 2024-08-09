@@ -10,7 +10,7 @@ using Numerous.Bot.Discord.Events;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 
 public partial class ConfigCommandModule
 {

@@ -13,7 +13,7 @@ using Numerous.Database.Dtos;
 using osu.Game.Beatmaps;
 using osu.Game.Scoring;
 
-namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
+namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
 partial class CompetitionCommandModule
 {

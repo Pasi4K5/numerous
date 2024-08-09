@@ -7,7 +7,7 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 
 [UsedImplicitly]
 [Group("config", "Configuration commands")]

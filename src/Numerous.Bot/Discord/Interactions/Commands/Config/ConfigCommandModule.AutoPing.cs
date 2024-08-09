@@ -8,7 +8,7 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Database.Context;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 
 public partial class ConfigCommandModule
 {

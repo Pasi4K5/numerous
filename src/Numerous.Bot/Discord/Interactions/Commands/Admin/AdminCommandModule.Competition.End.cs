@@ -8,7 +8,7 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Common.Util;
 
-namespace Numerous.Bot.Discord.Interactions.Commands;
+namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
 
 partial class AdminCommandModule
 {
