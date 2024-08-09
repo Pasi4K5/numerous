@@ -6,10 +6,9 @@
 using Discord.Interactions;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Osu;
-using Numerous.Bot.Web.Osu;
 using Numerous.Database.Context;
 
-namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
+namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
 [Group("competition", "Beatmap competition commands.")]
 public sealed partial class CompetitionCommandModule(
@@ -17,6 +16,5 @@ public sealed partial class CompetitionCommandModule(
     BeatmapService beatmapService,
     EmbedBuilders eb,
     IHttpClientFactory httpClientFactory,
-    IOsuApiRepository osuApi,
     ScoreValidator scoreValidator
 ) : InteractionModule;

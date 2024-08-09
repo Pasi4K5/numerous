@@ -8,9 +8,9 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Database.Dtos;
 
-namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
+namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
-public sealed partial class CompetitionCommandModule
+partial class CompetitionCommandModule
 {
     private const int PageSize = 5;
 
@@ -29,7 +29,7 @@ public sealed partial class CompetitionCommandModule
         await DeferAsync();
 
         var scores = await uow.BeatmapCompetitionScores.GetCurrentLeaderboardAsync(Context.Guild.Id, PageSize, 0);
-        var numScores = await uow.BeatmapCompetitions.GetNumScoresAsync(Context.Guild.Id);
+        var numScores = await uow.BeatmapCompetitionScores.GetNumTopScoresAsync(Context.Guild.Id);
 
         if (scores.Count == 0)
         {
@@ -103,7 +103,7 @@ public sealed partial class CompetitionCommandModule
     private async Task ModifyMessageAsync(int page, IUserMessage? message = null)
     {
         message ??= ((IComponentInteraction)Context.Interaction).Message;
-        var numScores = await uow.BeatmapCompetitions.GetNumScoresAsync(Context.Guild.Id);
+        var numScores = await uow.BeatmapCompetitionScores.GetNumTopScoresAsync(Context.Guild.Id);
         var numPages = (numScores - 1) / PageSize;
 
         if (page < 0 || page > numPages)

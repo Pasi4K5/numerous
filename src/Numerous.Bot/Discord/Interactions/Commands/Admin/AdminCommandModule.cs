@@ -3,19 +3,25 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using osu.Game.Beatmaps;
-using osu.Game.Database;
-using osu.Game.Scoring;
+using Discord;
+using Discord.Interactions;
+using JetBrains.Annotations;
+using Numerous.Bot.Osu;
+using Numerous.Bot.Web.Osu;
+using Numerous.Database.Context;
 
-namespace Numerous.Bot.Osu;
+namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
 
-public static class ScoringUtil
+[UsedImplicitly]
+[Group("admin", "Admin commands.")]
+[DefaultMemberPermissions(GuildPermission.Administrator)]
+public sealed partial class AdminCommandModule : InteractionModule
 {
-    public static void ToStandardisedScore(this ScoreInfo score, WorkingBeatmap beatmap)
-    {
-        if (StandardisedScoreMigrationTools.ShouldMigrateToNewStandardised(score))
-        {
-            StandardisedScoreMigrationTools.UpdateFromLegacy(score, beatmap);
-        }
-    }
+    [UsedImplicitly]
+    [Group("competition", "Competition admin commands.")]
+    private sealed partial class CompetitionGroup(
+        IUnitOfWork uow,
+        IOsuApiRepository osuApi,
+        BeatmapService beatmapService
+    );
 }

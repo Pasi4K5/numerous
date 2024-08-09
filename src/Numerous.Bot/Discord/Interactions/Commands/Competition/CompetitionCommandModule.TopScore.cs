@@ -8,9 +8,9 @@ using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Osu;
 
-namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
+namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
-public sealed partial class CompetitionCommandModule
+partial class CompetitionCommandModule
 {
     [UsedImplicitly]
     [SlashCommand("topscore", "Shows a player's top score for the current beatmap competition.")]

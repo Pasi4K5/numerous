@@ -9,6 +9,7 @@ using Numerous.Bot.Web.Osu.Models;
 using Numerous.Database.Dtos;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using Refit;
@@ -17,7 +18,13 @@ namespace Numerous.Bot.Osu;
 
 public sealed class ScoreValidator(IOsuApiRepository osuApi)
 {
-    public async Task<(ValidationResult, ulong?)> ValidateAsync(
+    public static Type[] ForbiddenMods { get; } =
+    [
+        typeof(ModScoreV2),
+        typeof(OsuModTargetPractice),
+    ];
+
+    public async Task<(ValidationResult result, ulong? apiScoreId)> ValidateAsync(
         BeatmapCompetitionDto competition,
         uint osuUserId,
         ScoreInfo score,
@@ -34,9 +41,9 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
             return (ValidationResult.TooEarly, null);
         }
 
-        if (score.Mods.Any(x => x is ModScoreV2))
+        if (score.Mods.Any(x => ForbiddenMods.Contains(x.GetType())))
         {
-            return (ValidationResult.ScoreV2, null);
+            return (ValidationResult.ForbiddenModCombination, null);
         }
 
         ApiScore[] scores;
@@ -60,9 +67,14 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
             return (ValidationResult.UsernameMismatch, null);
         }
 
+        if (IsFailed(score, workingBeatmap))
+        {
+            return (ValidationResult.Failed, null);
+        }
+
         var scoreFound = false;
 
-        foreach (var apiScore in scores.Where(s => score.MatchesApiScore(s) && s.EndedAt >= competition.StartTime))
+        foreach (var apiScore in scores.Where(score.MatchesApiScore))
         {
             scoreFound = true;
 
@@ -72,21 +84,16 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
             }
         }
 
-        // Score was not found in recent scores.
+        // No score withing the competition time frame was found.
 
-        return await BeatmapWasUpdatedAsync(competition)
-            ? (
-                IsFailed(score, workingBeatmap)
-                    ? ValidationResult.Failed
-                    : ValidationResult.Valid,
-                null
-            )
-            : (
-                scoreFound
-                    ? ValidationResult.TooEarly
-                    : ValidationResult.ScoreNotFound,
-                null
-            );
+        if (await BeatmapWasUpdatedAsync(competition))
+        {
+            return (ValidationResult.Valid, null);
+        }
+
+        return scoreFound
+            ? (ValidationResult.TooEarly, null)
+            : (ValidationResult.ScoreNotFound, null);
     }
 
     private async Task<bool> BeatmapWasUpdatedAsync(BeatmapCompetitionDto competition)
@@ -109,7 +116,7 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
     public enum ValidationResult
     {
         Valid,
-        ScoreV2,
+        ForbiddenModCombination,
         Failed,
         BeatmapMismatch,
         UsernameMismatch,

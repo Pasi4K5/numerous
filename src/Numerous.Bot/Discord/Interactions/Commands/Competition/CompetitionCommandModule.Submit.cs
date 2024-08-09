@@ -11,11 +11,12 @@ using Microsoft.EntityFrameworkCore;
 using Numerous.Bot.Osu;
 using Numerous.Database.Dtos;
 using osu.Game.Beatmaps;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 
-namespace Numerous.Bot.Discord.Interactions.Commands.BeatmapCompetition;
+namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
-public sealed partial class CompetitionCommandModule
+partial class CompetitionCommandModule
 {
     [UsedImplicitly]
     [SlashCommand("submit", "Submit a score by uploading a replay file.")]
@@ -74,7 +75,7 @@ public sealed partial class CompetitionCommandModule
             return;
         }
 
-        ScoringUtil.ToStandardisedScore(score, beatmap);
+        score.ToStandardisedScore(beatmap);
 
         var (result, scoreId) = await scoreValidator.ValidateAsync(competition, osuUserId.Value, score, beatmap);
 
@@ -133,14 +134,15 @@ public sealed partial class CompetitionCommandModule
                 "Failed score",
                 "You cannot submit failed scores."
             ),
+            ScoreValidator.ValidationResult.ForbiddenModCombination => (
+                "Forbidden mod combination",
+                "The following mods are not allowed:\n"
+                + string.Join(", ", ScoreValidator.ForbiddenMods.Select(t => ((Mod?)Activator.CreateInstance(t))?.Acronym))
+            ),
             ScoreValidator.ValidationResult.ScoreNotFound => (
                 "Score not found",
                 "The score you are trying to submit was not found in your recent scores.\n"
                 + "Please note that you can only submit scores from the last 24 hours."
-            ),
-            ScoreValidator.ValidationResult.ScoreV2 => (
-                "Invalid score",
-                "You are not allowed to use ScoreV2."
             ),
             ScoreValidator.ValidationResult.TooEarly => (
                 "Invalid score",

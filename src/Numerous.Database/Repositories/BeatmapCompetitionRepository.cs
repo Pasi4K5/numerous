@@ -23,7 +23,6 @@ public interface IBeatmapCompetitionRepository : IRepository<BeatmapCompetitionD
     );
 
     Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAndCreatorAsync(ulong guildId, CancellationToken ct = default);
-    Task<int> GetNumScoresAsync(ulong guildId, CancellationToken ct = default);
 
     Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
         ulong guildId,
@@ -74,14 +73,6 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
         return Mapper.Map<BeatmapCompetitionDto?>(entity);
     }
 
-    public async Task<int> GetNumScoresAsync(ulong guildId, CancellationToken ct = default)
-    {
-        return await GetLastCompetitionQuery(guildId)
-            .Include(x => x.Scores)
-            .SelectMany(x => x.Scores)
-            .CountAsync(ct);
-    }
-
     public async Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
         ulong guildId,
         ulong discordUserId,
@@ -127,12 +118,5 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
         var now = DateTimeOffset.UtcNow;
 
         return Set.Where(x => x.GuildId == guildId && x.StartTime < now && x.EndTime > now);
-    }
-
-    private IQueryable<DbBeatmapCompetition> GetLastCompetitionQuery(ulong guildId)
-    {
-        return Set.Where(x => x.GuildId == guildId)
-            .OrderByDescending(x => x.EndTime)
-            .Take(1);
     }
 }
