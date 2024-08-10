@@ -56,16 +56,7 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
         var entities = await Set
             .Include(x => x.Player)
             .Include(x => x.Competition.LocalBeatmap)
-            .Where(x =>
-                x.GuildId == guildId
-                && Context
-                    .BeatmapCompetitions
-                    .Where(y => y.GuildId == guildId)
-                    .OrderByDescending(y => y.EndTime)
-                    .Take(1)
-                    .Select(y => y.StartTime)
-                    .Contains(x.StartTime)
-            )
+            .Where(IsTopScore(guildId))
             .OrderByDescending(x => x.TotalScore)
             .ThenBy(x => x.DateTime)
             .Skip(offset)
