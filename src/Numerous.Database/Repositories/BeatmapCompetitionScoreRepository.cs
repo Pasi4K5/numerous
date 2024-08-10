@@ -56,7 +56,16 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
         var entities = await Set
             .Include(x => x.Player)
             .Include(x => x.Competition.LocalBeatmap)
-            .Where(IsTopScore(guildId))
+            .Where(x =>
+                x.GuildId == guildId
+                && Context
+                    .BeatmapCompetitions
+                    .Where(y => y.GuildId == guildId)
+                    .OrderByDescending(y => y.EndTime)
+                    .Take(1)
+                    .Select(y => y.StartTime)
+                    .Contains(x.StartTime)
+            )
             .OrderByDescending(x => x.TotalScore)
             .ThenBy(x => x.DateTime)
             .Skip(offset)
@@ -69,7 +78,16 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
     public async Task<int> GetNumTopScoresAsync(ulong guildId, CancellationToken ct = default)
     {
         return await Set
-            .Where(x => IsCurrentCompScore(x, guildId))
+            .Where(x =>
+                x.GuildId == guildId
+                && Context
+                    .BeatmapCompetitions
+                    .Where(y => y.GuildId == guildId)
+                    .OrderByDescending(y => y.EndTime)
+                    .Take(1)
+                    .Select(y => y.StartTime)
+                    .Contains(x.StartTime)
+            )
             .Select(x => x.PlayerId)
             .Distinct()
             .CountAsync(ct);
@@ -94,22 +112,18 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
     private Expression<Func<DbBeatmapCompetitionScore, bool>> IsTopScore(ulong guildId)
     {
         return score => Set
-            .Where(x => IsCurrentCompScore(x, guildId))
-            .GroupBy(x => x.PlayerId)
-            .Select(x => x.Max(z => z.TotalScore))
+            .Where(y =>
+                y.GuildId == guildId
+                && Context
+                    .BeatmapCompetitions
+                    .Where(z => z.GuildId == guildId)
+                    .OrderByDescending(z => z.EndTime)
+                    .Take(1)
+                    .Select(z => z.StartTime)
+                    .Contains(y.StartTime)
+            )
+            .GroupBy(y => y.PlayerId)
+            .Select(y => y.Max(z => z.TotalScore))
             .Contains(score.TotalScore);
-    }
-
-    private bool IsCurrentCompScore(DbBeatmapCompetitionScore score, ulong guildId)
-    {
-        return
-            score.GuildId == guildId
-            && Context
-                .BeatmapCompetitions
-                .Where(x => x.GuildId == guildId)
-                .OrderByDescending(x => x.EndTime)
-                .Take(1)
-                .Select(x => x.StartTime)
-                .Contains(score.StartTime);
     }
 }
