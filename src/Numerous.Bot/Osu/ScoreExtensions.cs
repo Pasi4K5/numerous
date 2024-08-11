@@ -21,9 +21,9 @@ public static class ScoreExtensions
             && Math.Abs(apiScore.Accuracy - scoreInfo.Accuracy) < 1E-5
             && apiScore.MaxCombo == scoreInfo.MaxCombo
             && apiScore.Beatmap?.Checksum == scoreInfo.BeatmapHash
-            && apiStats.Great == scoreStats[HitResult.Great]
-            && apiStats.Ok == scoreStats[HitResult.Ok]
-            && apiStats.Meh == scoreStats[HitResult.Meh]
-            && apiStats.Miss == scoreStats[HitResult.Miss];
+            && apiStats.Great == scoreStats.GetValueOrDefault(HitResult.Great)
+            && apiStats.Ok == scoreStats.GetValueOrDefault(HitResult.Ok)
+            && apiStats.Meh == scoreStats.GetValueOrDefault(HitResult.Meh)
+            && apiStats.Miss == scoreStats.GetValueOrDefault(HitResult.Miss);
     }
 }
