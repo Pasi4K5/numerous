@@ -81,7 +81,7 @@ partial class CompetitionCommandModule
 
         if (result != ScoreValidator.ValidationResult.Valid)
         {
-            await RespondWithErrorAsync(result);
+            await FollowupWithErrorAsync(result);
 
             return;
         }
@@ -121,7 +121,7 @@ partial class CompetitionCommandModule
         );
     }
 
-    private async Task RespondWithErrorAsync(ScoreValidator.ValidationResult result)
+    private async Task FollowupWithErrorAsync(ScoreValidator.ValidationResult result)
     {
         var (title, message) = result switch
         {
