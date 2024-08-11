@@ -107,7 +107,7 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
     {
         var playableBeatmap = beatmap.GetPlayableBeatmap(RulesetInfos.Osu, score.Mods);
 
-        var expectedNumResults = playableBeatmap.HitObjects.Count(x => x.Judgement.MaxResult.AffectsCombo());
+        var expectedNumResults = playableBeatmap.HitObjects.Count;
         var actualNumResults = score.MaximumStatistics[HitResult.Great];
 
         return expectedNumResults != actualNumResults;
