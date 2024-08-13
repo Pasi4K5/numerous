@@ -28,7 +28,11 @@ public sealed class OsuVerifier(
         host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(async () => await AssignAllRolesAsync(ct))
             .EveryMinute()
             .PreventOverlapping(nameof(OsuVerifier)));
-        discord.GuildMemberUpdated += async (_, user) => await AssignRolesInGuildAsync(user, await GetOsuUsersAsync(user, ct), await GetGroupRoleMappingsAsync(ct: ct));
+        discord.GuildMemberUpdated += async (_, user) => await AssignRolesInGuildAsync(
+            user,
+            await GetOsuUsersAsync(user, ct),
+            await GetGroupRoleMappingsAsync(user.Guild, ct)
+        );
 
         return Task.CompletedTask;
     }
