@@ -36,8 +36,8 @@ public partial class MessageResponder
         }
 
         var sender = await channel.Guild.GetUserAsync(msg.Author.Id);
-        var senderRolePositions = sender.RoleIds.Select(x => channel.Guild.GetRole(x).Position).Concat(new[] { -1 });
-        var targetRolePositions = target.RoleIds.Select(x => channel.Guild.GetRole(x).Position).Concat(new[] { -1 });
+        var senderRolePositions = sender.RoleIds.Select(x => channel.Guild.GetRole(x).Position).Concat([-1]);
+        var targetRolePositions = target.RoleIds.Select(x => channel.Guild.GetRole(x).Position).Concat([-1]);
 
         if (target.Id == client.CurrentUser.Id
             || target.Id == sender.Id

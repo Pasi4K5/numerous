@@ -21,19 +21,19 @@ public static class TimeUtil
         byte? second
     )
     {
-        Span<int?> values = stackalloc int?[] { year, month, day, hour, minute, second };
+        Span<int?> values = [year, month, day, hour, minute, second];
 
         var firstParamIdx = 0;
 
-        Span<int> nowArr = stackalloc int[6]
-        {
+        Span<int> nowArr =
+        [
             now.Year,
             now.Month,
             now.Day,
             now.Hour,
             now.Minute,
             now.Second,
-        };
+        ];
 
         while (firstParamIdx < values.Length && values[firstParamIdx] is null)
         {

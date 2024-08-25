@@ -7,6 +7,7 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Util;
+using Numerous.Common.Util;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 
@@ -51,22 +52,25 @@ public sealed class UnDeleteCommandModule(IUnitOfWork uow, AttachmentService att
 
     private async Task AddComponentsToMessage(IUserMessage target, DiscordMessageDto msg)
     {
-        var user = await Context.Client.Rest.GetUserAsync(msg.AuthorId);
+        const string editedMarked = "\n-# (edited)";
+        var edited = msg.Versions.Count > 1;
 
+        var user = await Context.Client.Rest.GetUserAsync(msg.AuthorId);
         var msgContent = msg.Versions.LastOrDefault()?.RawContent;
 
         var embed = new EmbedBuilder()
             .WithAuthor(user.Username, user.GetAvatarUrl())
             .WithDescription($"**User ID:** {msg.AuthorId}\n"
                              + $"**Message ID:** {msg.Id}")
-            .WithColor(new(0xff0000))
+            .WithColor(0xff0000)
             .WithFields(
                 new EmbedFieldBuilder()
                     .WithName("Message text")
                     .WithValue(
                         string.IsNullOrEmpty(msgContent)
                             ? "*(No message content)*"
-                            : msgContent + "\n-# (edited)".OnlyIf(msg.Versions.Count > 1)
+                            : msgContent.LimitLength(CharacterLimit.DiscordEmbedFieldValue - (edited ? editedMarked.Length : 0))
+                              + editedMarked.OnlyIf(edited)
                     ),
                 new EmbedFieldBuilder()
                     .WithName("Sent")

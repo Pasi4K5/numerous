@@ -7,6 +7,8 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Numerous.Bot.Util;
+using Numerous.Common.Util;
 using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
@@ -59,12 +61,17 @@ public sealed class UnEditCommandModule(IUnitOfWork uow, DiscordSocketClient cli
         var embed = new EmbedBuilder()
             .WithAuthor(user.Username, user.GetAvatarUrl())
             .WithDescription($"**User ID:** {discordMessage.AuthorId}")
-            .WithColor(new(0xff0000))
+            .WithColor(0xff0000)
             .WithFields(
                 versions
-                    .Select(v => new EmbedFieldBuilder()
-                        .WithName($"Version {versions.IndexOf(v) + 1}")
-                        .WithValue(v.RawContent + '\n' + v.Timestamp.ToDiscordTimestampRel()))
+                    .Select(v =>
+                    {
+                        var timestamp = v.Timestamp.ToDiscordTimestampRel();
+
+                        return new EmbedFieldBuilder()
+                            .WithName($"Version {versions.IndexOf(v) + 1}")
+                            .WithValue(v.RawContent.LimitLength(CharacterLimit.DiscordEmbedFieldValue - timestamp.Length - 1) + '\n' + timestamp);
+                    })
             ).Build();
 
         await FollowupAsync(embed: embed);
