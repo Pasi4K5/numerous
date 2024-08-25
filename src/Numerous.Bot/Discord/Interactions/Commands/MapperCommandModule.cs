@@ -193,7 +193,7 @@ public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuAp
                     .WithFields(fields)
                     .WithThumbnailUrl(osuUser.AvatarUrl)
                     .WithImageUrl(osuUser.Cover.Url)
-                    .WithColor(new(0x66ccff))
+                    .WithColor(0x66ccff)
                     .Build(),
                 components: new ComponentBuilder()
                     .WithButton("osu! profile", url: $"https://osu.ppy.sh/u/{osuUser.Id}", style: ButtonStyle.Link)
