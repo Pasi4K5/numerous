@@ -20,6 +20,7 @@ public interface IBeatmapCompetitionScoreRepository : IRepository<BeatmapCompeti
     Task<List<BeatmapCompetitionScoreDto>> GetCurrentLeaderboardAsync(ulong guildId, int limit, int offset, CancellationToken ct = default);
     Task<int> GetNumTopScoresAsync(ulong guildId, CancellationToken ct = default);
     Task<int> GetRankOfAsync(BeatmapCompetitionScoreDto dto, ulong guildId, CancellationToken ct = default);
+    Task<ulong?> FindTopPlayerDiscordIdAsync(ulong guildId, CancellationToken ct = default);
 }
 
 public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context, IMapper mapper)
@@ -98,6 +99,17 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
                            || x.TotalScore == dto.TotalScore && x.DateTime < dto.DateTime
                        ), ct)
                + 1;
+    }
+
+    public async Task<ulong?> FindTopPlayerDiscordIdAsync(ulong guildId, CancellationToken ct = default)
+    {
+        return await Set
+            .Include(x => x.Player)
+            .Where(IsTopScore(guildId))
+            .OrderByDescending(x => x.TotalScore)
+            .ThenBy(x => x.DateTime)
+            .Select(x => x.Player.DiscordUserId)
+            .FirstOrDefaultAsync(ct);
     }
 
     private Expression<Func<DbBeatmapCompetitionScore, bool>> IsTopScore(ulong guildId)

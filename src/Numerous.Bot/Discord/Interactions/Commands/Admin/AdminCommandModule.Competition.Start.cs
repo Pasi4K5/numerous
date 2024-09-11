@@ -32,10 +32,10 @@ partial class AdminCommandModule
             [Summary("beatmap", "The link or ID of the beatmap.")]
             string beatmapStr,
             [Summary("start_time", "The start time of the competition (in UTC).")]
-            [Autocomplete(typeof(DateTimeAutocompleteHandler))]
+            [Autocomplete<DateTimeAutocompleteHandler>]
             string startTimeStr,
             [Summary("end_time", "The end time of the competition (in UTC).")]
-            [Autocomplete(typeof(WeeklyDateTimeAutocompleteHandler))]
+            [Autocomplete<WeeklyDateTimeAutocompleteHandler>]
             string endTimeStr
         )
         {
