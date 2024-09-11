@@ -62,7 +62,7 @@ partial class AdminCommandModule
         {
             protected override DateTime? GetSuggestedDateTime(IAutocompleteInteraction interaction)
             {
-                var val = interaction.Data.Options.ElementAt(2).Value.ToString();
+                var val = interaction.Data.Options.ElementAt(3).Value.ToString();
 
                 return DateTime.TryParse(val, out var dateTime)
                     ? dateTime.AddDays(7)
