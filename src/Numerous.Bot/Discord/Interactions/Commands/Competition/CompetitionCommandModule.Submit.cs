@@ -122,7 +122,7 @@ partial class CompetitionCommandModule
             embed: eb.LeaderboardScore(dto, rank).Build()
         );
 
-        if (topScoreUserId is not null && topScoreUserId.Value != Context.User.Id)
+        if (rank == 1 && topScoreUserId is not null && topScoreUserId.Value != Context.User.Id)
         {
             await Context.Channel.SendMessageAsync(
                 $"<@{topScoreUserId}> your top score just got sniped. L bozo"
