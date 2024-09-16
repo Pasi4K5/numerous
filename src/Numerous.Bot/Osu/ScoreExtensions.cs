@@ -17,7 +17,7 @@ public static class ScoreExtensions
         var apiStats = apiScore.Statistics;
 
         return
-            apiScore.TotalScore == scoreInfo.TotalScore
+            Math.Abs(apiScore.TotalScore - scoreInfo.TotalScore) <= 1
             && Math.Abs(apiScore.Accuracy - scoreInfo.Accuracy) < 1E-5
             && apiScore.MaxCombo == scoreInfo.MaxCombo
             && apiScore.Beatmap?.Checksum == scoreInfo.BeatmapHash
