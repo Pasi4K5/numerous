@@ -22,6 +22,7 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
     [
         typeof(ModScoreV2),
         typeof(OsuModTargetPractice),
+        typeof(OsuModRandom),
     ];
 
     public async Task<(ValidationResult result, ulong? apiScoreId)> ValidateAsync(
