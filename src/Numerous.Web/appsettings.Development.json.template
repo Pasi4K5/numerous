@@ -12,7 +12,7 @@
         "DiscordClientId": 42,
         "DiscordClientSecret": "42",
         "BotToken": "42",
-        "DbConnectionString": "Host=db;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};Include Error Detail=True",
+        "DbConnectionString": "Host=localhost;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};Include Error Detail=True",
         "OsuClientId": 42,
         "OsuClientSecret": "42",
         "GuildMode": false,
