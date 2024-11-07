@@ -72,7 +72,7 @@ public partial class DiscordEventHandler
 
         await uow.CommitAsync();
 
-        var imgDirPath = cfgService.Get().AttachmentDirectory;
+        var imgDirPath = cfgProvider.Get().AttachmentDirectory;
 
         if (!Directory.Exists(imgDirPath))
         {

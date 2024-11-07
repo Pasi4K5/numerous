@@ -5,12 +5,13 @@ using Coravel;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Numerous.Bot;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Database;
 using Numerous.Web.Auth;
 using Numerous.Web.Components;
@@ -55,6 +56,13 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    Env.TraversePath().Load(".env");
+
+    builder.Configuration.AddEnvironmentVariableInterpolation();
+
+    var cfg = new Config();
+    builder.Configuration.GetSection("Configuration").Bind(cfg);
+
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents();
 
@@ -65,11 +73,8 @@ try
         GatewayIntents = GatewayIntents.All,
     });
 
-    var cfgService = new ConfigService();
-    var cfg = cfgService.Get();
-
     services.AddSingleton(discordClient);
-    services.AddSingleton<IConfigService>(cfgService);
+    services.AddSingleton<IConfigProvider>(new ConfigProvider(cfg));
     services.AddSingleton(new InteractionService(
         discordClient,
         new()

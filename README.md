@@ -5,7 +5,7 @@
   <br />
   <a href="https://github.com/Pasi4K5/numerous/actions/workflows/github-code-scanning/codeql"><img src="https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/github-code-scanning%2Fcodeql?style=for-the-badge&label=CodeQL" alt="" /></a>
   <a href="https://github.com/Pasi4K5/numerous/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/ci.yml?style=for-the-badge&label=Continuous%20Integration" alt="" /></a>
-  <a href="https://github.com/Pasi4K5/numerous/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/cd.yml?style=for-the-badge&label=Continuous%20Delivery" alt="" /></a>
+  <a href="https://github.com/Pasi4K5/numerous/actions/workflows/publish.yml"><img src="https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/publish.yml?style=for-the-badge&label=Publish" alt="" /></a>
 </p>
 
 A Discord Bot for the Numerus Discord server.

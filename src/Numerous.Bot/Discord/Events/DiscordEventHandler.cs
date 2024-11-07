@@ -6,14 +6,14 @@
 using Discord.WebSocket;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Events;
 
 // TODO: This whole class fucking sucks.
 public sealed partial class DiscordEventHandler(
-    IConfigService cfgService,
+    IConfigProvider cfgProvider,
     DiscordSocketClient client,
     IUnitOfWorkFactory uowFactory,
     AttachmentService attachmentService,

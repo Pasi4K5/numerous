@@ -3,7 +3,7 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 
 namespace Numerous.Bot.Web.SauceNao;
 
@@ -12,7 +12,7 @@ public interface ISauceNaoClient
     Task<SauceNaoResponse> SearchAsync(string url);
 }
 
-public sealed class SauceNaoClient(ISauceNaoApi api, IConfigService cfg) : ISauceNaoClient
+public sealed class SauceNaoClient(ISauceNaoApi api, IConfigProvider cfg) : ISauceNaoClient
 {
     public async Task<SauceNaoResponse> SearchAsync(string url)
     {

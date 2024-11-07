@@ -20,7 +20,7 @@ public partial class DiscordEventHandler
 
     private async Task MessageCommands_HandleAsync(IMessage msg)
     {
-        var cfg = cfgService.Get();
+        var cfg = cfgProvider.Get();
 
         if (msg.Author.IsBot || msg.Author.Id != cfg.OwnerDiscordId || !msg.Content.StartsWith(cfg.Prefix))
         {

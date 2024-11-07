@@ -9,7 +9,7 @@ using Numerous.Bot.Osu;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Database.Dtos;
 using Numerous.Database.Util;
 using osu.Game.Beatmaps;
@@ -20,11 +20,11 @@ using Refit;
 
 namespace Numerous.Bot.Discord.Util;
 
-public sealed class EmbedBuilders(IConfigService configService, IOsuApiRepository osuApi)
+public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository osuApi)
 {
     private static readonly OsuColour _colours = new();
 
-    private Config Config => configService.Get();
+    private Config Config => cfgProvider.Get();
 
     public async Task<EmbedBuilder> CompetitionInfoAsync(WorkingBeatmap beatmap, BeatmapCompetitionDto competition)
     {

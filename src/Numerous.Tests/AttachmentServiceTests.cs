@@ -1,7 +1,7 @@
 using Discord;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Services;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Tests.Stubs;
 
 namespace Numerous.Tests;
@@ -27,7 +27,7 @@ public sealed class AttachmentServiceTests
     [Fact]
     public void GetTargetPath_ReturnsCorrectPath()
     {
-        var configService = Substitute.For<IConfigService>();
+        var configService = Substitute.For<IConfigProvider>();
         configService.Get().ReturnsForAnyArgs(new Config
         {
             AttachmentDirectory = AttachmentDirectory,
@@ -49,7 +49,7 @@ public sealed class AttachmentServiceTests
     [Fact]
     public void GetFileAttachments_MessageWithSingleAttachment_ReturnsAttachment()
     {
-        var configService = Substitute.For<IConfigService>();
+        var configService = Substitute.For<IConfigProvider>();
         configService.Get().ReturnsForAnyArgs(new Config
         {
             AttachmentDirectory = AttachmentDirectory,
@@ -69,7 +69,7 @@ public sealed class AttachmentServiceTests
     [Fact]
     public void GetFileAttachments_MessageWithMultipleAttachments_ReturnsAllAttachments()
     {
-        var configService = Substitute.For<IConfigService>();
+        var configService = Substitute.For<IConfigProvider>();
         configService.Get().ReturnsForAnyArgs(new Config
         {
             AttachmentDirectory = AttachmentDirectory,

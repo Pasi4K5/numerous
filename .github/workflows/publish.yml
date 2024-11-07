@@ -1,0 +1,21 @@
+name: Publish
+
+on:
+  workflow_run:
+    workflows: [Continuous Integration]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Publish
+      run: dotnet publish ./src/Numerous.Web/Numerous.Web.csproj -c Release --os linux -o ./dist
+    - name: Docker Login
+      run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+    - name: Build Docker Image
+      run: docker build -t ghcr.io/pasi4k5/numerous:latest .
+    - name: Push Docker Image
+      run: docker push ghcr.io/pasi4k5/numerous:latest
