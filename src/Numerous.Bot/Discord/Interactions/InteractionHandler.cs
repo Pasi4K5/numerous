@@ -8,7 +8,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Common.Util;
 using Serilog;
 
@@ -18,10 +18,10 @@ public sealed class InteractionHandler(
     DiscordSocketClient client,
     InteractionService interactions,
     IServiceProvider services,
-    IConfigService cfgService
+    IConfigProvider cfgProvider
 ) : IHostedService
 {
-    private Config Cfg => cfgService.Get();
+    private Config Cfg => cfgProvider.Get();
 
     public Task StartAsync(CancellationToken cancellationToken)
     {

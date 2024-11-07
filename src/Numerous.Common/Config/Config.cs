@@ -5,26 +5,26 @@
 
 using Newtonsoft.Json;
 
-namespace Numerous.Common.Services;
+namespace Numerous.Common.Config;
 
 [JsonObject(MemberSerialization.OptOut)]
 public record Config
 {
     public ulong OwnerDiscordId { get; init; }
-    public string Prefix { get; init; } = "\\";
+    public string Prefix { get; init; } = null!;
     public ulong DiscordClientId { get; init; }
-    public string DiscordClientSecret { get; init; } = "";
-    public string BotToken { get; init; } = "";
-    public string DbConnectionString { get; init; } = "";
+    public string DiscordClientSecret { get; init; } = null!;
+    public string BotToken { get; init; } = null!;
+    public string DbConnectionString { get; init; } = null!;
     public uint OsuClientId { get; init; }
-    public string OsuClientSecret { get; init; } = "";
-    public bool GuildMode { get; init; } = true;
-    public ulong[] GuildIds { get; init; } = [];
-    public string AttachmentDirectory { get; init; } = "./data/attachments/";
-    public string BeatmapDirectory { get; init; } = "./data/beatmaps/";
-    public string BaseUrl { get; init; } = "https://localhost:44333";
-    public string SauceNaoApiKey { get; set; } = "";
-    public EmojiContainer Emojis { get; init; } = new();
+    public string OsuClientSecret { get; init; } = null!;
+    public bool GuildMode { get; init; }
+    public ulong[] GuildIds { get; init; } = null!;
+    public string AttachmentDirectory { get; init; } = null!;
+    public string BeatmapDirectory { get; init; } = null!;
+    public string BaseUrl { get; init; } = null!;
+    public string SauceNaoApiKey { get; set; } = null!;
+    public EmojiContainer Emojis { get; init; } = null!;
 
     public record EmojiContainer
     {

@@ -8,21 +8,21 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Database.Context;
 
 namespace Numerous.Bot.Services;
 
 public sealed class Startup(
     DiscordSocketClient discordClient,
-    IConfigService cfgService,
+    IConfigProvider cfgProvider,
     IUnitOfWorkFactory uowFactory,
     ReminderService reminderService,
     OsuVerifier verifier,
     DiscordEventHandler eventHandler
 ) : IHostedService
 {
-    private Config Cfg => cfgService.Get();
+    private Config Cfg => cfgProvider.Get();
 
     public async Task StartAsync(CancellationToken ct)
     {

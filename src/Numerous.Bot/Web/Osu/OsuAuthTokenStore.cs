@@ -5,7 +5,7 @@
 
 using Newtonsoft.Json;
 using Numerous.Bot.Web.Osu.Models;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 
 namespace Numerous.Bot.Web.Osu;
 
@@ -14,7 +14,7 @@ public interface IOsuTokenProvider
     Task<string> GetTokenAsync();
 }
 
-public sealed class OsuTokenProvider(IConfigService cfgService, IHttpClientFactory clientFactory) : IOsuTokenProvider
+public sealed class OsuTokenProvider(IConfigProvider cfgProvider, IHttpClientFactory clientFactory) : IOsuTokenProvider
 {
     private static readonly TimeSpan _tokenExpirationBuffer = TimeSpan.FromSeconds(10);
 
@@ -25,8 +25,8 @@ public sealed class OsuTokenProvider(IConfigService cfgService, IHttpClientFacto
 
     private readonly HttpClient _client = clientFactory.CreateClient();
 
-    private uint ClientId => cfgService.Get().OsuClientId;
-    private string ClientSecret => cfgService.Get().OsuClientSecret;
+    private uint ClientId => cfgProvider.Get().OsuClientId;
+    private string ClientSecret => cfgProvider.Get().OsuClientSecret;
 
     public async Task<string> GetTokenAsync()
     {

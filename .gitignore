@@ -6,6 +6,8 @@ out/
 obj/
 bin/
 dist/
-config.json
+*.conf
+*.json
+.env
 
 DesignTimeNumerousDbContextFactory.cs

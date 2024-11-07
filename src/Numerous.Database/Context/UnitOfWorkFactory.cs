@@ -16,8 +16,23 @@ public interface IUnitOfWorkFactory
 public sealed class UnitOfWorkFactory(IDbContextFactory<NumerousDbContext> contextFactory, IMapper mapper)
     : IUnitOfWorkFactory
 {
+    private static bool _migrated;
+    private static readonly object _migratedLock = new();
+
     public IUnitOfWork Create()
     {
+        lock (_migratedLock)
+        {
+            if (!_migrated)
+            {
+                using var ctx = contextFactory.CreateDbContext();
+
+                ctx.Database.Migrate();
+
+                _migrated = true;
+            }
+        }
+
         return new UnitOfWork(contextFactory, mapper);
     }
 }

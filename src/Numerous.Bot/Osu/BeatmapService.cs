@@ -5,17 +5,17 @@
 
 using System.Security.Cryptography;
 using Numerous.Bot.Web.Osu.Models;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
 
 namespace Numerous.Bot.Osu;
 
-public sealed class BeatmapService(IConfigService cfgService, IUnitOfWork uow, IHttpClientFactory httpClientFactory)
+public sealed class BeatmapService(IConfigProvider cfgProvider, IUnitOfWork uow, IHttpClientFactory httpClientFactory)
 {
     private const string MirrorBaseUrl = "https://osu.direct/api";
 
-    private Config Config => cfgService.Get();
+    private Config Config => cfgProvider.Get();
 
     private readonly HttpClient _client = httpClientFactory.CreateClient();
 

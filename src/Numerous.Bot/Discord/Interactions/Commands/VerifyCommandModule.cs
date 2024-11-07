@@ -5,13 +5,13 @@
 
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Common.Config;
 using Numerous.Common.Enums;
-using Numerous.Common.Services;
 using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class VerifyCommandModule(IConfigService cfg, IUnitOfWork uow, OsuVerifier verifier) : InteractionModule
+public sealed class VerifyCommandModule(IConfigProvider cfg, IUnitOfWork uow, OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("verify", "Links your osu! account to your Discord account.")]

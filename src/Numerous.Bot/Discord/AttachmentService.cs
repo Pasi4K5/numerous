@@ -5,15 +5,15 @@
 
 using Discord;
 using Numerous.Bot.Services;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 
 namespace Numerous.Bot.Discord;
 
-public sealed class AttachmentService(IConfigService cfgService, IFileService files)
+public sealed class AttachmentService(IConfigProvider cfgProvider, IFileService files)
 {
     private readonly HttpClient _httpClient = new();
 
-    private Config Config => cfgService.Get();
+    private Config Config => cfgProvider.Get();
 
     public async Task SaveAttachmentAsync(string url, string targetPath)
     {

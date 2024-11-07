@@ -13,17 +13,17 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Numerous.Bot.Discord;
-using Numerous.Common.Services;
+using Numerous.Common.Config;
 using Numerous.Web.Auth;
 
 namespace Numerous.Web.Controllers;
 
 [Route("[action]")]
-public sealed class AuthController(IConfigService cfgService) : ControllerBase
+public sealed class AuthController(IConfigProvider cfgProvider) : ControllerBase
 {
     private static readonly Dictionary<ulong, string> _states = new();
 
-    private Config Config => cfgService.Get();
+    private Config Config => cfgProvider.Get();
 
     [HttpGet]
     public IActionResult Login(string returnUrl = "/")

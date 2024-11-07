@@ -3,22 +3,17 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Numerous.Common.Config;
-using Serilog;
+namespace Numerous.Web;
 
-namespace Numerous.Database.Context;
-
-public sealed class NumerousDbContextFactory(IConfigProvider cfgProvider) : IDbContextFactory<NumerousDbContext>
+public abstract class HostedService : IHostedService
 {
-    public NumerousDbContext CreateDbContext()
+    public virtual Task StartAsync(CancellationToken ct)
     {
-        var options = new DbContextOptionsBuilder<NumerousDbContext>()
-            .UseNpgsql(cfgProvider.Get().DbConnectionString)
-            .LogTo(Log.Logger.Information, LogLevel.Information)
-            .Options;
+        return Task.CompletedTask;
+    }
 
-        return new NumerousDbContext(options);
+    public virtual Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }
