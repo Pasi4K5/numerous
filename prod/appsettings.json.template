@@ -1,0 +1,36 @@
+{
+    "Logging": {
+        "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+        }
+    },
+    "AllowedHosts": "*",
+    "Configuration": {
+        "OwnerDiscordId": 42,
+        "Prefix": "\\",
+        "DiscordClientId": 42,
+        "DiscordClientSecret": "42",
+        "BotToken": "42",
+        "DbConnectionString": "Host=db;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};Include Error Detail=True",
+        "OsuClientId": 42,
+        "OsuClientSecret": "42",
+        "GuildMode": false,
+        "GuildIds": [],
+        "AttachmentDirectory": "/data/attachments/",
+        "BeatmapDirectory": "/data/beatmapsets/",
+        "BaseUrl": "https://example.com",
+        "SauceNaoApiKey": "42",
+        "Emojis": {
+            "RankSilverSs": 42,
+            "RankSs": 42,
+            "RankSilverS": 42,
+            "RankS": 42,
+            "RankA": 42,
+            "RankB": 42,
+            "RankC": 42,
+            "RankD": 42,
+            "RankF": 42
+        }
+    }
+}

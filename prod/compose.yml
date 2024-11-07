@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17.0
+    container_name: numerous-db
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./backup:/backup
+    env_file:
+      - .env
+    networks:
+      - numerous-net
+  app:
+    image: ghcr.io/pasi4k5/numerous:latest
+    container_name: numerous-app
+    depends_on:
+      - db
+    volumes:
+      - ./appsettings.json:/app/appsettings.json:ro
+      - ./data:/data
+    env_file:
+      - .env
+    networks:
+      - numerous-net
+  nginx:
+    image: jonasal/nginx-certbot:latest
+    container_name: numerous-nginx
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - CERTBOT_EMAIL=${CERTBOT_EMAIL}
+      - RENEWAL_INTERVAL=12h
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - nginx-secrets:/etc/letsencrypt
+      - ./user_conf.d:/etc/nginx/user_conf.d:ro
+    networks:
+      - numerous-net
+
+volumes:
+  db-data:
+  nginx-secrets:
+
+networks:
+  numerous-net:
