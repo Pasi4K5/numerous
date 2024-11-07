@@ -5,26 +5,21 @@
 
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
+using Numerous.Common;
 
 namespace Numerous.Bot.Discord.Events;
 
-public sealed class MudaeMessageHandler(DiscordSocketClient client) : IHostedService
+public sealed class MudaeMessageHandler(DiscordSocketClient client) : HostedService
 {
     private readonly TimeSpan _timeBetweenRollGroups = TimeSpan.FromSeconds(10);
 
     private readonly Dictionary<ulong, string> _firstClaimMessageLinks = new();
     private readonly Dictionary<ulong, DateTimeOffset> _lastRollTimes = new();
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
         client.MessageReceived += HandleMessageReceived;
 
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
         return Task.CompletedTask;
     }
 

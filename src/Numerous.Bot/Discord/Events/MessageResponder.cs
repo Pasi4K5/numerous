@@ -4,21 +4,16 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
+using Numerous.Common;
 
 namespace Numerous.Bot.Discord.Events;
 
-public sealed partial class MessageResponder(DiscordSocketClient client) : IHostedService
+public sealed partial class MessageResponder(DiscordSocketClient client) : HostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
         client.MessageReceived += async msg => await RespondAsync(msg);
 
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
         return Task.CompletedTask;
     }
 

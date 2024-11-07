@@ -5,9 +5,9 @@
 
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
+using Numerous.Common;
 using Numerous.Common.Config;
 using Numerous.Database.Context;
 
@@ -20,11 +20,11 @@ public sealed class Startup(
     ReminderService reminderService,
     OsuVerifier verifier,
     DiscordEventHandler eventHandler
-) : IHostedService
+) : HostedService
 {
     private Config Cfg => cfgProvider.Get();
 
-    public async Task StartAsync(CancellationToken ct)
+    public override async Task StartAsync(CancellationToken ct)
     {
         discordClient.Log += Log;
 
@@ -51,7 +51,7 @@ public sealed class Startup(
         eventHandler.Start();
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await discordClient.LogoutAsync();
         await discordClient.StopAsync();
