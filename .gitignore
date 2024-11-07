@@ -6,6 +6,7 @@ out/
 obj/
 bin/
 dist/
+logs/
 *.conf
 *.json
 .env
