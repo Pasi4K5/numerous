@@ -120,7 +120,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             {
                 var now = Context.Interaction.CreatedAt;
 
-                var timestamp = TimeUtil.ParametersToDateTime(
+                var timestamp = DateTimeUtil.ParametersToDateTime(
                     now.ToDateTime(timeZone),
                     (ushort?)year,
                     (byte?)month,
