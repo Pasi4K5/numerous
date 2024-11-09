@@ -177,11 +177,9 @@ csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
 
 # Expressions
 
-csharp_style_expression_bodied_methods = false:warning
 csharp_style_expression_bodied_constructors = false:warning
 csharp_style_expression_bodied_properties = true:warning
 csharp_style_expression_bodied_accessors = true:warning
-csharp_style_expression_bodied_operators = false:warning
 csharp_style_expression_bodied_local_functions = false:warning
 
 # this. qualification
