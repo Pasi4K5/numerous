@@ -18,6 +18,7 @@ services:
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
       - ./data:/data
+      - ./logs:/app/logs
     env_file:
       - .env
     networks:
