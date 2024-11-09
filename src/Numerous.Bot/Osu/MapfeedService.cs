@@ -86,7 +86,7 @@ public sealed class MapfeedService(
                 await guild.DownloadUsersAsync();
                 var guildUserIds = (await guild.GetUsersAsync()).Select(u => u.Id);
 
-                if (allMapperDiscordIds.All(discordId => guildUserIds.Contains(discordId)))
+                if (allMapperDiscordIds.All(discordId => !guildUserIds.Contains(discordId)))
                 {
                     // No mapper or GDer in guild.
                     return;
