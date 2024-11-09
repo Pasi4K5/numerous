@@ -82,7 +82,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
                 .WithButton(
                     "osu!direct",
                     style: ButtonStyle.Link,
-                    url: $"https://axer-url.vercel.app/api/direct?map={beatmapSet.Id}",
+                    url: $"https://axer-url.vercel.app/api/direct?set={beatmapSet.Id}",
                     emote: new Emoji("⬇️")
                 )
                 .WithButton(
