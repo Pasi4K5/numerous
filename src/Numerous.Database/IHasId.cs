@@ -7,5 +7,5 @@ namespace Numerous.Database;
 
 public interface IHasId<TId>
 {
-    TId Id { get; init; }
+    TId Id { get; internal set; }
 }

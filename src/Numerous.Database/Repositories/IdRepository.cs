@@ -14,6 +14,12 @@ public interface IIdRepository<TDto, in TId> : IRepository<TDto>
     where TDto : class, IHasId<TId>
     where TId : struct, IEquatable<TId>
 {
+    /// <summary>
+    /// Inserts the given DTO, immediately calls <see cref="DbContext.SaveChangesAsync(System.Threading.CancellationToken)"/>,
+    /// and sets the ID of the DTO to the ID of the entity.
+    /// </summary>
+    public Task ExecuteInsertAsync(TDto dto, CancellationToken ct = default);
+
     Task<TDto?> FindAsync(TId id, CancellationToken ct = default);
     Task<TDto> GetAsync(TId id, CancellationToken ct = default);
     Task<bool> ExistsAsync(TId id, CancellationToken ct = default);
@@ -27,6 +33,15 @@ public class IdRepository<TEntity, TDto, TId>(NumerousDbContext context, IMapper
     where TDto : class, IHasId<TId>
     where TId : struct, IEquatable<TId>
 {
+    public async Task ExecuteInsertAsync(TDto dto, CancellationToken ct = default)
+    {
+        var entity = Mapper.Map<TEntity>(dto);
+        await Set.AddAsync(entity, ct);
+        await Context.SaveChangesAsync(ct);
+
+        dto.Id = entity.Id;
+    }
+
     public async Task<TDto?> FindAsync(TId id, CancellationToken ct = default)
     {
         return Mapper.Map<TDto?>(await Set.FindAsync([id], ct));
