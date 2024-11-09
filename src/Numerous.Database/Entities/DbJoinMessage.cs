@@ -9,11 +9,11 @@ using Numerous.Common.Util;
 
 namespace Numerous.Database.Entities;
 
-[Table("JoinMessage")]
+[Table("join_message")]
 public sealed class DbJoinMessage : DbEntity<ulong>
 {
     [NotMapped]
-    public override ulong Id { get => GuildId; init => GuildId = value; }
+    public override ulong Id { get => GuildId; set => GuildId = value; }
 
     public DbGuild Guild { get; init; } = null!;
 

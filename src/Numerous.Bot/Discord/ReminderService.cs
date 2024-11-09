@@ -26,7 +26,12 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
         );
     }
 
-    public async Task AddReminderAsync(ReminderDto reminder, bool insertIntoDb = true, CancellationToken ct = default)
+    public async Task AddReminderAsync(ReminderDto reminder, CancellationToken ct = default)
+    {
+        await AddReminderAsync(reminder, true, ct);
+    }
+
+    private async Task AddReminderAsync(ReminderDto reminder, bool insertIntoDb, CancellationToken ct = default)
     {
         if (reminder.Timestamp < DateTimeOffset.Now + _cacheInterval)
         {
@@ -46,10 +51,7 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
         if (insertIntoDb)
         {
             await using var uow = uowFactory.Create();
-
-            await uow.Reminders.InsertAsync(reminder, ct);
-
-            await uow.CommitAsync(ct);
+            await uow.Reminders.ExecuteInsertAsync(reminder, ct);
         }
     }
 
@@ -94,6 +96,7 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
     {
         if (await client.GetChannelAsync(reminder.ChannelId) is not IMessageChannel channel)
         {
+            // TODO: Handle this by sending a DM.
             return;
         }
 

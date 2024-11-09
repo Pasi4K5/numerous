@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("DiscordMessage")]
+[Table("discord_message")]
 public sealed class DbDiscordMessage : DbEntity<ulong>
 {
     public DateTimeOffset? DeletedAt { get; set; }

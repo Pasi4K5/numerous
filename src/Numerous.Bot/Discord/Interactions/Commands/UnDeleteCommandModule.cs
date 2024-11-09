@@ -92,20 +92,18 @@ public sealed class UnDeleteCommandModule(IUnitOfWork uow, AttachmentService att
         var prevMsg = prevDisabled ? null : messages[messages.IndexOf(msg) + 1];
         var nextMsg = nextDisabled ? null : messages[messages.IndexOf(msg) - 1];
 
-        var buttons = new ComponentBuilder()
-            .WithRows([
-                new ActionRowBuilder().WithButton(
-                    "\u2b06\ufe0f Previous",
-                    $"{PreviousButtonId}:{target.Id},{prevMsg?.Id}",
-                    disabled: prevDisabled
-                ),
-                new ActionRowBuilder().WithButton(
-                    "\u2b07\ufe0f Next",
-                    $"{NextButtonId}:{target.Id},{nextMsg?.Id}",
-                    disabled: nextDisabled
-                ),
-            ])
-            .Build();
+        var buttons = new ComponentBuilder().WithRows([
+            new ActionRowBuilder().WithButton(
+                "\u2b06\ufe0f Previous",
+                $"{PreviousButtonId}:{target.Id},{prevMsg?.Id}",
+                disabled: prevDisabled
+            ),
+            new ActionRowBuilder().WithButton(
+                "\u2b07\ufe0f Next",
+                $"{NextButtonId}:{target.Id},{nextMsg?.Id}",
+                disabled: nextDisabled
+            ),
+        ]).Build();
 
         await target.ModifyAsync(m =>
         {

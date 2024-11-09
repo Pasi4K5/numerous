@@ -15,6 +15,7 @@ public interface IMessageChannelRepository : IIdRepository<MessageChannelDto, ul
 {
     Task<bool> IsReadOnlyAsync(ulong channelId, CancellationToken ct = default);
     Task<bool> ToggleReadOnlyAsync(ulong guildId, ulong channelId, CancellationToken ct = default);
+    Task<ulong[]> GetAllMapfeedChannelIdsAsync(CancellationToken ct = default);
 }
 
 public sealed class MessageChannelRepository(NumerousDbContext context, IMapper mapper)
@@ -48,5 +49,13 @@ public sealed class MessageChannelRepository(NumerousDbContext context, IMapper 
         }
 
         return channel?.IsReadOnly ?? true;
+    }
+
+    public async Task<ulong[]> GetAllMapfeedChannelIdsAsync(CancellationToken ct = default)
+    {
+        return await Set
+            .Where(x => x.Guild.MapfeedChannel == x)
+            .Select(x => x.Id)
+            .ToArrayAsync(ct);
     }
 }

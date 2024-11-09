@@ -15,6 +15,7 @@ public interface IOsuUserRepository : IIdRepository<OsuUserDto, uint>
 {
     Task<OsuUserDto?> FindByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
     Task<uint?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
+    Task<Dictionary<uint, ulong>> GetVerifiedWithDiscordId(CancellationToken ct = default);
 }
 
 public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
@@ -38,5 +39,13 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
             .FirstOrDefaultAsync(ct);
 
         return result == default ? null : result;
+    }
+
+    public async Task<Dictionary<uint, ulong>> GetVerifiedWithDiscordId(CancellationToken ct = default)
+    {
+        return await Set
+            .Where(u => u.DiscordUserId != null)
+            .Select(u => new { DiscordId = u.DiscordUserId!.Value, OsuId = u.Id })
+            .ToDictionaryAsync(u => u.OsuId, u => u.DiscordId, ct);
     }
 }

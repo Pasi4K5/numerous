@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("MessageChannel")]
+[Table("message_channel")]
 public sealed class DbMessageChannel : DbChannel
 {
     [DefaultValue(false)]

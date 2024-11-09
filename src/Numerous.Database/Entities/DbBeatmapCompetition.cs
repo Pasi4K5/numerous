@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
-[Table("BeatmapCompetition")]
+[Table("beatmap_competition")]
 [PrimaryKey(nameof(GuildId), nameof(StartTime))]
 public sealed class DbBeatmapCompetition
 {

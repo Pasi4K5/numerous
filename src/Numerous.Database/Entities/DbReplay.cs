@@ -7,12 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("Replay")]
+[Table("replay")]
 public sealed class DbReplay : DbEntity<Guid>
 {
-    [Column("Md5Hash")]
+    [Column("md5_hash")]
     [ForeignKey(nameof(Score))]
-    public override Guid Id { get; init; }
+    public override Guid Id { get; set; }
 
     public DbBeatmapCompetitionScore Score { get; set; } = null!;
 

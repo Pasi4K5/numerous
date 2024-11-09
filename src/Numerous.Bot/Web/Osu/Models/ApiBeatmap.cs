@@ -23,6 +23,9 @@ public record ApiBeatmap
 
     [JsonProperty("mode")]
     public required string Mode { get; init; }
+
+    [JsonProperty("difficulty_rating")]
+    public required float DifficultyRating { get; init; }
 }
 
 public sealed record ApiBeatmapExtended : ApiBeatmap

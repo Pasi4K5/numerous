@@ -24,11 +24,32 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbReminder> Reminders { get; set; }
     public DbSet<DbReplay> Replays { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        optionsBuilder.UseSnakeCaseNamingConvention();
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
         builder.UseSerialColumns();
+
+        builder.Entity<DbGuild>(e =>
+        {
+            e.HasMany(x => x.Channels)
+                .WithOne(x => x.Guild)
+                .HasForeignKey(x => x.GuildId)
+                .IsRequired();
+
+            e.HasOne(x => x.MapfeedChannel)
+                .WithOne()
+                .HasForeignKey<DbGuild>(x => x.MapfeedChannelId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
 
         builder.Entity<DbBeatmapCompetition>(e =>
         {

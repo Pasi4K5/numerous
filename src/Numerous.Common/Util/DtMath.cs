@@ -3,22 +3,12 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.ComponentModel.DataAnnotations.Schema;
+namespace Numerous.Common.Util;
 
-namespace Numerous.Database.Entities;
-
-[Table("local_beatmap")]
-public sealed class DbLocalBeatmap : DbEntity<Guid>
+public static class DtMath
 {
-    [Column("md5_hash")]
-    public override Guid Id { get; set; }
-
-    public string OsuText { get; set; } = null!;
-    public byte[] OszHash { get; set; } = null!;
-    public uint MaxCombo { get; set; }
-
-    public DbOnlineBeatmap? OnlineBeatmap { get; set; }
-    public uint OnlineBeatmapId { get; set; }
-
-    public ICollection<DbBeatmapCompetition> BeatmapCompetitions { get; set; } = [];
+    public static DateTimeOffset Max(DateTimeOffset p1, DateTimeOffset p2)
+    {
+        return p1 >= p2 ? p1 : p2;
+    }
 }

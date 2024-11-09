@@ -28,6 +28,7 @@ public static class BotServiceConfiguration
         services.AddTransient<EmbedBuilders>();
         services.AddSingleton<IFileService, FileService>();
         services.AddHostedService<InteractionHandler>();
+        services.AddHostedService<MapfeedService>();
         services.AddHostedService<MessageResponder>();
         services.AddHostedService<MudaeMessageHandler>();
         services.AddSingleton<IOsuApiRepository, OsuApiRepository>();

@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("Channel")]
+[Table("channel")]
 public class DbChannel : DbEntity<ulong>
 {
     public DbGuild Guild { get; set; } = null!;

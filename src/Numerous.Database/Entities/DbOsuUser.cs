@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
-[Table("OsuUser")]
+[Table("osu_user")]
 [Index(nameof(DiscordUserId), IsUnique = true)]
 public sealed class DbOsuUser : DbEntity<uint>
 {

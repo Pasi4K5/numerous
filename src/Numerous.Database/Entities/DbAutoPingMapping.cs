@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
-[Table("AutoPingMapping")]
+[Table("auto_ping_mapping")]
 [Index(nameof(ChannelId), nameof(TagId), nameof(RoleId), IsUnique = true)]
 public sealed class DbAutoPingMapping
 {

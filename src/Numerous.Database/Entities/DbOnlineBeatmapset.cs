@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("OnlineBeatmapset")]
+[Table("online_beatmapset")]
 public sealed class DbOnlineBeatmapset : DbEntity<uint>
 {
     public DbOsuUser Creator { get; set; } = null!;

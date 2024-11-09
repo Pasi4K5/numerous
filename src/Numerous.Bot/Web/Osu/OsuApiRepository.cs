@@ -6,6 +6,7 @@
 using System.Diagnostics;
 using System.Net;
 using Numerous.Bot.Web.Osu.Models;
+using Numerous.Common.Util;
 using Refit;
 
 namespace Numerous.Bot.Web.Osu;
@@ -17,6 +18,7 @@ public interface IOsuApiRepository
     Task<ApiScore[]> GetRecentScoresAsync(uint userId);
     Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type);
     Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id);
+    Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync();
     Task<ApiBeatmapExtended> GetBeatmapAsync(uint id);
 }
 
@@ -69,6 +71,20 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
     public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id)
     {
         return await api.GetBeatmapsetAsync(id);
+    }
+
+    public async Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync()
+    {
+        var updatedMapsTask =
+            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any);
+        var rankedQualifiedMapsTask =
+            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, IOsuApi.BeatmapsetSort.RankedDesc);
+
+        var (updatedMaps, rankedQualifiedMaps) = await (updatedMapsTask, rankedQualifiedMapsTask);
+
+        return updatedMaps.Beatmapsets.Concat(rankedQualifiedMaps.Beatmapsets)
+            .OrderByDescending(x => x.RankedDate ?? x.SubmittedDate)
+            .ToArray();
     }
 
     public async Task<ApiBeatmapExtended> GetBeatmapAsync(uint id)

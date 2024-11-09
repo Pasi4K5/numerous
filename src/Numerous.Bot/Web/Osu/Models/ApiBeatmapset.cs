@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Newtonsoft.Json;
+using osu.Game.Beatmaps;
 
 namespace Numerous.Bot.Web.Osu.Models;
 
@@ -54,7 +55,10 @@ public record ApiBeatmapset
 public record ApiBeatmapsetExtended : ApiBeatmapset
 {
     [JsonProperty("submitted_date")]
-    public DateTimeOffset? SubmittedDate { get; init; }
+    public DateTimeOffset SubmittedDate { get; init; }
+
+    [JsonProperty("ranked")]
+    public BeatmapOnlineStatus Ranked { get; set; }
 
     [JsonProperty("ranked_date")]
     public DateTimeOffset? RankedDate { get; init; }
@@ -63,5 +67,11 @@ public record ApiBeatmapsetExtended : ApiBeatmapset
     public required ApiOsuUser User { get; init; }
 
     [JsonProperty("related_users")]
-    public required IReadOnlyCollection<ApiOsuUser> RelatedUsers { get; init; }
+    public required IReadOnlyCollection<ApiOsuUser> RelatedUsers
+    {
+        get => _relatedUsers ?? [];
+        init => _relatedUsers = value;
+    }
+
+    private IReadOnlyCollection<ApiOsuUser>? _relatedUsers;
 }

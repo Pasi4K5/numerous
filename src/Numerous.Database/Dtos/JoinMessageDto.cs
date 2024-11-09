@@ -11,9 +11,9 @@ public sealed class JoinMessageDto : IdDto<ulong>
     /// <summary>
     /// Equivalent to <see cref="GuildId"/>.
     /// </summary>
-    public override ulong Id { get => GuildId; init => GuildId = value; }
+    public override ulong Id { get => GuildId; set => GuildId = value; }
 
-    public required ulong GuildId { get; init; }
+    public required ulong GuildId { get; set; }
     public required ulong ChannelId { get; set; }
 
     public string? Title { get; set; }

@@ -9,11 +9,11 @@ using Numerous.Common.Enums;
 
 namespace Numerous.Database.Entities;
 
-[Table("GroupRoleMapping")]
+[Table("group_role_mapping")]
 [PrimaryKey(nameof(GuildId), nameof(RoleId), nameof(Group))]
 public sealed class DbGroupRoleMapping
 {
-    [Column("GroupId")]
+    [Column("group_id")]
     public OsuUserGroup Group { get; set; }
 
     public ulong RoleId { get; set; }

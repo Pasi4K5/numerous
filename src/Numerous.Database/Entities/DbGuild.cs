@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
-[Table("Guild")]
+[Table("guild")]
 [Index(nameof(UnverifiedRoleId), IsUnique = true)]
 public sealed class DbGuild : DbEntity<ulong>
 {
@@ -18,6 +18,9 @@ public sealed class DbGuild : DbEntity<ulong>
 
     public DbJoinMessage? JoinMessage { get; set; }
     public ulong? UnverifiedRoleId { get; set; }
+
+    public DbChannel? MapfeedChannel { get; set; }
+    public ulong? MapfeedChannelId { get; set; }
 
     public ICollection<DbChannel> Channels { get; set; } = [];
     public ICollection<DbGroupRoleMapping> GroupRoleMappings { get; set; } = [];

@@ -10,7 +10,7 @@ using Numerous.Common.Util;
 
 namespace Numerous.Database.Entities;
 
-[Table("DiscordMessageVersion")]
+[Table("discord_message_version")]
 [PrimaryKey(nameof(MessageId), nameof(Timestamp))]
 public sealed class DbDiscordMessageVersion
 {
