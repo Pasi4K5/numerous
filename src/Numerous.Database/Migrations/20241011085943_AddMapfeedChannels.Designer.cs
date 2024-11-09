@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Numerous.Database.Context;
@@ -11,9 +12,11 @@ using Numerous.Database.Context;
 namespace Numerous.Database.Migrations
 {
     [DbContext(typeof(NumerousDbContext))]
-    partial class NumerousDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241011085943_AddMapfeedChannels")]
+    partial class AddMapfeedChannels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,58 +29,46 @@ namespace Numerous.Database.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("channel_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("RoleId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("role_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("TagId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("tag_id");
+                        .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_auto_ping_mapping");
+                    b.HasKey("Id");
 
                     b.HasIndex("ChannelId", "TagId", "RoleId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_auto_ping_mapping_channel_id_tag_id_role_id");
+                        .IsUnique();
 
-                    b.ToTable("auto_ping_mapping", (string)null);
+                    b.ToTable("AutoPingMapping");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetition", b =>
                 {
                     b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTimeOffset>("StartTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_time");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("EndTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_time");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("LocalBeatmapId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("local_beatmap_id");
+                        .HasColumnType("uuid");
 
-                    b.HasKey("GuildId", "StartTime")
-                        .HasName("pk_beatmap_competition");
+                    b.HasKey("GuildId", "StartTime");
 
-                    b.HasIndex("LocalBeatmapId")
-                        .HasDatabaseName("ix_beatmap_competition_local_beatmap_id");
+                    b.HasIndex("LocalBeatmapId");
 
-                    b.ToTable("beatmap_competition", null, t =>
+                    b.ToTable("BeatmapCompetition", t =>
                         {
                             t.HasCheckConstraint("CK_BeatmapCompetition_ValidTime", "\"StartTime\" < \"EndTime\"");
                         });
@@ -91,91 +82,71 @@ namespace Numerous.Database.Migrations
                         .HasColumnName("Md5Hash");
 
                     b.Property<double>("Accuracy")
-                        .HasColumnType("double precision")
-                        .HasColumnName("accuracy");
+                        .HasColumnType("double precision");
 
                     b.Property<DateTimeOffset>("DateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_time");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("GreatCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("great_count");
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<long>("MaxCombo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("max_combo");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("MehCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("meh_count");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("MissCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("miss_count");
+                        .HasColumnType("bigint");
 
                     b.Property<string[]>("Mods")
                         .IsRequired()
-                        .HasColumnType("char(2)[]")
-                        .HasColumnName("mods");
+                        .HasColumnType("char(2)[]");
 
                     b.Property<long>("OkCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("ok_count");
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("OnlineId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("online_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_id");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("StartTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_time");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("TotalScore")
-                        .HasColumnType("bigint")
-                        .HasColumnName("total_score");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_beatmap_competition_score");
+                    b.HasKey("Id");
 
                     b.HasIndex("OnlineId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_beatmap_competition_score_online_id");
+                        .IsUnique();
 
-                    b.HasIndex("PlayerId")
-                        .HasDatabaseName("ix_beatmap_competition_score_player_id");
+                    b.HasIndex("PlayerId");
 
-                    b.HasIndex("GuildId", "StartTime")
-                        .HasDatabaseName("ix_beatmap_competition_score_guild_id_start_time");
+                    b.HasIndex("GuildId", "StartTime");
 
-                    b.ToTable("beatmap_competition_score", (string)null);
+                    b.ToTable("BeatmapCompetitionScore");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbChannel", b =>
                 {
                     b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId")
-                        .HasDatabaseName("ix_channel_guild_id");
+                    b.HasIndex("GuildId");
 
-                    b.ToTable("channel");
+                    b.ToTable("Channel");
 
                     b.UseTptMappingStrategy();
                 });
@@ -184,170 +155,136 @@ namespace Numerous.Database.Migrations
                 {
                     b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("AuthorId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("author_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("channel_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsHidden")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_hidden");
+                        .HasColumnType("boolean");
 
                     b.Property<decimal?>("ReferenceMessageId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("reference_message_id");
+                        .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_discord_message");
+                    b.HasKey("Id");
 
-                    b.HasIndex("AuthorId")
-                        .HasDatabaseName("ix_discord_message_author_id");
+                    b.HasIndex("AuthorId");
 
-                    b.HasIndex("ChannelId")
-                        .HasDatabaseName("ix_discord_message_channel_id");
+                    b.HasIndex("ChannelId");
 
-                    b.HasIndex("ReferenceMessageId")
-                        .HasDatabaseName("ix_discord_message_reference_message_id");
+                    b.HasIndex("ReferenceMessageId");
 
-                    b.ToTable("discord_message", (string)null);
+                    b.ToTable("DiscordMessage");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbDiscordMessageVersion", b =>
                 {
                     b.Property<decimal>("MessageId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("message_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTimeOffset>("Timestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CleanContent")
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)")
-                        .HasColumnName("clean_content")
                         .HasComment("If NULL, the clean content is the same as the raw content.");
 
                     b.Property<string>("RawContent")
                         .IsRequired()
                         .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("raw_content");
+                        .HasColumnType("character varying(4000)");
 
-                    b.HasKey("MessageId", "Timestamp")
-                        .HasName("pk_discord_message_version");
+                    b.HasKey("MessageId", "Timestamp");
 
-                    b.ToTable("discord_message_version", (string)null);
+                    b.ToTable("DiscordMessageVersion");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbDiscordUser", b =>
                 {
                     b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("TimeZoneId")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("time_zone_id");
+                        .HasColumnType("character varying(64)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_discord_user");
+                    b.HasKey("Id");
 
-                    b.ToTable("discord_user", (string)null);
+                    b.ToTable("DiscordUser");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbGroupRoleMapping", b =>
                 {
                     b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("RoleId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("role_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<short>("Group")
                         .HasColumnType("smallint")
-                        .HasColumnName("group_id");
+                        .HasColumnName("GroupId");
 
-                    b.HasKey("GuildId", "RoleId", "Group")
-                        .HasName("pk_group_role_mapping");
+                    b.HasKey("GuildId", "RoleId", "Group");
 
-                    b.ToTable("group_role_mapping", (string)null);
+                    b.ToTable("GroupRoleMapping");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbGuild", b =>
                 {
                     b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("MapfeedChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("mapfeed_channel_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("TrackMessages")
-                        .HasColumnType("boolean")
-                        .HasColumnName("track_messages");
+                        .HasColumnType("boolean");
 
                     b.Property<decimal?>("UnverifiedRoleId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("unverified_role_id");
+                        .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_guild");
+                    b.HasKey("Id");
 
                     b.HasIndex("MapfeedChannelId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_guild_mapfeed_channel_id");
+                        .IsUnique();
 
                     b.HasIndex("UnverifiedRoleId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_guild_unverified_role_id");
+                        .IsUnique();
 
-                    b.ToTable("guild", (string)null);
+                    b.ToTable("Guild");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbJoinMessage", b =>
                 {
                     b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("channel_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(4096)");
 
                     b.Property<string>("Title")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(256)");
 
-                    b.HasKey("GuildId")
-                        .HasName("pk_join_message");
+                    b.HasKey("GuildId");
 
-                    b.HasIndex("ChannelId")
-                        .HasDatabaseName("ix_join_message_channel_id");
+                    b.HasIndex("ChannelId");
 
-                    b.ToTable("join_message", null, t =>
+                    b.ToTable("JoinMessage", t =>
                         {
                             t.HasCheckConstraint("CK_JoinMessage_HasText", "\"Title\" IS NOT NULL OR \"Description\" IS NOT NULL");
                         });
@@ -358,33 +295,27 @@ namespace Numerous.Database.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("md5_hash");
+                        .HasColumnName("Md5Hash");
 
                     b.Property<long>("MaxCombo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("max_combo");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("OnlineBeatmapId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("online_beatmap_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("OsuText")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("osu_text");
+                        .HasColumnType("text");
 
                     b.Property<byte[]>("OszHash")
                         .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("osz_hash");
+                        .HasColumnType("bytea");
 
-                    b.HasKey("Id")
-                        .HasName("pk_local_beatmap");
+                    b.HasKey("Id");
 
-                    b.HasIndex("OnlineBeatmapId")
-                        .HasDatabaseName("ix_local_beatmap_online_beatmap_id");
+                    b.HasIndex("OnlineBeatmapId");
 
-                    b.ToTable("local_beatmap", null, t =>
+                    b.ToTable("LocalBeatmap", t =>
                         {
                             t.HasCheckConstraint("CK_LocalBeatmap_ValidSha256", "length(\"OszHash\") = 256 / 8");
                         });
@@ -394,136 +325,112 @@ namespace Numerous.Database.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
 
                     b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("OnlineBeatmapsetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("online_beatmapset_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_online_beatmap");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CreatorId")
-                        .HasDatabaseName("ix_online_beatmap_creator_id");
+                    b.HasIndex("CreatorId");
 
-                    b.HasIndex("OnlineBeatmapsetId")
-                        .HasDatabaseName("ix_online_beatmap_online_beatmapset_id");
+                    b.HasIndex("OnlineBeatmapsetId");
 
-                    b.ToTable("online_beatmap", (string)null);
+                    b.ToTable("OnlineBeatmap");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbOnlineBeatmapset", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
 
                     b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_online_beatmapset");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CreatorId")
-                        .HasDatabaseName("ix_online_beatmapset_creator_id");
+                    b.HasIndex("CreatorId");
 
-                    b.ToTable("online_beatmapset", (string)null);
+                    b.ToTable("OnlineBeatmapset");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbOsuUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
 
                     b.Property<decimal?>("DiscordUserId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("discord_user_id");
+                        .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_osu_user");
+                    b.HasKey("Id");
 
                     b.HasIndex("DiscordUserId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_osu_user_discord_user_id");
+                        .IsUnique();
 
-                    b.ToTable("osu_user", (string)null);
+                    b.ToTable("OsuUser");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbReminder", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("channel_id");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Message")
                         .HasMaxLength(6000)
-                        .HasColumnType("character varying(6000)")
-                        .HasColumnName("message");
+                        .HasColumnType("character varying(6000)");
 
                     b.Property<DateTimeOffset>("Timestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("user_id");
+                        .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_reminder");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ChannelId")
-                        .HasDatabaseName("ix_reminder_channel_id");
+                    b.HasIndex("ChannelId");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_reminder_user_id");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("reminder", (string)null);
+                    b.ToTable("Reminder");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbReplay", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
-                        .HasColumnName("md5_hash");
+                        .HasColumnName("Md5Hash");
 
                     b.Property<byte[]>("Data")
                         .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("data");
+                        .HasColumnType("bytea");
 
-                    b.HasKey("Id")
-                        .HasName("pk_replay");
+                    b.HasKey("Id");
 
-                    b.ToTable("replay", (string)null);
+                    b.ToTable("Replay");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbForumChannel", b =>
                 {
                     b.HasBaseType("Numerous.Database.Entities.DbChannel");
 
-                    b.ToTable("forum_channel");
+                    b.ToTable("ForumChannel");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbMessageChannel", b =>
@@ -531,10 +438,9 @@ namespace Numerous.Database.Migrations
                     b.HasBaseType("Numerous.Database.Entities.DbChannel");
 
                     b.Property<bool>("IsReadOnly")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_read_only");
+                        .HasColumnType("boolean");
 
-                    b.ToTable("message_channel");
+                    b.ToTable("MessageChannel");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbAutoPingMapping", b =>
@@ -543,8 +449,7 @@ namespace Numerous.Database.Migrations
                         .WithMany("AutoPingMappings")
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_auto_ping_mapping_forum_channel_channel_id");
+                        .IsRequired();
 
                     b.Navigation("Channel");
                 });
@@ -555,15 +460,13 @@ namespace Numerous.Database.Migrations
                         .WithMany("BeatmapCompetitions")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_beatmap_competition_guild_guild_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbLocalBeatmap", "LocalBeatmap")
                         .WithMany("BeatmapCompetitions")
                         .HasForeignKey("LocalBeatmapId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_beatmap_competition_local_beatmap_local_beatmap_id");
+                        .IsRequired();
 
                     b.Navigation("Guild");
 
@@ -576,15 +479,13 @@ namespace Numerous.Database.Migrations
                         .WithMany()
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_beatmap_competition_score_osu_user_player_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbBeatmapCompetition", "Competition")
                         .WithMany("Scores")
                         .HasForeignKey("GuildId", "StartTime")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_beatmap_competition_score_beatmap_competition_guild_id_star");
+                        .IsRequired();
 
                     b.Navigation("Competition");
 
@@ -597,8 +498,7 @@ namespace Numerous.Database.Migrations
                         .WithMany("Channels")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_channel_guild_guild_id");
+                        .IsRequired();
 
                     b.Navigation("Guild");
                 });
@@ -609,20 +509,17 @@ namespace Numerous.Database.Migrations
                         .WithMany("Messages")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_discord_message_discord_user_author_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbMessageChannel", "Channel")
                         .WithMany("Messages")
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_discord_message_message_channel_channel_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbDiscordMessage", "ReferenceMessage")
                         .WithMany("Replies")
-                        .HasForeignKey("ReferenceMessageId")
-                        .HasConstraintName("fk_discord_message_discord_message_reference_message_id");
+                        .HasForeignKey("ReferenceMessageId");
 
                     b.Navigation("Author");
 
@@ -637,8 +534,7 @@ namespace Numerous.Database.Migrations
                         .WithMany("Versions")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_discord_message_version_discord_message_message_id");
+                        .IsRequired();
 
                     b.Navigation("Message");
                 });
@@ -649,8 +545,7 @@ namespace Numerous.Database.Migrations
                         .WithMany("GroupRoleMappings")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_group_role_mapping_guild_guild_id");
+                        .IsRequired();
 
                     b.Navigation("Guild");
                 });
@@ -660,8 +555,7 @@ namespace Numerous.Database.Migrations
                     b.HasOne("Numerous.Database.Entities.DbChannel", "MapfeedChannel")
                         .WithOne()
                         .HasForeignKey("Numerous.Database.Entities.DbGuild", "MapfeedChannelId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_guild_channel_mapfeed_channel_id");
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("MapfeedChannel");
                 });
@@ -672,15 +566,13 @@ namespace Numerous.Database.Migrations
                         .WithMany()
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_join_message_message_channel_channel_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbGuild", "Guild")
                         .WithOne("JoinMessage")
                         .HasForeignKey("Numerous.Database.Entities.DbJoinMessage", "GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_join_message_guild_guild_id");
+                        .IsRequired();
 
                     b.Navigation("Channel");
 
@@ -693,8 +585,7 @@ namespace Numerous.Database.Migrations
                         .WithMany("LocalBeatmaps")
                         .HasForeignKey("OnlineBeatmapId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_local_beatmap_online_beatmap_online_beatmap_id");
+                        .IsRequired();
 
                     b.Navigation("OnlineBeatmap");
                 });
@@ -705,15 +596,13 @@ namespace Numerous.Database.Migrations
                         .WithMany("OnlineBeatmaps")
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_online_beatmap_osu_user_creator_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbOnlineBeatmapset", "OnlineBeatmapset")
                         .WithMany("Beatmaps")
                         .HasForeignKey("OnlineBeatmapsetId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_online_beatmap_online_beatmapset_online_beatmapset_id");
+                        .IsRequired();
 
                     b.Navigation("Creator");
 
@@ -726,8 +615,7 @@ namespace Numerous.Database.Migrations
                         .WithMany("OnlineBeatmapsets")
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_online_beatmapset_osu_user_creator_id");
+                        .IsRequired();
 
                     b.Navigation("Creator");
                 });
@@ -736,8 +624,7 @@ namespace Numerous.Database.Migrations
                 {
                     b.HasOne("Numerous.Database.Entities.DbDiscordUser", "DiscordUser")
                         .WithOne("OsuUser")
-                        .HasForeignKey("Numerous.Database.Entities.DbOsuUser", "DiscordUserId")
-                        .HasConstraintName("fk_osu_user_discord_user_discord_user_id");
+                        .HasForeignKey("Numerous.Database.Entities.DbOsuUser", "DiscordUserId");
 
                     b.Navigation("DiscordUser");
                 });
@@ -748,15 +635,13 @@ namespace Numerous.Database.Migrations
                         .WithMany()
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_reminder_message_channel_channel_id");
+                        .IsRequired();
 
                     b.HasOne("Numerous.Database.Entities.DbDiscordUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_reminder_discord_user_user_id");
+                        .IsRequired();
 
                     b.Navigation("Channel");
 
@@ -769,8 +654,7 @@ namespace Numerous.Database.Migrations
                         .WithOne("Replay")
                         .HasForeignKey("Numerous.Database.Entities.DbReplay", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_replay_beatmap_competition_score_md5_hash");
+                        .IsRequired();
 
                     b.Navigation("Score");
                 });
@@ -781,8 +665,7 @@ namespace Numerous.Database.Migrations
                         .WithOne()
                         .HasForeignKey("Numerous.Database.Entities.DbForumChannel", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_forum_channel_channel_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbMessageChannel", b =>
@@ -791,8 +674,7 @@ namespace Numerous.Database.Migrations
                         .WithOne()
                         .HasForeignKey("Numerous.Database.Entities.DbMessageChannel", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_message_channel_channel_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbBeatmapCompetition", b =>

@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("ForumChannel")]
+[Table("forum_channel")]
 public sealed class DbForumChannel : DbChannel
 {
     public ICollection<DbAutoPingMapping> AutoPingMappings { get; set; } = [];

@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Numerous.Database.Entities;
 
-[Table("DiscordUser")]
+[Table("discord_user")]
 public sealed class DbDiscordUser : DbEntity<ulong>
 {
     [MaxLength(64)]

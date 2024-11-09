@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
-[Table("BeatmapCompetitionScore")]
+[Table("beatmap_competition_score")]
 [Index(nameof(OnlineId), IsUnique = true)]
 public sealed class DbBeatmapCompetitionScore : DbEntity<Guid>
 {
     [Column("Md5Hash")]
-    public override Guid Id { get; init; }
+    public override Guid Id { get; set; }
 
     public ulong? OnlineId { get; set; }
 

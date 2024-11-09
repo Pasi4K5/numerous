@@ -86,4 +86,9 @@ public static partial class DiscordExtensions
     {
         return $"[{s}]({url})";
     }
+
+    public static string Mention(this IMessageChannel channel)
+    {
+        return MentionUtils.MentionChannel(channel.Id);
+    }
 }

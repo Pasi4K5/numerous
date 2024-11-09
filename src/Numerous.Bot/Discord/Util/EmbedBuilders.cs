@@ -5,6 +5,7 @@
 
 using System.Net;
 using Discord;
+using Humanizer;
 using Numerous.Bot.Osu;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
@@ -25,6 +26,72 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
     private static readonly OsuColour _colours = new();
 
     private Config Config => cfgProvider.Get();
+
+    public static (EmbedBuilder, ComponentBuilder) BeatmapSetUpdate(
+        ApiBeatmapsetExtended beatmapSet,
+        string mapper,
+        string[] gdMappers
+    )
+    {
+        var (eb, cp) = BeatmapSet(beatmapSet, mapper, gdMappers);
+
+        return (
+            eb.WithTitle(beatmapSet.Ranked switch
+                {
+                    BeatmapOnlineStatus.WIP or BeatmapOnlineStatus.Pending =>
+                        "New beatmap has been uploaded.",
+                    BeatmapOnlineStatus.Qualified =>
+                        "Beatmap has been qualified.",
+                    BeatmapOnlineStatus.Ranked =>
+                        "Beatmap has been ranked.",
+                    BeatmapOnlineStatus.Loved =>
+                        "Beatmap has been loved.",
+                    _ => throw new InvalidOperationException("Invalid beatmap status"),
+                }
+            ).WithTimestamp(beatmapSet.RankedDate ?? beatmapSet.SubmittedDate),
+            cp
+        );
+    }
+
+    private static (EmbedBuilder, ComponentBuilder) BeatmapSet(
+        ApiBeatmapsetExtended beatmapSet,
+        string mapper,
+        string[] gdMappers
+    )
+    {
+        var color = OsuColour.ForBeatmapSetOnlineStatus(beatmapSet.Ranked);
+
+        return (
+            new EmbedBuilder()
+                .WithColor(color?.ToRgb() ?? Color.Default)
+                .WithImageUrl(beatmapSet.Covers.Card2X)
+                .WithDescription(
+                    $"## {beatmapSet.Title}\n"
+                    + $"### by {beatmapSet.Artist}\n"
+                    + $"**Mapped by** {mapper}\n"
+                    + $"**{(gdMappers.Length == 1 ? "GD" : "GDs")} by** {gdMappers.Humanize()}"
+                ),
+            new ComponentBuilder()
+                .WithButton(
+                    "Beatmap page",
+                    style: ButtonStyle.Link,
+                    url: $"https://osu.ppy.sh/s/{beatmapSet.Id}",
+                    emote: new Emoji("🌐")
+                )
+                .WithButton(
+                    "osu!direct",
+                    style: ButtonStyle.Link,
+                    url: $"https://axer-url.vercel.app/api/direct?map={beatmapSet.Id}",
+                    emote: new Emoji("⬇️")
+                )
+                .WithButton(
+                    "Mapper profile",
+                    style: ButtonStyle.Link,
+                    url: $"https://osu.ppy.sh/u/{beatmapSet.UserId}",
+                    emote: new Emoji("👤")
+                )
+        );
+    }
 
     public async Task<EmbedBuilder> CompetitionInfoAsync(WorkingBeatmap beatmap, BeatmapCompetitionDto competition)
     {

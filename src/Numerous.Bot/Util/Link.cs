@@ -3,10 +3,20 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Database.Entities;
+namespace Numerous.Bot.Util;
 
-public class DbEntity<TId> : IHasId<TId>
-    where TId : struct
+// TODO: Use this for all links.
+public static class Link
 {
-    public virtual TId Id { get; set; }
+    public static string OsuUser(uint userId, string text = "") =>
+        text.ToMdLink($"https://osu.ppy.sh/users/{userId}");
+
+    public static string ToMdLink(this string text, string url)
+    {
+        return string.IsNullOrWhiteSpace(text)
+            ? url
+            : string.IsNullOrWhiteSpace(url)
+                ? text
+                : $"[{text}]({url})";
+    }
 }
