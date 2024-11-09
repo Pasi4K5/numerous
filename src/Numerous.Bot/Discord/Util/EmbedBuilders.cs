@@ -70,6 +70,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
                     + $"### by {beatmapSet.Artist}\n"
                     + $"**Mapped by** {mapper}\n"
                     + $"**{(gdMappers.Length == 1 ? "GD" : "GDs")} by** {gdMappers.Humanize()}"
+                        .OnlyIf(gdMappers.Length > 0)
                 ),
             new ComponentBuilder()
                 .WithButton(
