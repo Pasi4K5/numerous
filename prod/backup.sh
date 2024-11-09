@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Backing up database..."
+
 date=`date +%Y-%m-%d_%H-%M-%S`
 file="/backup/backup_$date.sql"
 source ./.env
