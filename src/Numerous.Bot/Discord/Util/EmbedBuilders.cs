@@ -65,10 +65,11 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             new EmbedBuilder()
                 .WithColor(color?.ToRgb() ?? Color.Default)
                 .WithImageUrl(beatmapSet.Covers.Card2X)
+                .WithThumbnailUrl(beatmapSet.User.AvatarUrl)
                 .WithDescription(
                     $"## {beatmapSet.Title}\n"
                     + $"### by {beatmapSet.Artist}\n"
-                    + $"**Mapped by** {mapper}\n"
+                    + $"**mapped by** {mapper}\n"
                     + $"**{(gdMappers.Length == 1 ? "GD" : "GDs")} by** {gdMappers.Humanize()}"
                         .OnlyIf(gdMappers.Length > 0)
                 ),
