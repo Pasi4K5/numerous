@@ -13,6 +13,7 @@ using Numerous.Bot.Web.Osu;
 using Numerous.Common;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
+using osu.Game.Beatmaps;
 
 namespace Numerous.Bot.Osu;
 
@@ -56,6 +57,15 @@ public sealed class MapFeedService(
 
         foreach (var set in beatmapSets)
         {
+            // Pending/WIP maps can't have GDs yet, because they have just been submitted.
+            var canHaveGds = set.Ranked is not (BeatmapOnlineStatus.WIP or BeatmapOnlineStatus.Pending);
+
+            if (!canHaveGds && !osuUserDiscordIdDic.ContainsKey(set.UserId))
+            {
+                // Mapper not verified.
+                continue;
+            }
+
             var fullSet = await api.GetBeatmapsetAsync(set.Id);
 
             var gdMapperIds = fullSet.Beatmaps
