@@ -26,9 +26,13 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             [Summary("hours")] int? hours = null,
             [Summary("minutes")] int? minutes = null,
             [Summary("seconds")] int? seconds = null,
-            [Summary("about")] string? message = null
+            [Summary("about")] string? message = null,
+            [Summary("private")] bool priv = false
         )
         {
+            var ephemeral = priv;
+            priv |= Context.Channel is IDMChannel;
+
             if (hours is null && minutes is null && seconds is null)
             {
                 await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
@@ -38,20 +42,10 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
             var timestamp = Context.Interaction.CreatedAt;
 
-            if (hours is not null)
-            {
-                timestamp = timestamp.AddHours(hours.Value);
-            }
-
-            if (minutes is not null)
-            {
-                timestamp = timestamp.AddMinutes(minutes.Value);
-            }
-
-            if (seconds is not null)
-            {
-                timestamp = timestamp.AddSeconds(seconds.Value);
-            }
+            timestamp = timestamp
+                .AddHours(hours ?? 0)
+                .AddMinutes(minutes ?? 0)
+                .AddSeconds(seconds ?? 0);
 
             if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
             {
@@ -60,13 +54,13 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                 return;
             }
 
-            await DeferAsync();
+            await DeferAsync(ephemeral);
 
             await reminderService.AddReminderAsync(new ReminderDto
             {
                 UserId = Context.User.Id,
-                GuildId = Context.Guild.Id,
-                ChannelId = Context.Channel.Id,
+                GuildId = Context.Guild?.Id,
+                ChannelId = priv ? null : Context.Channel.Id,
                 Timestamp = timestamp,
                 Message = message,
             });
@@ -79,7 +73,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                         $"{message}\n".OnlyIf(message is not null)
                         + $"{timestamp.ToDiscordTimestampLong()} ({timestamp.ToDiscordTimestampRel()})"
                     )
-                    .Build()
+                    .Build(),
+                ephemeral: ephemeral
             );
         }
 
@@ -92,9 +87,13 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             [Summary("hour")] int? hour = null,
             [Summary("minute")] int? minute = null,
             [Summary("second")] int? second = null,
-            [Summary("about")] string? message = null
+            [Summary("about")] string? message = null,
+            [Summary("private")] bool priv = false
         )
         {
+            var ephemeral = priv;
+            priv |= Context.Channel is IDMChannel;
+
             if (year is null && month is null && day is null && hour is null && minute is null && second is null)
             {
                 await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
@@ -102,7 +101,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                 return;
             }
 
-            await DeferAsync();
+            await DeferAsync(ephemeral);
 
             var timeZone = (await uow.DiscordUsers.GetAsync(Context.User.Id)).TimeZone;
 
@@ -138,8 +137,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                 await reminderService.AddReminderAsync(new ReminderDto
                 {
                     UserId = Context.User.Id,
-                    GuildId = Context.Guild.Id,
-                    ChannelId = Context.Channel.Id,
+                    GuildId = Context.Guild?.Id,
+                    ChannelId = priv ? null : Context.Channel.Id,
                     Timestamp = timestamp,
                     Message = message,
                 });
@@ -152,7 +151,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                             $"{message}\n".OnlyIf(message is not null)
                             + $"{timestamp.ToDiscordTimestampDateTime()} ({timestamp.ToDiscordTimestampRel()})"
                         )
-                        .Build()
+                        .Build(),
+                    ephemeral: ephemeral
                 );
             }
             catch (InvalidCastException)
@@ -181,9 +181,9 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
     [UsedImplicitly]
     [SlashCommand("list", "Lists your reminders.")]
-    public async Task ListCommand()
+    public async Task ListCommand([Summary("private")] bool ephemeral = false)
     {
-        await DeferAsync();
+        await DeferAsync(ephemeral);
 
         var reminders = await uow.Reminders.GetOrderedRemindersAsync(Context.User.Id);
 
@@ -201,13 +201,16 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
         foreach (var (reminder, index) in reminders.WithIndexes())
         {
             embed.AddField(
-                $"Reminder {index + 1} in <#{reminder.ChannelId}>",
-                $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
+                $"Reminder {index + 1} in <#{reminder.ChannelId ?? (await Context.User.CreateDMChannelAsync()).Id}>",
+                (reminder.ChannelId is not null || Context.Channel is IDMChannel || ephemeral
+                    ? $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
+                    : "*[REDACTED]*\n"
+                )
                 + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
             );
         }
 
-        await FollowupAsync(embed: embed.Build());
+        await FollowupAsync(embed: embed.Build(), ephemeral: ephemeral);
     }
 
     [UsedImplicitly]

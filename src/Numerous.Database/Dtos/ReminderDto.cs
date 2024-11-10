@@ -8,8 +8,8 @@ namespace Numerous.Database.Dtos;
 public sealed class ReminderDto : IdDto<uint>
 {
     public required ulong UserId { get; set; }
-    public required ulong GuildId { internal get; set; }
-    public required ulong ChannelId { get; set; }
+    public required ulong? GuildId { internal get; set; }
+    public required ulong? ChannelId { get; set; }
     public required DateTimeOffset Timestamp { get; set; }
     public string? Message { get; set; }
 }

@@ -23,6 +23,6 @@ public sealed class DbReminder : DbEntity<uint>
     public DbDiscordUser User { get; set; } = null!;
     public ulong UserId { get; set; }
 
-    public DbMessageChannel Channel { get; set; } = null!;
-    public ulong ChannelId { get; set; }
+    public DbMessageChannel? Channel { get; set; } = null!;
+    public ulong? ChannelId { get; set; }
 }

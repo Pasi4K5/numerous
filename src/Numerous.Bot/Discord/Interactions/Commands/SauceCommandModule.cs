@@ -16,6 +16,7 @@ public sealed class SauceCommandModule(ISauceNaoClient sauceNao) : InteractionMo
     // Current rate limit is 4 per 30 seconds and 100 per 24 hours.
     [UsedImplicitly]
     [MessageCommand("Sauce")]
+    [CommandContextType(InteractionContextType.Guild)]
     public async Task SauceCommand(IMessage msg)
     {
         var imgAttachments = msg.Attachments

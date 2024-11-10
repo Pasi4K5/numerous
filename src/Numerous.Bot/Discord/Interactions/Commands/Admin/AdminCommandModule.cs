@@ -14,6 +14,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
 
 [UsedImplicitly]
 [Group("admin", "Admin commands.")]
+[CommandContextType(InteractionContextType.Guild)]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
 public sealed partial class AdminCommandModule : InteractionModule
 {

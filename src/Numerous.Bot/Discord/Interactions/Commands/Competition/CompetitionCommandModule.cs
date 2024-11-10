@@ -3,6 +3,7 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Discord;
 using Discord.Interactions;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Osu;
@@ -11,6 +12,7 @@ using Numerous.Database.Context;
 namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
 [Group("competition", "Beatmap competition commands.")]
+[CommandContextType(InteractionContextType.Guild)]
 public sealed partial class CompetitionCommandModule(
     IUnitOfWork uow,
     BeatmapService beatmapService,

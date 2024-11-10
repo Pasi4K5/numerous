@@ -23,7 +23,11 @@ public sealed class ReminderRepository(NumerousDbContext context, IMapper mapper
     public override async Task InsertAsync(ReminderDto dto, CancellationToken ct = default)
     {
         await EnsureDiscordUserExistsAsync(dto.UserId, ct);
-        await EnsureChannelExistsAsync<DbMessageChannel>(dto.GuildId, dto.ChannelId, ct);
+
+        if (dto.GuildId is not null && dto.ChannelId is not null)
+        {
+            await EnsureChannelExistsAsync<DbMessageChannel>(dto.GuildId.Value, dto.ChannelId.Value, ct);
+        }
 
         dto.Timestamp = dto.Timestamp.ToUniversalTime();
 

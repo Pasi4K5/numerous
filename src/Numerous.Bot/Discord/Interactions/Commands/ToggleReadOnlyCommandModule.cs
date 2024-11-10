@@ -10,6 +10,7 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
+[CommandContextType(InteractionContextType.Guild)]
 public sealed class ToggleReadOnlyCommandModule(IUnitOfWork uow) : InteractionModule
 {
     [UsedImplicitly]
