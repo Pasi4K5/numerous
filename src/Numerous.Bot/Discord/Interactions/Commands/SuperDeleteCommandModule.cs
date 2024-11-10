@@ -10,6 +10,7 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.PrivateChannel)]
 public sealed class SuperDeleteCommandModule(IUnitOfWork uow) : InteractionModule
 {
     [UsedImplicitly]

@@ -7,6 +7,7 @@ using Coravel;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
+using Numerous.Bot.Util;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 using Timer = System.Timers.Timer;
@@ -94,10 +95,13 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
 
     private async Task TriggerReminderAsync(ReminderDto reminder, CancellationToken ct)
     {
-        if (await client.GetChannelAsync(reminder.ChannelId) is not IMessageChannel channel)
+        var isDmReminder = false;
+
+        if (reminder.ChannelId is null
+            || await client.GetChannelAsync(reminder.ChannelId.Value) is not IMessageChannel channel)
         {
-            // TODO: Handle this by sending a DM.
-            return;
+            channel = await (await client.GetUserAsync(reminder.UserId)).CreateDMChannelAsync();
+            isDmReminder = true;
         }
 
         var embed = new EmbedBuilder()
@@ -107,12 +111,13 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
             .WithTimestamp(reminder.Timestamp)
             .Build();
 
-        await channel.SendMessageAsync($"<@{reminder.UserId}>", embed: embed);
+        await channel.SendMessageAsync(
+            MentionUtils.MentionUser(reminder.UserId).OnlyIf(!isDmReminder),
+            embed: embed
+        );
 
         await using var uow = uowFactory.Create();
-
         await uow.Reminders.DeleteByIdAsync(reminder.Id, ct);
-
         await uow.CommitAsync(ct);
 
         _timerCache.Remove(reminder.Id);

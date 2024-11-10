@@ -11,5 +11,6 @@ namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 
 [UsedImplicitly]
 [Group("config", "Configuration commands")]
+[CommandContextType(InteractionContextType.Guild)]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
 public sealed partial class ConfigCommandModule : InteractionModule;
