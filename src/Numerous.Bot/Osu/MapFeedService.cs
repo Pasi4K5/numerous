@@ -16,7 +16,7 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Osu;
 
-public sealed class MapfeedService(
+public sealed class MapFeedService(
     IHost host,
     DiscordSocketClient discordClient,
     IOsuApiRepository api,
@@ -26,11 +26,11 @@ public sealed class MapfeedService(
     private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
     private static readonly DateTimeOffset _startupTime = DateTime.Now;
 
-    private readonly Dictionary<uint, DateTimeOffset> _sentSets = new();
+    private readonly Dictionary<uint, DateTimeOffset> _checkedSets = new();
 
     public override Task StartAsync(CancellationToken ct)
     {
-        host.Services.UseScheduler(s => s.ScheduleAsync(() => CheckForNewBeatmapsetsAsync(ct)).EveryTenSeconds().PreventOverlapping(nameof(MapfeedService)));
+        host.Services.UseScheduler(s => s.ScheduleAsync(() => CheckForNewBeatmapsetsAsync(ct)).EveryTenSeconds().PreventOverlapping(nameof(MapFeedService)));
 
         return Task.CompletedTask;
     }
@@ -40,44 +40,51 @@ public sealed class MapfeedService(
         await using var uow = uowFactory.Create();
 
         var channelIds = await uow.MessageChannels.GetAllMapfeedChannelIdsAsync(ct);
-        var osuUsers = await uow.OsuUsers.GetVerifiedWithDiscordId(ct);
+        var osuUserDiscordIdDic = await uow.OsuUsers.GetVerifiedWithDiscordId(ct);
 
-        if (channelIds.Length == 0 || osuUsers.Count == 0)
+        if (channelIds.Length == 0 || osuUserDiscordIdDic.Count == 0)
         {
             return;
         }
 
-        var beatmapsets = (await api.SearchRecentlyChangedBeatmapsetsAsync())
+        var beatmapSets = (await api.SearchRecentlyChangedBeatmapsetsAsync())
             .Where(s =>
                 (s.RankedDate ?? s.SubmittedDate) >= DtMath.Max(_startupTime, DateTimeOffset.UtcNow - _cacheDuration)
-                && !_sentSets.ContainsKey(s.Id)
-            ).OrderBy(s => s.RankedDate ?? s.SubmittedDate);
+                && !_checkedSets.ContainsKey(s.Id)
+            ).OrderBy(s => s.RankedDate ?? s.SubmittedDate)
+            .ToArray();
 
-        foreach (var set in beatmapsets)
+        foreach (var set in beatmapSets)
         {
-            var allMapperOsuIds = set.RelatedUsers
+            var fullSet = await api.GetBeatmapsetAsync(set.Id);
+
+            var gdMapperIds = fullSet.Beatmaps
                 .Select(u => u.Id)
-                .Prepend(set.UserId)
+                .Where(id => id != fullSet.UserId)
                 .ToArray();
 
-            if (allMapperOsuIds.All(id => !osuUsers.ContainsKey(id)))
+            var allMapperOsuIds = gdMapperIds
+                .Prepend(fullSet.UserId)
+                .ToArray();
+
+            if (allMapperOsuIds.All(id => !osuUserDiscordIdDic.ContainsKey(id)))
             {
                 // No mapper or GDer verified.
                 continue;
             }
 
             var allMapperDiscordIds = allMapperOsuIds
-                .Where(osuUsers.ContainsKey)
-                .Select(osuId => osuUsers[osuId])
+                .Where(osuUserDiscordIdDic.ContainsKey)
+                .Select(osuId => osuUserDiscordIdDic[osuId])
                 .ToArray();
 
-            var mapper = osuUsers.TryGetValue(set.UserId, out var userId)
+            var mapper = osuUserDiscordIdDic.TryGetValue(fullSet.UserId, out var userId)
                 ? MentionUtils.MentionUser(userId)
-                : Link.OsuUser(set.UserId, set.Creator);
+                : Link.OsuUser(fullSet.UserId, fullSet.Creator);
 
-            var verifiedGdMapperDiscordIds = set.RelatedUsers
-                .Where(u => osuUsers.ContainsKey(u.Id))
-                .Select(u => osuUsers[u.Id]);
+            var verifiedGdMapperDiscordIds = gdMapperIds
+                .Where(id => osuUserDiscordIdDic.ContainsKey(id))
+                .Select(id => osuUserDiscordIdDic[id]);
 
             var sendTasks = channelIds.Select(id => Task.Run(async () =>
             {
@@ -97,20 +104,23 @@ public sealed class MapfeedService(
                     .Select(MentionUtils.MentionUser)
                     .ToArray();
 
-                var (eb, cb) = EmbedBuilders.BeatmapSetUpdate(set, mapper, gdMappersInGuild);
+                var (eb, cb) = EmbedBuilders.BeatmapSetUpdate(fullSet, mapper, gdMappersInGuild);
                 await channel.SendMessageAsync(embed: eb.Build(), components: cb.Build());
             }, ct));
 
             await Task.WhenAll(sendTasks);
-
-            _sentSets[set.Id] = set.RankedDate ?? set.SubmittedDate;
         }
 
-        foreach (var (id, submittedDate) in _sentSets)
+        foreach (var set in beatmapSets)
+        {
+            _checkedSets[set.Id] = set.RankedDate ?? set.SubmittedDate;
+        }
+
+        foreach (var (id, submittedDate) in _checkedSets)
         {
             if (submittedDate < DateTimeOffset.Now - _cacheDuration)
             {
-                _sentSets.Remove(id);
+                _checkedSets.Remove(id);
             }
         }
     }

@@ -158,7 +158,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
                 : beatmap.Metadata.Author.Username.WithLink($"https://osu.ppy.sh/u/{apiSet.UserId}");
             var diffMapper = onlineBeatmap?.Creator.DiscordUserId.HasValue == true
                 ? MentionUtils.MentionUser(onlineBeatmap.Creator.DiscordUserId.Value)
-                : apiSet.RelatedUsers.FirstOrDefault(x => x.Id == apiMap?.UserId)?.Username
+                : apiSet.RelatedUsers?.FirstOrDefault(x => x.Id == apiMap?.UserId)?.Username
                     .WithLink($"https://osu.ppy.sh/u/{apiMap!.UserId}");
 
             eb.WithImageUrl(apiSet.Covers.Card2X)
