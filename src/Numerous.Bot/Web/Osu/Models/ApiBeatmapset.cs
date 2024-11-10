@@ -67,11 +67,5 @@ public record ApiBeatmapsetExtended : ApiBeatmapset
     public required ApiOsuUser User { get; init; }
 
     [JsonProperty("related_users")]
-    public required IReadOnlyCollection<ApiOsuUser> RelatedUsers
-    {
-        get => _relatedUsers ?? [];
-        init => _relatedUsers = value;
-    }
-
-    private IReadOnlyCollection<ApiOsuUser>? _relatedUsers;
+    public required IReadOnlyCollection<ApiOsuUser>? RelatedUsers { get; init; }
 }
