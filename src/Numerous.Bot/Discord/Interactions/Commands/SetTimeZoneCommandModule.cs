@@ -10,170 +10,50 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-// TODO: Use argument with autocomplete handler instead of this abomination.
 [UsedImplicitly]
 public sealed class SetTimeZoneCommandModule(IUnitOfWork uow) : InteractionModule
 {
-    private const string SelectMenuId = "cmd:settimezone:select:menu";
-    private const string FirstButtonId = "cmd:settimezone:select:first";
-    private const string PrevButtonId = "cmd:settimezone:select:prev";
-    private const string PageButtonId = "cmd:settimezone:select:page";
-    private const string NextButtonId = "cmd:settimezone:select:next";
-    private const string LastButtonId = "cmd:settimezone:select:last";
-    private const string CancelButtonId = "cmd:settimezone:select:cancel";
-    private const string ConfirmButtonId = "cmd:settimezone:select:confirm";
-
-    private static readonly Dictionary<ulong, State> _userStates = new();
-
-    private static int TopPage => (TimeZoneInfo.GetSystemTimeZones().Count - 1) / 25;
-
-    private State CurrentState => _userStates[Context.User.Id];
-
-    private TimeZoneInfo? SelectedTimeZone => CurrentState.SelectedTimeZoneId is { } id
-        ? TimeZoneInfo.FindSystemTimeZoneById(id)
-        : null;
-
-    private MessageComponent Component
-    {
-        get
-        {
-            var options = TimeZoneInfo.GetSystemTimeZones()
-                .Select(tz => new SelectMenuOptionBuilder(tz.DisplayName, tz.Id))
-                .Skip(CurrentState.Page * 25)
-                .Take(25)
-                .ToList();
-
-            return new ComponentBuilder
-            {
-                ActionRows =
-                [
-                    new ActionRowBuilder().WithSelectMenu(SelectMenuId, options, SelectedTimeZone?.DisplayName),
-                    new ActionRowBuilder()
-                        .WithButton("\u25c0\u25c0", FirstButtonId, disabled: CurrentState.Page <= 0)
-                        .WithButton("\u25c0", PrevButtonId, disabled: CurrentState.Page <= 0)
-                        .WithButton($"Page {CurrentState.Page + 1}/{TopPage + 1}", PageButtonId, ButtonStyle.Secondary, disabled: true)
-                        .WithButton("\u25b6", NextButtonId, disabled: CurrentState.Page >= TopPage)
-                        .WithButton("\u25b6\u25b6", LastButtonId, disabled: CurrentState.Page >= TopPage),
-                    new ActionRowBuilder()
-                        .WithButton("Cancel", CancelButtonId, ButtonStyle.Danger)
-                        .WithButton("Confirm", ConfirmButtonId, ButtonStyle.Success, disabled: SelectedTimeZone is null),
-                ],
-            }.Build();
-        }
-    }
+    private const string TimeZoneParamName = "timezone";
 
     [UsedImplicitly]
     [SlashCommand("settimezone", "Sets your time zone.")]
-    public async Task SetTimeZoneCommand()
+    public async Task SetTimeZoneCommand(
+        [Autocomplete<TimeZoneAutocompleteHandler>]
+        [Summary(TimeZoneParamName, "Your time zone")]
+        string tzId
+    )
     {
-        _userStates[Context.User.Id] = new State(
-            async msg => await ModifyOriginalResponseAsync(msg)
-        );
+        var tz = TimeZoneInfo.FindSystemTimeZoneById(tzId);
 
-        await RespondAsync(components: Component, ephemeral: true);
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(SelectMenuId)]
-    public async Task SelectTimeZone(string id)
-    {
-        CurrentState.SelectedTimeZoneId = id;
-
-        await UpdateSelectMenu();
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(FirstButtonId)]
-    public async Task FirstPage()
-    {
-        CurrentState.Page = 0;
-
-        await UpdateSelectMenu();
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(PrevButtonId)]
-    public async Task PrevPage()
-    {
-        if (CurrentState.Page > 0)
-        {
-            CurrentState.Page--;
-
-            await UpdateSelectMenu();
-        }
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(NextButtonId)]
-    public async Task NextPage()
-    {
-        if (CurrentState.Page < 25)
-        {
-            CurrentState.Page++;
-
-            await UpdateSelectMenu();
-        }
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(LastButtonId)]
-    public async Task LastPage()
-    {
-        CurrentState.Page = TopPage;
-
-        await UpdateSelectMenu();
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(CancelButtonId)]
-    public async Task Cancel()
-    {
-        await CurrentState.ModifyOriginalResponseAsync(msg =>
-        {
-            msg.Components = new ComponentBuilder().Build();
-            msg.Embed = new EmbedBuilder()
-                .WithTitle("Canceled")
-                .WithColor(Color.DarkRed)
-                .Build();
-        });
-
-        _userStates.Remove(Context.User.Id);
-    }
-
-    [UsedImplicitly]
-    [ComponentInteraction(ConfirmButtonId)]
-    public async Task Confirm()
-    {
         await DeferAsync(true);
 
-        await uow.DiscordUsers.SetTimezoneAsync(Context.User.Id, SelectedTimeZone);
-
+        await uow.DiscordUsers.SetTimezoneAsync(Context.User.Id, tz);
         await uow.CommitAsync();
 
-        await CurrentState.ModifyOriginalResponseAsync(msg =>
-        {
-            msg.Components = new ComponentBuilder().Build();
-            msg.Embed = new EmbedBuilder()
-                .WithTitle("Time Zone Set")
-                .WithDescription($"Your time zone has been set to **{SelectedTimeZone?.DisplayName}**.")
-                .WithColor(Color.DarkGreen)
-                .Build();
-        });
+        await FollowupWithEmbedAsync($"Your time zone has been set to {tz.DisplayName}.");
     }
 
-    private async Task UpdateSelectMenu()
+    [UsedImplicitly]
+    private sealed class TimeZoneAutocompleteHandler : AutocompleteHandler
     {
-        await CurrentState.ModifyOriginalResponseAsync(msg =>
+        public override Task<AutocompletionResult> GenerateSuggestionsAsync(
+            IInteractionContext context,
+            IAutocompleteInteraction autocompleteInteraction,
+            IParameterInfo parameter,
+            IServiceProvider services)
         {
-            msg.Components = Component;
-        });
+            var query = autocompleteInteraction.Data.Options
+                            .FirstOrDefault(x => x.Name == TimeZoneParamName)
+                            ?.Value.ToString()
+                        ?? "";
+            var timezones = TimeZoneInfo.GetSystemTimeZones();
+            var results = timezones
+                .Where(x => (x.DisplayName + x.Id).Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Select(x => new AutocompleteResult(x.DisplayName, x.Id))
+                .OrderBy(x => x.Name)
+                .Take(25);
 
-        await RespondAsync();
-    }
-
-    private record State(Func<Action<MessageProperties>, Task<IUserMessage>> ModifyOriginalResponseAsync)
-    {
-        public int Page { get; set; }
-        public string? SelectedTimeZoneId { get; set; }
+            return Task.FromResult(AutocompletionResult.FromSuccess(results));
+        }
     }
 }
