@@ -34,6 +34,12 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
 
     private async Task AddReminderAsync(ReminderDto reminder, bool insertIntoDb, CancellationToken ct = default)
     {
+        if (insertIntoDb)
+        {
+            await using var uow = uowFactory.Create();
+            await uow.Reminders.ExecuteInsertAsync(reminder, ct);
+        }
+
         if (reminder.Timestamp < DateTimeOffset.Now + _cacheInterval)
         {
             var timer = new Timer
@@ -48,17 +54,11 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
 
             timer.Start();
         }
-
-        if (insertIntoDb)
-        {
-            await using var uow = uowFactory.Create();
-            await uow.Reminders.ExecuteInsertAsync(reminder, ct);
-        }
     }
 
     public async Task RemoveReminderAsync(ReminderDto reminder)
     {
-        if (_timerCache.TryGetValue(reminder.Id, out var timer))
+        if (_timerCache.Remove(reminder.Id, out var timer))
         {
             timer.Stop();
             timer.Dispose();
