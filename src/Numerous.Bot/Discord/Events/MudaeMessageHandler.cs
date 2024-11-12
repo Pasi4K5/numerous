@@ -25,17 +25,25 @@ public sealed class MudaeMessageHandler(DiscordSocketClient client) : HostedServ
 
     private async Task HandleMessageReceived(IMessage msg)
     {
-        if (msg.Content == "top" && !msg.Author.IsBot && _firstClaimMessageLinks.TryGetValue(msg.Channel.Id, out var link))
+        if (msg.Content.Trim().Equals("top", StringComparison.OrdinalIgnoreCase)
+            && !msg.Author.IsBot
+            && _firstClaimMessageLinks.TryGetValue(msg.Channel.Id, out var link))
         {
             await msg.ReplyAsync(link);
 
             return;
         }
 
-        if (
-            msg.Author.Id != Constants.MudaeUserId
-            || !msg.Embeds.Any(e => e.Description.EndsWith("React with any emoji to claim!"))
-        )
+        var isReactionRoll =
+            msg.Embeds.Count == 1
+            && msg.Embeds.First().Description.EndsWith("React with any emoji to claim!");
+        var actionRowComponents = (msg.Components.FirstOrDefault() as ActionRowComponent)?.Components;
+        var isButtonRoll =
+            msg.Components.Count == 1
+            && actionRowComponents?.Count == 1
+            && actionRowComponents.First().Type == ComponentType.Button;
+
+        if (msg.Author.Id != Constants.MudaeUserId || (!isReactionRoll && !isButtonRoll))
         {
             return;
         }
