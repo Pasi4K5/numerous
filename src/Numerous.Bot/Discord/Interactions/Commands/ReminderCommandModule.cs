@@ -23,6 +23,9 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
         [UsedImplicitly]
         [SlashCommand("in", "Sets a reminder after the specified time.")]
         public async Task InCommand(
+            [Summary("years")] int? years = null,
+            [Summary("months")] int? months = null,
+            [Summary("days")] int? days = null,
             [Summary("hours")] int? hours = null,
             [Summary("minutes")] int? minutes = null,
             [Summary("seconds")] int? seconds = null,
@@ -33,7 +36,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             var ephemeral = priv;
             priv |= Context.Channel is IDMChannel;
 
-            if (hours is null && minutes is null && seconds is null)
+            if (AllAreNull(years, months, days, hours, minutes, seconds))
             {
                 await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
 
@@ -43,9 +46,15 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             var timestamp = Context.Interaction.CreatedAt;
 
             timestamp = timestamp
+                // ReSharper bug?
+                // ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+                .AddYears(years ?? 0)
+                .AddMonths(months ?? 0)
+                .AddDays(days ?? 0)
                 .AddHours(hours ?? 0)
                 .AddMinutes(minutes ?? 0)
                 .AddSeconds(seconds ?? 0);
+                // ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 
             if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
             {
@@ -94,7 +103,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             var ephemeral = priv;
             priv |= Context.Channel is IDMChannel;
 
-            if (year is null && month is null && day is null && hour is null && minute is null && second is null)
+            if (AllAreNull(year, month, day, hour, minute, second))
             {
                 await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
 
