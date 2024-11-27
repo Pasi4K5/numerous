@@ -23,6 +23,9 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
         [UsedImplicitly]
         [SlashCommand("in", "Sets a reminder after the specified time.")]
         public async Task InCommand(
+            [Summary("years")] int? years = null,
+            [Summary("months")] int? months = null,
+            [Summary("days")] int? days = null,
             [Summary("hours")] int? hours = null,
             [Summary("minutes")] int? minutes = null,
             [Summary("seconds")] int? seconds = null,
@@ -33,23 +36,46 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             var ephemeral = priv;
             priv |= Context.Channel is IDMChannel;
 
-            if (hours is null && minutes is null && seconds is null)
+            if (AllAreNull(years, months, days, hours, minutes, seconds))
             {
-                await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
+                await RespondWithEmbedAsync(message: "Please specify a time.", type: ResponseType.Error, ephemeral: priv);
 
                 return;
             }
 
             var timestamp = Context.Interaction.CreatedAt;
 
-            timestamp = timestamp
-                .AddHours(hours ?? 0)
-                .AddMinutes(minutes ?? 0)
-                .AddSeconds(seconds ?? 0);
+            try
+            {
+                timestamp = timestamp
+                    // ReSharper bug?
+                    // ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+                    .AddYears(years ?? 0)
+                    .AddMonths(months ?? 0)
+                    .AddDays(days ?? 0)
+                    .AddHours(hours ?? 0)
+                    .AddMinutes(minutes ?? 0)
+                    .AddSeconds(seconds ?? 0);
+                // ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                await RespondWithEmbedAsync(
+                    message: "Please specify a time that is not ridiculous.",
+                    type: ResponseType.Error,
+                    ephemeral: priv
+                );
+
+                return;
+            }
 
             if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
             {
-                await RespondWithEmbedAsync(message: "The specified time must be at least 10 seconds in the future.", type: ResponseType.Error);
+                await RespondWithEmbedAsync(
+                    message: "The specified time must be at least 10 seconds in the future.",
+                    type: ResponseType.Error,
+                    ephemeral: priv
+                );
 
                 return;
             }
@@ -94,9 +120,9 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
             var ephemeral = priv;
             priv |= Context.Channel is IDMChannel;
 
-            if (year is null && month is null && day is null && hour is null && minute is null && second is null)
+            if (AllAreNull(year, month, day, hour, minute, second))
             {
-                await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
+                await RespondWithEmbedAsync(message: "Please specify a time.", type: ResponseType.Error, ephemeral: priv);
 
                 return;
             }
@@ -131,7 +157,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
                 if (timestamp < now.AddSeconds(10))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new TooEarlyException();
                 }
 
                 await reminderService.AddReminderAsync(new ReminderDto
@@ -162,10 +188,17 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                     type: ResponseType.Error
                 );
             }
-            catch (ArgumentOutOfRangeException)
+            catch (TooEarlyException)
             {
                 await FollowupWithEmbedAsync(
                     message: "The specified time must be at least 10 seconds in the future.",
+                    type: ResponseType.Error
+                );
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                await FollowupWithEmbedAsync(
+                    message: "Please specify a time that is not ridiculous.",
                     type: ResponseType.Error
                 );
             }
@@ -246,4 +279,6 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                 .Build()
         );
     }
+
+    private class TooEarlyException : Exception;
 }

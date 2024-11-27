@@ -25,7 +25,7 @@ public sealed class ToggleReadOnlyCommandModule(IUnitOfWork uow) : InteractionMo
         await uow.CommitAsync();
 
         await RespondWithEmbedAsync(
-            $"Channel {channel.Mention} is now {(isReadOnly ? "read-only" : "writable")}.",
+            message: $"Channel {channel.Mention} is now {(isReadOnly ? "read-only" : "writable")}.",
             type: ResponseType.Success
         );
     }
