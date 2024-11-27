@@ -38,27 +38,44 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
             if (AllAreNull(years, months, days, hours, minutes, seconds))
             {
-                await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
+                await RespondWithEmbedAsync(message: "Please specify a time.", type: ResponseType.Error, ephemeral: priv);
 
                 return;
             }
 
             var timestamp = Context.Interaction.CreatedAt;
 
-            timestamp = timestamp
-                // ReSharper bug?
-                // ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
-                .AddYears(years ?? 0)
-                .AddMonths(months ?? 0)
-                .AddDays(days ?? 0)
-                .AddHours(hours ?? 0)
-                .AddMinutes(minutes ?? 0)
-                .AddSeconds(seconds ?? 0);
+            try
+            {
+                timestamp = timestamp
+                    // ReSharper bug?
+                    // ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+                    .AddYears(years ?? 0)
+                    .AddMonths(months ?? 0)
+                    .AddDays(days ?? 0)
+                    .AddHours(hours ?? 0)
+                    .AddMinutes(minutes ?? 0)
+                    .AddSeconds(seconds ?? 0);
                 // ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                await RespondWithEmbedAsync(
+                    message: "Please specify a time that is not ridiculous.",
+                    type: ResponseType.Error,
+                    ephemeral: priv
+                );
+
+                return;
+            }
 
             if (timestamp < Context.Interaction.CreatedAt.AddSeconds(10))
             {
-                await RespondWithEmbedAsync(message: "The specified time must be at least 10 seconds in the future.", type: ResponseType.Error);
+                await RespondWithEmbedAsync(
+                    message: "The specified time must be at least 10 seconds in the future.",
+                    type: ResponseType.Error,
+                    ephemeral: priv
+                );
 
                 return;
             }
@@ -105,7 +122,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
             if (AllAreNull(year, month, day, hour, minute, second))
             {
-                await RespondWithEmbedAsync("Please specify a time.", type: ResponseType.Error);
+                await RespondWithEmbedAsync(message: "Please specify a time.", type: ResponseType.Error, ephemeral: priv);
 
                 return;
             }
@@ -140,7 +157,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
                 if (timestamp < now.AddSeconds(10))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new TooEarlyException();
                 }
 
                 await reminderService.AddReminderAsync(new ReminderDto
@@ -171,10 +188,17 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                     type: ResponseType.Error
                 );
             }
-            catch (ArgumentOutOfRangeException)
+            catch (TooEarlyException)
             {
                 await FollowupWithEmbedAsync(
                     message: "The specified time must be at least 10 seconds in the future.",
+                    type: ResponseType.Error
+                );
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                await FollowupWithEmbedAsync(
+                    message: "Please specify a time that is not ridiculous.",
                     type: ResponseType.Error
                 );
             }
@@ -255,4 +279,6 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
                 .Build()
         );
     }
+
+    private class TooEarlyException : Exception;
 }
