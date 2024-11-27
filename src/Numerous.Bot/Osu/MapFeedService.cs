@@ -89,12 +89,12 @@ public sealed class MapFeedService(
                 .ToArray();
 
             var mapper = osuUserDiscordIdDic.TryGetValue(fullSet.UserId, out var userId)
-                ? MentionUtils.MentionUser(userId)
+                ? $"{MentionUtils.MentionUser(userId)} ({Link.OsuUser(fullSet.UserId, fullSet.Creator)})"
                 : Link.OsuUser(fullSet.UserId, fullSet.Creator);
 
-            var verifiedGdMapperDiscordIds = gdMapperIds
+            var verifiedGdMapperIds = gdMapperIds
                 .Where(id => osuUserDiscordIdDic.ContainsKey(id))
-                .Select(id => osuUserDiscordIdDic[id]);
+                .Select(id => new { osuId = id, discordId = osuUserDiscordIdDic[id] });
 
             var sendTasks = channelIds.Select(id => Task.Run(async () =>
             {
@@ -109,9 +109,9 @@ public sealed class MapFeedService(
                     return;
                 }
 
-                var gdMappersInGuild = verifiedGdMapperDiscordIds
-                    .Where(discordId => guildUserIds.Contains(discordId))
-                    .Select(MentionUtils.MentionUser)
+                var gdMappersInGuild = verifiedGdMapperIds
+                    .Where(ids => guildUserIds.Contains(ids.discordId))
+                    .Select(ids => $"{MentionUtils.MentionUser(ids.discordId)} ({Link.OsuUser(ids.osuId)})")
                     .ToArray();
 
                 var (eb, cb) = EmbedBuilders.BeatmapSetUpdate(fullSet, mapper, gdMappersInGuild);
