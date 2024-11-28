@@ -8,6 +8,7 @@ using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
 using Numerous.Bot.Discord.Interactions;
 using Numerous.Bot.Discord.Util;
+using Numerous.Bot.Exclusive;
 using Numerous.Bot.Osu;
 using Numerous.Bot.Services;
 using Numerous.Bot.Util;
@@ -38,6 +39,7 @@ public static class BotServiceConfiguration
         services.AddSingleton<ReminderService>();
         services.AddSingleton<ISauceNaoClient, SauceNaoClient>();
         services.AddTransient<ScoreValidator>();
+        services.AddHostedService<StarReactPreventionService>();
         services.AddHostedService<Startup>();
 
         // TODO: Consider switching to System.Text.Json (for everything)

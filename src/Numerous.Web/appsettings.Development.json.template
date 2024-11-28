@@ -8,6 +8,7 @@
     "AllowedHosts": "*",
     "Configuration": {
         "OwnerDiscordId": 42,
+        "ExclusiveServerId": 42,
         "Prefix": "\\",
         "DiscordClientId": 42,
         "DiscordClientSecret": "42",

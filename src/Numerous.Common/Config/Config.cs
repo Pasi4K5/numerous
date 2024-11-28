@@ -11,6 +11,7 @@ namespace Numerous.Common.Config;
 public record Config
 {
     public ulong OwnerDiscordId { get; init; }
+    public ulong ExclusiveServerId { get; init; }
     public string Prefix { get; init; } = null!;
     public ulong DiscordClientId { get; init; }
     public string DiscordClientSecret { get; init; } = null!;
