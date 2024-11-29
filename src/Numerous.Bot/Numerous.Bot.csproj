@@ -26,11 +26,16 @@
 	  <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 	  <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 	  <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+	  <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
 	</ItemGroup>
 	
 	<ItemGroup>
 	  <ProjectReference Include="..\Numerous.Common\Numerous.Common.csproj" />
 	  <ProjectReference Include="..\Numerous.Database\Numerous.Database.csproj" />
 	</ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\speech_bubble.png" />
+    </ItemGroup>
 
 </Project>
