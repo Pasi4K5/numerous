@@ -96,6 +96,9 @@ public sealed class MapFeedService(
                 .Where(id => osuUserDiscordIdDic.ContainsKey(id))
                 .Select(id => new { osuId = id, discordId = osuUserDiscordIdDic[id] });
 
+            var usernames = fullSet.RelatedUsers?.ToDictionary(u => u.Id, u => u.Username)
+                            ?? [];
+
             var sendTasks = channelIds.Select(id => Task.Run(async () =>
             {
                 var channel = (IMessageChannel)await discordClient.GetChannelAsync(id);
@@ -111,7 +114,7 @@ public sealed class MapFeedService(
 
                 var gdMappersInGuild = verifiedGdMapperIds
                     .Where(ids => guildUserIds.Contains(ids.discordId))
-                    .Select(ids => $"{MentionUtils.MentionUser(ids.discordId)} ({Link.OsuUser(ids.osuId)})")
+                    .Select(ids => $"{MentionUtils.MentionUser(ids.discordId)} ({Link.OsuUser(ids.osuId, usernames[ids.osuId])})")
                     .ToArray();
 
                 var (eb, cb) = EmbedBuilders.BeatmapSetUpdate(fullSet, mapper, gdMappersInGuild);
