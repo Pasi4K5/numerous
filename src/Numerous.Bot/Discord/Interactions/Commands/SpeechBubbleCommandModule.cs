@@ -26,7 +26,7 @@ public sealed class SpeechBubbleCommandModule(IHttpClientFactory clientFactory) 
         if (!attachment.ContentType.StartsWith("image/"))
         {
             await RespondWithEmbedAsync(
-                message: "This file type is not supported.",
+                message: "The file you uploaded is not an image.",
                 type: ResponseType.Error
             );
 
@@ -46,37 +46,48 @@ public sealed class SpeechBubbleCommandModule(IHttpClientFactory clientFactory) 
 
         using var client = clientFactory.CreateClient();
         await using var customImageStream = await client.GetStreamAsync(attachment.Url);
-        var customImage = await Image.LoadAsync<Rgba32>(customImageStream);
 
-        var customImageAspectRatio = (float)customImage.Width / customImage.Height;
-        var speechBubbleAspectRatio = (float)speechBubble.Width / speechBubble.Height;
-        speechBubble.Mutate(x => x.Resize(new Size(
-            customImage.Width,
-            (int)Math.Floor((double)customImage.Width / speechBubbleAspectRatio / customImageAspectRatio)))
-        );
-
-        using var result = new Image<Rgba32>(customImage.Width, customImage.Height);
-
-        for (var y = 0; y < customImage.Height; y++)
+        try
         {
-            for (var x = 0; x < customImage.Width; x++)
+            var customImage = await Image.LoadAsync<Rgba32>(customImageStream);
+
+            var customImageAspectRatio = (float)customImage.Width / customImage.Height;
+            var speechBubbleAspectRatio = (float)speechBubble.Width / speechBubble.Height;
+            speechBubble.Mutate(x => x.Resize(new Size(
+                customImage.Width,
+                (int)Math.Floor((double)customImage.Width / speechBubbleAspectRatio / customImageAspectRatio)))
+            );
+
+            using var result = new Image<Rgba32>(customImage.Width, customImage.Height);
+
+            for (var y = 0; y < customImage.Height; y++)
             {
-                if (y < speechBubble.Height)
+                for (var x = 0; x < customImage.Width; x++)
                 {
-                    var imgPixel = customImage[x, y];
-                    var maskPixel = speechBubble[x, y];
-                    var alpha = (double)maskPixel.R / 255;
-                    result[x, y] = new Rgba32(imgPixel.R, imgPixel.G, imgPixel.B, (byte)Math.Round(alpha * imgPixel.A));
-                }
-                else
-                {
-                    result[x, y] = customImage[x, y];
+                    if (y < speechBubble.Height)
+                    {
+                        var imgPixel = customImage[x, y];
+                        var maskPixel = speechBubble[x, y];
+                        var alpha = (double)maskPixel.R / 255;
+                        result[x, y] = new Rgba32(imgPixel.R, imgPixel.G, imgPixel.B, (byte)Math.Round(alpha * imgPixel.A));
+                    }
+                    else
+                    {
+                        result[x, y] = customImage[x, y];
+                    }
                 }
             }
-        }
 
-        using var resultStream = new MemoryStream();
-        await result.SaveAsPngAsync(resultStream);
-        await FollowupWithFileAsync(resultStream, "speech_bubble.png");
+            using var resultStream = new MemoryStream();
+            await result.SaveAsPngAsync(resultStream);
+            await FollowupWithFileAsync(resultStream, "speech_bubble.png");
+        }
+        catch (UnknownImageFormatException)
+        {
+            await FollowupWithEmbedAsync(
+                message: "This image format is not supported.",
+                type: ResponseType.Error
+            );
+        }
     }
 }
