@@ -12,4 +12,6 @@ public sealed class ReminderDto : IdDto<uint>
     public required ulong? ChannelId { get; set; }
     public required DateTimeOffset Timestamp { get; set; }
     public string? Message { get; set; }
+
+    public bool IsPrivate => ChannelId is null;
 }

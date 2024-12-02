@@ -235,7 +235,7 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
         {
             embed.AddField(
                 $"Reminder {index + 1} in <#{reminder.ChannelId ?? (await Context.User.CreateDMChannelAsync()).Id}>",
-                (reminder.ChannelId is not null || Context.Channel is IDMChannel || ephemeral
+                (!reminder.IsPrivate || Context.Channel is IDMChannel || ephemeral
                     ? $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
                     : "*[REDACTED]*\n"
                 )
@@ -253,13 +253,14 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
         int index
     )
     {
-        await DeferAsync();
-
         var reminders = await uow.Reminders.GetOrderedRemindersAsync(Context.User.Id);
 
         if (index < 1 || index > reminders.Length)
         {
-            await FollowupWithEmbedAsync("There is no reminder with that index.", type: ResponseType.Error);
+            await RespondWithEmbedAsync(
+                message: "There is no reminder with that index.",
+                type: ResponseType.Error
+            );
 
             return;
         }
@@ -268,15 +269,12 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
         await reminderService.RemoveReminderAsync(reminder);
 
-        await FollowupAsync(embed:
-            new EmbedBuilder()
-                .WithColor(Color.Red)
-                .WithTitle("Reminder Removed")
-                .WithDescription(
-                    $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
-                    + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})"
-                )
-                .Build()
+        await RespondWithEmbedAsync(
+            "Reminder Removed",
+            $"{reminder.Message}\n".OnlyIf(reminder.Message is not null)
+            + $"{reminder.Timestamp.ToDiscordTimestampLong()} ({reminder.Timestamp.ToDiscordTimestampRel()})",
+            type: ResponseType.Success,
+            reminder.IsPrivate && Context.Channel is not IDMChannel
         );
     }
 
