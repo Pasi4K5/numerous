@@ -10,6 +10,7 @@ using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Events;
 
+// TODO: Code quality
 public partial class DiscordEventHandler
 {
     [Init]
@@ -38,12 +39,18 @@ public partial class DiscordEventHandler
 
         var joinMsg = await uow.JoinMessages.FindAsync(newUser.Guild.Id);
         var roleId = (await uow.Guilds.FindAsync(newUser.Guild.Id))?.UnverifiedRoleId;
+        var guild = await uow.Guilds.GetAsync(newUser.Guild.Id);
 
         if (
             roleId is not null
             && oldUser.HasValue
-            && oldUser.Value.Roles.Any(r => r.Id == roleId)
-            && newUser.Roles.All(r => r.Id != roleId)
+            && ((!guild.GreetOnAdded
+                 && oldUser.Value.Roles.Any(r => r.Id == roleId)
+                 && newUser.Roles.All(r => r.Id != roleId))
+                || (guild.GreetOnAdded
+                    && newUser.Roles.Any(r => r.Id == roleId)
+                    && oldUser.Value.Roles.All(r => r.Id != roleId))
+            )
         )
         {
             await GreetAsync(newUser, joinMsg);

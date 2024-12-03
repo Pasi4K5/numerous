@@ -17,7 +17,13 @@ public sealed class DbGuild : DbEntity<ulong>
     public bool TrackMessages { get; set; }
 
     public DbJoinMessage? JoinMessage { get; set; }
+
+    // TODO: Rename
     public ulong? UnverifiedRoleId { get; set; }
+
+    // TODO: This is a hotfix. This, JoinMessage and UnverifiedRoleIed should be extracted into a separate entity.
+    [DefaultValue(true)]
+    public bool GreetOnAdded { get; set; }
 
     public DbChannel? MapfeedChannel { get; set; }
     public ulong? MapfeedChannelId { get; set; }

@@ -13,7 +13,7 @@ namespace Numerous.Database.Repositories;
 
 public interface IGuildRepository : IIdRepository<GuildDto, ulong>
 {
-    Task SetUnverifiedRoleAsync(ulong guildId, ulong? roleId, CancellationToken ct = default);
+    Task SetVerifiedRoleAsync(ulong guildId, ulong? roleId, bool greetOnAdded = true, CancellationToken ct = default);
     Task SetJoinMessageAsync(JoinMessageDto dto, CancellationToken ct = default);
     Task SetMapfeedChannel(ulong guildId, ulong? channelId, CancellationToken ct = default);
 }
@@ -21,10 +21,11 @@ public interface IGuildRepository : IIdRepository<GuildDto, ulong>
 public sealed class GuildRepository(NumerousDbContext context, IMapper mapper)
     : IdRepository<DbGuild, GuildDto, ulong>(context, mapper), IGuildRepository
 {
-    public async Task SetUnverifiedRoleAsync(ulong guildId, ulong? roleId, CancellationToken ct = default)
+    public async Task SetVerifiedRoleAsync(ulong guildId, ulong? roleId, bool greetOnAdded = true, CancellationToken ct = default)
     {
         var guild = await Set.SingleAsync(x => x.Id == guildId, ct);
         guild.UnverifiedRoleId = roleId;
+        guild.GreetOnAdded = greetOnAdded;
     }
 
     public async Task SetJoinMessageAsync(JoinMessageDto dto, CancellationToken ct = default)
