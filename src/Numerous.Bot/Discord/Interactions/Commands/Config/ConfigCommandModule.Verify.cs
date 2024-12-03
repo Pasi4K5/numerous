@@ -63,22 +63,24 @@ public partial class ConfigCommandModule
         }
 
         [UsedImplicitly]
-        [SlashCommand("set_unverified_role", "(Un-)Sets the role which's users will be greeted as soon as the role is removed.")]
+        [SlashCommand("set_verified_role", "(Un-)Sets the role which's users will be greeted as soon as the role is added/removed.")]
         public async Task SetMemberRole(
             [Summary("role", "The role which's users should be greeted as soon as the role is removed")]
-            IRole? role = null
+            IRole? role = null,
+            [Summary("on_added", "Whether users should be greeted once the role is added or removed.")]
+            bool greetOnAdded = true
         )
         {
             await DeferAsync();
 
-            await uow.Guilds.SetUnverifiedRoleAsync(Context.Guild.Id, role?.Id);
+            await uow.Guilds.SetVerifiedRoleAsync(Context.Guild.Id, role?.Id, greetOnAdded);
 
             await uow.CommitAsync();
 
             await FollowupWithEmbedAsync(
                 message: role is not null
-                    ? $"Users will now be greeted as soon as the {role.Mention} role is removed from them."
-                    : "Unverified role removed. If the join message channel is set, all users will be greeted as soon as they join.",
+                    ? $"Users will now be greeted as soon as the {role.Mention} role is {(greetOnAdded ? "assigned to" : "removed from")} them."
+                    : "(Un-)Verified role removed. If the join message channel is set, all users will be greeted as soon as they join.",
                 type: ResponseType.Success
             );
         }

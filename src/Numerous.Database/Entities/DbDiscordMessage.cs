@@ -5,10 +5,12 @@
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Numerous.Database.Entities;
 
 [Table("discord_message")]
+[Index(nameof(ChannelId))]
 public sealed class DbDiscordMessage : DbEntity<ulong>
 {
     public DateTimeOffset? DeletedAt { get; set; }
