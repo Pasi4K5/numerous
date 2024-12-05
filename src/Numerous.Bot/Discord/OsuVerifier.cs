@@ -12,6 +12,7 @@ using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Enums;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
+using osu.Game.Beatmaps;
 using Serilog;
 
 namespace Numerous.Bot.Discord;
@@ -58,7 +59,7 @@ public sealed class OsuVerifier(
 
             if (await UserIsVerifiedAsync(guildUser, osuUsers))
             {
-                await Task.Delay(2000, ct);
+                await Task.Delay(5000, ct);
             }
         }
     }
@@ -194,10 +195,25 @@ public sealed class OsuVerifier(
             }
         }
 
+        var isRanked =
+            osuUser.HasRankedSets()
+            || (osuUser.HasLeaderboardGds()
+                && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest))
+                .Any(s => s.Ranked == BeatmapOnlineStatus.Ranked)
+            );
+
         await Task.WhenAll(
-            AssignRoleAsync(mappings, OsuUserGroup.UnrankedMapper, osuUser.IsUnrankedMapper()),
-            AssignRoleAsync(mappings, OsuUserGroup.RankedMapper, osuUser.IsRankedMapper()),
-            AssignRoleAsync(mappings, OsuUserGroup.ProjectLoved, osuUser.IsLovedMapper())
+            AssignRoleAsync(mappings, OsuUserGroup.UnrankedMapper, osuUser.IsMapper() && !isRanked),
+            AssignRoleAsync(mappings, OsuUserGroup.RankedMapper, isRanked),
+            AssignRoleAsync(
+                mappings,
+                OsuUserGroup.LovedMapper,
+                osuUser.HasLovedSets()
+                || (osuUser.HasLeaderboardGds()
+                    && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest))
+                    .Any(s => s.Ranked == BeatmapOnlineStatus.Loved)
+                )
+            )
         );
 
         return;

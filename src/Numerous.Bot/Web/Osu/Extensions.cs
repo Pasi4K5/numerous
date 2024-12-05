@@ -9,21 +9,23 @@ namespace Numerous.Bot.Web.Osu;
 
 public static class Extensions
 {
-    public static bool IsRankedMapper(this ApiOsuUser user)
+    public static bool HasRankedSets(this ApiOsuUser user)
     {
-        return user.RankedBeatmapsetCount > 0
-               || user.GuestBeatmapsetCount > 0;
+        return user.RankedBeatmapsetCount > 0;
     }
 
-    public static bool IsLovedMapper(this ApiOsuUser user)
+    public static bool HasLeaderboardGds(this ApiOsuUser user)
+    {
+        return user.GuestBeatmapsetCount > 0;
+    }
+
+    public static bool HasLovedSets(this ApiOsuUser user)
     {
         return user.LovedBeatmapsetCount > 0;
     }
 
-    public static bool IsUnrankedMapper(this ApiOsuUser user)
+    public static bool IsMapper(this ApiOsuUser user)
     {
-        return
-            (user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0)
-            && !user.IsRankedMapper();
+        return user.GraveyardBeatmapsetCount > 0 || user.PendingBeatmapsetCount > 0;
     }
 }
