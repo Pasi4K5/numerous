@@ -7,7 +7,7 @@ using Discord;
 using Numerous.Bot.Services;
 using Numerous.Common.Config;
 
-namespace Numerous.Bot.Discord;
+namespace Numerous.Bot.Discord.Services.Attachments;
 
 public sealed class AttachmentService(IConfigProvider cfgProvider, IFileService files)
 {

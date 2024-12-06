@@ -4,27 +4,35 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord.WebSocket;
-using Numerous.Bot.Discord.Services;
-using Numerous.Bot.Discord.Services.Attachments;
-using Numerous.Bot.Util;
-using Numerous.Bot.Web.Osu;
-using Numerous.Common.Config;
 using Numerous.Database.Context;
 
-namespace Numerous.Bot.Discord.Events;
+namespace Numerous.Bot.Discord.Services;
 
-// TODO: This whole class fucking sucks.
-public sealed partial class DiscordEventHandler(
-    IConfigProvider cfgProvider,
+public sealed class GuildStatsService(
     DiscordSocketClient client,
-    IUnitOfWorkFactory uowFactory,
-    AttachmentService attachmentService,
-    OsuVerifier verifier,
-    IOsuApiRepository osuApi
+    IUnitOfWorkFactory uowFactory
 )
 {
     public void Start()
     {
-        this.Init();
+        client.UserJoined += async gu => await UpdateStatsAsync(gu.Guild);
+        client.UserLeft += async (g, _) => await UpdateStatsAsync(g);
+    }
+
+    private async Task UpdateStatsAsync(SocketGuild guild)
+    {
+        var now = DateTimeOffset.UtcNow;
+        await guild.DownloadUsersAsync();
+
+        await using var uow = uowFactory.Create();
+
+        await uow.GuildStats.InsertAsync(new()
+        {
+            GuildId = guild.Id,
+            Timestamp = now,
+            MemberCount = guild.DownloadedMemberCount,
+        });
+
+        await uow.CommitAsync();
     }
 }

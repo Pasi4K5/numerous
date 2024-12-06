@@ -7,6 +7,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Util;
 using Numerous.Common.Util;
 using Numerous.Database.Context;

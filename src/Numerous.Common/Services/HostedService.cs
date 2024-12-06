@@ -3,9 +3,19 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Bot.Discord;
+using Microsoft.Extensions.Hosting;
 
-internal static class Constants
+namespace Numerous.Common.Services;
+
+public abstract class HostedService : IHostedService
 {
-    internal const ulong MudaeUserId = 432610292342587392;
+    public virtual Task StartAsync(CancellationToken ct)
+    {
+        return Task.CompletedTask;
+    }
+
+    public virtual Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
 }

@@ -4,9 +4,10 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.DependencyInjection;
-using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
 using Numerous.Bot.Discord.Interactions;
+using Numerous.Bot.Discord.Services;
+using Numerous.Bot.Discord.Services.Attachments;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Exclusive;
 using Numerous.Bot.Osu;
@@ -28,6 +29,7 @@ public static class BotServiceConfiguration
         services.AddSingleton<DiscordEventHandler>();
         services.AddTransient<EmbedBuilders>();
         services.AddSingleton<IFileService, FileService>();
+        services.AddTransient<GuildStatsService>();
         services.AddHostedService<InteractionHandler>();
         services.AddHostedService<MapFeedService>();
         services.AddHostedService<MessageResponder>();

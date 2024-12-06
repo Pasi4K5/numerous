@@ -15,7 +15,7 @@ using Numerous.Database.Dtos;
 using osu.Game.Beatmaps;
 using Serilog;
 
-namespace Numerous.Bot.Discord;
+namespace Numerous.Bot.Discord.Services;
 
 public sealed class OsuVerifier(
     IHost host,
@@ -24,7 +24,7 @@ public sealed class OsuVerifier(
     IOsuApiRepository osuApi
 )
 {
-    public Task StartAsync(CancellationToken ct)
+    public void Start(CancellationToken ct)
     {
         host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(async () => await AssignAllRolesAsync(ct))
             .EveryMinute()
@@ -34,8 +34,6 @@ public sealed class OsuVerifier(
             await GetOsuUsersAsync(user, ct),
             await GetGroupRoleMappingsAsync(user.Guild, ct)
         );
-
-        return Task.CompletedTask;
     }
 
     public async Task AssignAllRolesAsync(SocketGuild guild, CancellationToken ct = default)

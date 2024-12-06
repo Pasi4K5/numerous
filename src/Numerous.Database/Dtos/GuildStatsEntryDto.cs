@@ -3,27 +3,14 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Numerous.Common.Services;
+namespace Numerous.Database.Dtos;
 
-namespace Numerous.Bot.Discord.Events;
-
-public sealed partial class MessageResponder(DiscordSocketClient client) : HostedService
+public class GuildStatsEntryDto
 {
-    public override Task StartAsync(CancellationToken cancellationToken)
-    {
-        client.MessageReceived += async msg => await RespondAsync(msg);
+    public GuildDto Guild { get; set; } = null!;
+    public required ulong GuildId { get; set; }
 
-        return Task.CompletedTask;
-    }
+    public required DateTimeOffset Timestamp { get; set; }
 
-    private Task RespondAsync(SocketMessage msg)
-    {
-        if (!msg.Author.IsBot)
-        {
-            Task.Run(async () => await RespondToBanMessageAsync(msg));
-        }
-
-        return Task.CompletedTask;
-    }
+    public required int MemberCount { get; set; }
 }

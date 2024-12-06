@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Numerous.Bot.Discord;
+using Numerous.Bot.Discord.Services;
 using Numerous.Common.Config;
 using Numerous.Web.Auth;
 

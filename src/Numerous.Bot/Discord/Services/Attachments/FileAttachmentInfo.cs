@@ -3,19 +3,14 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.Extensions.Hosting;
+using Discord;
 
-namespace Numerous.Common;
+namespace Numerous.Bot.Discord.Services.Attachments;
 
-public abstract class HostedService : IHostedService
+public readonly record struct FileAttachmentInfo(string Path, string FileName)
 {
-    public virtual Task StartAsync(CancellationToken ct)
+    public static explicit operator FileAttachment(FileAttachmentInfo info)
     {
-        return Task.CompletedTask;
-    }
-
-    public virtual Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        return new FileAttachment(info.Path, info.FileName);
     }
 }

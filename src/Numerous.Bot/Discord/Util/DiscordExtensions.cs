@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using Discord;
 using Discord.WebSocket;
 
-namespace Numerous.Bot.Discord;
+namespace Numerous.Bot.Discord.Util;
 
 public static partial class DiscordExtensions
 {

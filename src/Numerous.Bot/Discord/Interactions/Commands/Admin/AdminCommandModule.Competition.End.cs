@@ -6,6 +6,7 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Bot.Discord.Util;
 using Numerous.Common.Util;
 
 namespace Numerous.Bot.Discord.Interactions.Commands.Admin;
