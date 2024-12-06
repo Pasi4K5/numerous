@@ -1,5 +1,4 @@
 using Discord;
-using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Services.Attachments;
 using Numerous.Bot.Services;
 using Numerous.Common.Config;

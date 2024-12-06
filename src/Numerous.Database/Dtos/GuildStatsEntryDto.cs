@@ -5,7 +5,7 @@
 
 namespace Numerous.Database.Dtos;
 
-public class GuildStatsEntryDto
+public sealed class GuildStatsEntryDto
 {
     public GuildDto Guild { get; set; } = null!;
     public required ulong GuildId { get; set; }
