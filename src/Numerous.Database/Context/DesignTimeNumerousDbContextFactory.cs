@@ -3,6 +3,7 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using DotNetEnv;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -12,13 +13,18 @@ namespace Numerous.Database.Context;
 [UsedImplicitly]
 public sealed class DesignTimeNumerousDbContextFactory : IDesignTimeDbContextFactory<NumerousDbContext>
 {
-    private const string ConnectionString =
-        "Host=YOUR_HOST;Username=YOUR_USERNAME;Password=YOUR_PASSWORD;Database=numerous";
-
     public NumerousDbContext CreateDbContext(string[] args)
     {
+        Env.TraversePath().Load(".env");
+
+        var connectionString =
+            $"Host=localhost;"
+            + $"Username={Env.GetString("POSTGRES_USER")};"
+            + $"Password={Env.GetString("POSTGRES_PASSWORD")};"
+            + $"Database={Env.GetString("POSTGRES_DB")}";
+
         var optionsBuilder = new DbContextOptionsBuilder<NumerousDbContext>()
-            .UseNpgsql(ConnectionString);
+            .UseNpgsql(connectionString);
 
         return new NumerousDbContext(optionsBuilder.Options);
     }
