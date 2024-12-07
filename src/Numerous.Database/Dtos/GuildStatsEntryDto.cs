@@ -3,9 +3,14 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Bot.Discord;
+namespace Numerous.Database.Dtos;
 
-internal static class Constants
+public sealed class GuildStatsEntryDto
 {
-    internal const ulong MudaeUserId = 432610292342587392;
+    public GuildDto Guild { get; set; } = null!;
+    public required ulong GuildId { get; set; }
+
+    public required DateTimeOffset Timestamp { get; set; }
+
+    public required int MemberCount { get; set; }
 }

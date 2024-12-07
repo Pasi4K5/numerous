@@ -31,4 +31,5 @@ public sealed class DbGuild : DbEntity<ulong>
     public ICollection<DbChannel> Channels { get; set; } = [];
     public ICollection<DbGroupRoleMapping> GroupRoleMappings { get; set; } = [];
     public ICollection<DbBeatmapCompetition> BeatmapCompetitions { get; set; } = [];
+    public ICollection<DbGuildStatsEntry> Stats { get; set; } = [];
 }

@@ -7,8 +7,9 @@ using System.Reflection;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Numerous.Common;
+using Numerous.Bot.Discord.Util;
 using Numerous.Common.Config;
+using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Serilog;
 

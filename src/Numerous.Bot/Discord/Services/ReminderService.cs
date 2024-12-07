@@ -12,7 +12,7 @@ using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 using Timer = System.Timers.Timer;
 
-namespace Numerous.Bot.Discord;
+namespace Numerous.Bot.Discord.Services;
 
 public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, DiscordSocketClient client)
 {
@@ -20,7 +20,7 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
 
     private readonly Dictionary<uint, Timer> _timerCache = new();
 
-    public void StartAsync(CancellationToken ct)
+    public void Start(CancellationToken ct)
     {
         host.Services.UseScheduler(s =>
             s.ScheduleAsync(() => CacheRemindersAsync(ct)).Hourly().RunOnceAtStart().PreventOverlapping(nameof(ReminderService))

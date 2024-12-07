@@ -10,5 +10,3 @@ logs/
 *.conf
 *.json
 .env
-
-DesignTimeNumerousDbContextFactory.cs

@@ -5,6 +5,7 @@
 
 using System.Net;
 using Discord;
+using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Util;
 using Refit;
 

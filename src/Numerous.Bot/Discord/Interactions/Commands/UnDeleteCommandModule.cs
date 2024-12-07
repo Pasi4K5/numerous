@@ -6,6 +6,7 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Bot.Discord.Services.Attachments;
 using Numerous.Bot.Util;
 using Numerous.Common.Util;
 using Numerous.Database.Context;

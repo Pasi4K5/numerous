@@ -5,10 +5,10 @@
 
 using Discord;
 using Discord.WebSocket;
-using Numerous.Bot.Discord;
 using Numerous.Bot.Discord.Events;
-using Numerous.Common;
+using Numerous.Bot.Discord.Services;
 using Numerous.Common.Config;
+using Numerous.Common.Services;
 using Numerous.Database.Context;
 
 namespace Numerous.Bot.Services;
@@ -19,7 +19,8 @@ public sealed class Startup(
     IUnitOfWorkFactory uowFactory,
     ReminderService reminderService,
     OsuVerifier verifier,
-    DiscordEventHandler eventHandler
+    DiscordEventHandler eventHandler,
+    GuildStatsService guildStatsService
 ) : HostedService
 {
     private Config Cfg => cfgProvider.Get();
@@ -46,9 +47,10 @@ public sealed class Startup(
 
         await uow.CommitAsync(ct);
 
-        reminderService.StartAsync(ct);
-        await verifier.StartAsync(ct);
+        reminderService.Start(ct);
+        verifier.Start(ct);
         eventHandler.Start();
+        guildStatsService.Start();
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

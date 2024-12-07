@@ -63,6 +63,9 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbGuild, GuildDto>();
         CreateMap<GuildDto, DbGuild>();
 
+        CreateMap<DbGuildStatsEntry, GuildStatsEntryDto>();
+        CreateMap<GuildStatsEntryDto, DbGuildStatsEntry>();
+
         CreateMap<DbJoinMessage, JoinMessageDto>();
         CreateMap<JoinMessageDto, DbJoinMessage>();
 

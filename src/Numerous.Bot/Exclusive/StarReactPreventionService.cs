@@ -5,8 +5,8 @@
 
 using Discord;
 using Discord.WebSocket;
-using Numerous.Common;
 using Numerous.Common.Config;
+using Numerous.Common.Services;
 
 namespace Numerous.Bot.Exclusive;
 
