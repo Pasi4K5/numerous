@@ -10,7 +10,6 @@ using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
-using Numerous.Common;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;

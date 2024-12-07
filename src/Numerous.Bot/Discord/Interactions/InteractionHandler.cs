@@ -8,7 +8,6 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Numerous.Bot.Discord.Util;
-using Numerous.Common;
 using Numerous.Common.Config;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
