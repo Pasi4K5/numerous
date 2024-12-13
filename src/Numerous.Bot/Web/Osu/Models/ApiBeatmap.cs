@@ -26,6 +26,19 @@ public record ApiBeatmap
 
     [JsonProperty("difficulty_rating")]
     public required float DifficultyRating { get; init; }
+
+    [JsonProperty("owners")]
+    public required IReadOnlyCollection<Owner> Owners { get; init; }
+
+    [JsonObject(MemberSerialization.OptIn)]
+    public record Owner
+    {
+        [JsonProperty("id")]
+        public required uint Id { get; init; }
+
+        [JsonProperty("username")]
+        public required string Username { get; init; }
+    }
 }
 
 public sealed record ApiBeatmapExtended : ApiBeatmap

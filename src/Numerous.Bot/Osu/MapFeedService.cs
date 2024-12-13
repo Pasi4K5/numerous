@@ -69,13 +69,14 @@ public sealed class MapFeedService(
             var fullSet = await api.GetBeatmapsetAsync(set.Id);
 
             var gdMapperIds = fullSet.Beatmaps
-                .Select(u => u.UserId)
-                .Where(id => id != fullSet.UserId)
-                .ToArray();
+                .SelectMany(b => b.Owners)
+                .Where(o => o.Id != fullSet.UserId)
+                .Select(o => o.Id)
+                .ToHashSet();
 
             var allMapperOsuIds = gdMapperIds
-                .Prepend(fullSet.UserId)
-                .ToArray();
+                .Append(fullSet.UserId)
+                .ToHashSet();
 
             if (allMapperOsuIds.All(id => !osuUserDiscordIdDic.ContainsKey(id)))
             {
@@ -86,7 +87,7 @@ public sealed class MapFeedService(
             var allMapperDiscordIds = allMapperOsuIds
                 .Where(osuUserDiscordIdDic.ContainsKey)
                 .Select(osuId => osuUserDiscordIdDic[osuId])
-                .ToArray();
+                .ToHashSet();
 
             var mapper = osuUserDiscordIdDic.TryGetValue(fullSet.UserId, out var userId)
                 ? $"{MentionUtils.MentionUser(userId)} ({Link.OsuUser(fullSet.UserId, fullSet.Creator)})"
