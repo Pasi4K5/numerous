@@ -16,6 +16,7 @@ using Serilog;
 namespace Numerous.Bot.Discord.Interactions;
 
 public sealed class InteractionHandler(
+    ILogger logger,
     DiscordSocketClient client,
     InteractionService interactions,
     IServiceProvider services,
@@ -74,7 +75,7 @@ public sealed class InteractionHandler(
             return;
         }
 
-        Log.Error(
+        logger.Error(
             "Error executing command {CommandName}: {Error}",
             cmd.Name,
             exRes.Exception.ToString()

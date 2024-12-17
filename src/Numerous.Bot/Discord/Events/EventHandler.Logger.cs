@@ -6,7 +6,6 @@
 using Discord.WebSocket;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Util;
-using Serilog;
 
 namespace Numerous.Bot.Discord.Events;
 
@@ -26,7 +25,7 @@ public partial class DiscordEventHandler
             ? await client.Rest.GetGuildAsync(cmd.GuildId.Value)
             : null;
 
-        Log.Information(
+        logger.Information(
             """User "{User}" (ID: {Uid}) executed slash command "{Cmd}" with args {Args} in channel "{Channel}" (ID: {ChannelId}) in guild "{Guild}" (ID: {GuildId})""",
             cmd.User.Username,
             cmd.User.Id,
@@ -38,9 +37,9 @@ public partial class DiscordEventHandler
             cmd.GuildId);
     }
 
-    private static Task LogMessageCommand(SocketMessageCommand msgCmd)
+    private Task LogMessageCommand(SocketMessageCommand msgCmd)
     {
-        Log.Information(
+        logger.Information(
             """User "{User}" (ID: {Uid}) executed message command "{Cmd}" on message <{Msg}>.""",
             msgCmd.User.Username,
             msgCmd.User.Id,
@@ -50,9 +49,9 @@ public partial class DiscordEventHandler
         return Task.CompletedTask;
     }
 
-    private static Task LogUserCommand(SocketUserCommand userCmd)
+    private Task LogUserCommand(SocketUserCommand userCmd)
     {
-        Log.Information("""User "{User} (ID: {Uid}) executed user command "{Cmd}" on user "{Target} (ID: {Tid}).""",
+        logger.Information("""User "{User} (ID: {Uid}) executed user command "{Cmd}" on user "{Target} (ID: {Tid}).""",
             userCmd.User.Username,
             userCmd.User.Id,
             userCmd.CommandName,

@@ -10,11 +10,13 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Common.Config;
 using Numerous.Database.Context;
+using Serilog;
 
 namespace Numerous.Bot.Discord.Events;
 
 // TODO: This whole class fucking sucks.
 public sealed partial class DiscordEventHandler(
+    ILogger logger,
     IConfigProvider cfgProvider,
     DiscordSocketClient client,
     IUnitOfWorkFactory uowFactory,

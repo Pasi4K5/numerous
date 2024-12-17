@@ -19,6 +19,7 @@ namespace Numerous.Bot.Discord.Services;
 
 public sealed class OsuVerifier(
     IHost host,
+    ILogger logger,
     DiscordSocketClient discord,
     IUnitOfWorkFactory uowFactory,
     IOsuApiRepository osuApi
@@ -49,7 +50,7 @@ public sealed class OsuVerifier(
             }
             catch (Exception e)
             {
-                Log.Warning(e,
+                logger.Warning(e,
                     "Failed to assign roles to user {User} in guild {Guild}",
                     guildUser.Id, guild.Id
                 );
