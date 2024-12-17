@@ -4,16 +4,17 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Net.Http.Headers;
+using Serilog;
 
 namespace Numerous.Bot.Web.Osu;
 
-public sealed class OsuAuthHandler(IOsuTokenProvider tokenProvider) : DelegatingHandler
+public sealed class OsuHttpHandler(ILogger logger, IOsuTokenProvider tokenProvider) : HttpLoggingHandler(logger)
 {
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
     {
         var token = await tokenProvider.GetTokenAsync();
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return await base.SendAsync(req, ct).ConfigureAwait(false);
     }
 }

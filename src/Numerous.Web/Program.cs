@@ -67,6 +67,7 @@ try
         .AddInteractiveServerComponents();
 
     var services = builder.Services;
+    services.AddSerilog(Log.Logger);
 
     var discordClient = new DiscordSocketClient(new()
     {

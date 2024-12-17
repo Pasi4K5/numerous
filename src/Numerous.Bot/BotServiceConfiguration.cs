@@ -13,6 +13,7 @@ using Numerous.Bot.Exclusive;
 using Numerous.Bot.Osu;
 using Numerous.Bot.Services;
 using Numerous.Bot.Util;
+using Numerous.Bot.Web;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.SauceNao;
 using Refit;
@@ -30,12 +31,13 @@ public static class BotServiceConfiguration
         services.AddTransient<EmbedBuilders>();
         services.AddSingleton<IFileService, FileService>();
         services.AddTransient<GuildStatsService>();
+        services.AddTransient<HttpLoggingHandler>();
         services.AddHostedService<InteractionHandler>();
         services.AddHostedService<MapFeedService>();
         services.AddHostedService<MessageResponder>();
         services.AddHostedService<MudaeMessageHandler>();
         services.AddSingleton<IOsuApiRepository, OsuApiRepository>();
-        services.AddTransient<OsuAuthHandler>();
+        services.AddTransient<OsuHttpHandler>();
         services.AddSingleton<OsuVerifier>();
         services.AddSingleton<IOsuTokenProvider, OsuTokenProvider>();
         services.AddSingleton<ReminderService>();
@@ -53,7 +55,8 @@ public static class BotServiceConfiguration
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(ISauceNaoApi.BaseUrl);
-            });
+            })
+            .AddHttpMessageHandler<HttpLoggingHandler>();
 
         services.AddRefitClient<IOsuApi>(new RefitSettings
             {
@@ -63,6 +66,6 @@ public static class BotServiceConfiguration
             {
                 c.BaseAddress = new Uri(IOsuApi.BaseUrl);
             })
-            .AddHttpMessageHandler<OsuAuthHandler>();
+            .AddHttpMessageHandler<OsuHttpHandler>();
     }
 }

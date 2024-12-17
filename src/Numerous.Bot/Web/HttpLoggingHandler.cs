@@ -3,30 +3,19 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Numerous.Bot.Discord.Services;
-using Numerous.Bot.Discord.Services.Attachments;
-using Numerous.Bot.Util;
-using Numerous.Bot.Web.Osu;
-using Numerous.Common.Config;
-using Numerous.Database.Context;
 using Serilog;
 
-namespace Numerous.Bot.Discord.Events;
+namespace Numerous.Bot.Web;
 
-// TODO: This whole class fucking sucks.
-public sealed partial class DiscordEventHandler(
-    ILogger logger,
-    IConfigProvider cfgProvider,
-    DiscordSocketClient client,
-    IUnitOfWorkFactory uowFactory,
-    AttachmentService attachmentService,
-    OsuVerifier verifier,
-    IOsuApiRepository osuApi
-)
+public class HttpLoggingHandler(ILogger logger) : DelegatingHandler
 {
-    public void Start()
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
     {
-        this.Init();
+        var id = Guid.NewGuid();
+        logger.Debug("Sending HTTP request '{Id}'\n{Req}", id, req);
+        var response = await base.SendAsync(req, ct);
+        logger.Debug("Received response for HTTP request '{Id}'\n{Response}", id, response);
+
+        return response;
     }
 }
