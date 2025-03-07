@@ -198,7 +198,11 @@ public sealed class OsuVerifier(
             osuUser.HasRankedSets()
             || (osuUser.HasLeaderboardGds()
                 && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest))
-                .Any(s => s.Ranked == BeatmapOnlineStatus.Ranked)
+                .Any(
+                    s => s.Ranked is BeatmapOnlineStatus.Ranked
+                        or BeatmapOnlineStatus.Approved
+                        or BeatmapOnlineStatus.Qualified
+                )
             );
 
         await Task.WhenAll(
