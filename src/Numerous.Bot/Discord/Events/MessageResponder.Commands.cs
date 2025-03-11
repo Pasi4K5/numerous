@@ -3,28 +3,35 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Discord;
 using Discord.WebSocket;
-using Numerous.Common.Services;
 
 namespace Numerous.Bot.Discord.Events;
 
-public sealed partial class MessageResponder(DiscordSocketClient client) : HostedService
+public partial class MessageResponder
 {
-    public override Task StartAsync(CancellationToken cancellationToken)
-    {
-        client.MessageReceived += async msg => await RespondAsync(msg);
+    private const ulong WhithardUserId = 357477071179481100;
+    private const int Repetitions = 10;
+    private const int Delay = 1000;
 
-        return Task.CompletedTask;
-    }
-
-    private Task RespondAsync(SocketMessage msg)
+    private static async Task<bool> RespondToCommandMessageAsync(SocketMessage msg)
     {
-        if (!msg.Author.IsBot)
+        if (msg.CleanContent != "!whit" || msg.Channel is not IGuildChannel)
         {
-            Task.Run(async () => await RespondToBanMessageAsync(msg));
-            Task.Run(async () => await RespondToCommandMessageAsync(msg));
+            return false;
         }
 
-        return Task.CompletedTask;
+        var msgIds = new List<ulong>();
+
+        for (var i = 0; i < Repetitions; i++)
+        {
+            var newMsg = await msg.Channel.SendMessageAsync($"<@{WhithardUserId}>");
+            msgIds.Add(newMsg.Id);
+            await Task.Delay(Delay);
+        }
+
+        await Task.WhenAll(msgIds.Select(id => msg.Channel.DeleteMessageAsync(id)));
+
+        return true;
     }
 }
