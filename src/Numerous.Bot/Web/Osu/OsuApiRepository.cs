@@ -80,7 +80,20 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
             _ => throw new UnreachableException(),
         };
 
-        return await api.GetUserBeatmapsetsAsync(userId, typeStr, "10000");
+        var beatmapsets = new List<ApiBeatmapsetExtended>();
+
+        while (true)
+        {
+            var newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, "100");
+            beatmapsets.AddRange(newBeatmapsets);
+
+            if (newBeatmapsets.Length < 100)
+            {
+                break;
+            }
+        }
+
+        return beatmapsets.ToArray();
     }
 
     public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id)
