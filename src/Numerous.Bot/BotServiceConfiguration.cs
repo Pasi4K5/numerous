@@ -38,6 +38,7 @@ public static class BotServiceConfiguration
         services.AddHostedService<MudaeMessageHandler>();
         services.AddSingleton<IOsuApiRepository, OsuApiRepository>();
         services.AddTransient<OsuHttpHandler>();
+        services.AddHostedService<OsuUserStatsService>();
         services.AddSingleton<OsuVerifier>();
         services.AddSingleton<IOsuTokenProvider, OsuTokenProvider>();
         services.AddSingleton<ReminderService>();

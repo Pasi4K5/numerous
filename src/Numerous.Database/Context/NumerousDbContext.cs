@@ -8,6 +8,8 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbAutoPingMapping> AutoPingMappings { get; set; }
     public DbSet<DbBeatmapCompetition> BeatmapCompetitions { get; set; }
     public DbSet<DbBeatmapCompetitionScore> BeatmapCompetitionScores { get; set; }
+    public DbSet<DbBeatmapsetStats> BeatmapsetStats { get; set; }
+    public DbSet<DbBeatmapStats> BeatmapStats { get; set; }
     public DbSet<DbChannel> Channels { get; set; }
     public DbSet<DbDiscordMessage> DiscordMessages { get; set; }
     public DbSet<DbDiscordMessageVersion> DiscordMessageVersions { get; set; }
@@ -21,6 +23,7 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbOnlineBeatmap> OnlineBeatmaps { get; set; }
     public DbSet<DbOnlineBeatmapset> OnlineBeatmapsets { get; set; }
     public DbSet<DbOsuUser> OsuUsers { get; set; }
+    public DbSet<DbOsuUserStats> OsuUserStats { get; set; }
     public DbSet<DbReminder> Reminders { get; set; }
     public DbSet<DbReplay> Replays { get; set; }
 

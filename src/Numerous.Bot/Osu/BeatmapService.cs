@@ -57,7 +57,6 @@ public sealed class BeatmapService(IConfigProvider cfgProvider, IUnitOfWork uow,
             await uow.OnlineBeatmaps.EnsureExistsAsync(new()
             {
                 Id = beatmap.Id,
-                CreatorId = beatmap.UserId,
                 OnlineBeatmapsetId = beatmap.Beatmapset.Id,
             });
             await uow.LocalBeatmaps.EnsureExistsAsync(new()

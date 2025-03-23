@@ -14,4 +14,5 @@ public sealed class DbOnlineBeatmapset : DbEntity<uint>
     public uint CreatorId { get; set; }
 
     public ICollection<DbOnlineBeatmap> Beatmaps { get; set; } = [];
+    public ICollection<DbBeatmapsetStats> Stats { get; set; } = [];
 }

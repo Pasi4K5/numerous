@@ -4,6 +4,8 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using NodaTime;
+using NodaTime.Extensions;
 using Numerous.Database.Dtos;
 using Numerous.Database.Entities;
 using TimeZoneConverter;
@@ -14,6 +16,9 @@ public sealed class DbMapperProfile : Profile
 {
     public DbMapperProfile()
     {
+        CreateMap<DateTimeOffset, Instant>().ConvertUsing<DateTimeOffsetConverter>();
+        CreateMap<Instant, DateTimeOffset>().ConvertUsing<InstantConverter>();
+
         CreateMap<DbAutoPingMapping, AutoPingMappingDto>();
         CreateMap<AutoPingMappingDto, DbAutoPingMapping>();
 
@@ -23,14 +28,28 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbBeatmapCompetitionScore, BeatmapCompetitionScoreDto>();
         CreateMap<BeatmapCompetitionScoreDto, DbBeatmapCompetitionScore>();
 
+        CreateMap<DbBeatmapsetStats, BeatmapsetStatsDto>();
+        CreateMap<BeatmapsetStatsDto, DbBeatmapsetStats>();
+
+        CreateMap<DbBeatmapStats, BeatmapStatsDto>();
+        CreateMap<BeatmapStatsDto, DbBeatmapStats>();
+
         CreateMap<DbBeatmapCompetitionScore, BeatmapCompetitionScoreDto>();
         CreateMap<BeatmapCompetitionScoreDto, DbBeatmapCompetitionScore>();
 
         CreateMap<DbChannel, ChannelDto>();
         CreateMap<ChannelDto, DbChannel>();
 
-        CreateMap<DbDiscordMessage, DiscordMessageDto>();
-        CreateMap<DiscordMessageDto, DbDiscordMessage>();
+        CreateMap<DbDiscordMessage, DiscordMessageDto>()
+            .ForMember(
+                dest => dest.DeletedAt,
+                opt => opt.MapFrom(src => src.DeletedAt.HasValue ? src.DeletedAt.Value.ToDateTimeOffset() : (DateTimeOffset?)null)
+            );
+        CreateMap<DiscordMessageDto, DbDiscordMessage>()
+            .ForMember(
+                dest => dest.DeletedAt,
+                opt => opt.MapFrom(src => src.DeletedAt.HasValue ? src.DeletedAt.Value.ToInstant() : (Instant?)null)
+            );
 
         CreateMap<DbDiscordMessageVersion, DiscordMessageVersionDto>()
             .ForMember(
@@ -84,10 +103,29 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbOsuUser, OsuUserDto>();
         CreateMap<OsuUserDto, DbOsuUser>();
 
+        CreateMap<DbOsuUserStats, OsuUserStatsDto>();
+        CreateMap<OsuUserStatsDto, DbOsuUserStats>();
+
         CreateMap<DbReminder, ReminderDto>();
         CreateMap<ReminderDto, DbReminder>();
 
         CreateMap<DbReplay, ReplayDto>();
         CreateMap<ReplayDto, DbReplay>();
+    }
+
+    public sealed class DateTimeOffsetConverter : ITypeConverter<DateTimeOffset, Instant>
+    {
+        public Instant Convert(DateTimeOffset source, Instant destination, ResolutionContext context)
+        {
+            return source.ToInstant();
+        }
+    }
+
+    public sealed class InstantConverter : ITypeConverter<Instant, DateTimeOffset>
+    {
+        public DateTimeOffset Convert(Instant source, DateTimeOffset destination, ResolutionContext context)
+        {
+            return source.ToDateTimeOffset();
+        }
     }
 }

@@ -42,10 +42,10 @@ public record ApiBeatmapset
     public required ApiCovers Covers { get; init; }
 
     [JsonProperty("play_count")]
-    public uint PlayCount { get; init; }
+    public int PlayCount { get; init; }
 
     [JsonProperty("favourite_count")]
-    public uint FavouriteCount { get; init; }
+    public int FavouriteCount { get; init; }
 
     [JsonProperty("beatmaps")]
     public required IReadOnlyCollection<ApiBeatmap> Beatmaps { get; init; }

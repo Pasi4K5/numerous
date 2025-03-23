@@ -27,6 +27,12 @@ public record ApiBeatmap
     [JsonProperty("difficulty_rating")]
     public required float DifficultyRating { get; init; }
 
+    [JsonProperty("playcount")]
+    public required int PlayCount { get; init; }
+
+    [JsonProperty("passcount")]
+    public required int PassCount { get; init; }
+
     [JsonProperty("owners")]
     public required IReadOnlyCollection<Owner> Owners { get; init; }
 

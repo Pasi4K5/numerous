@@ -6,6 +6,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Numerous.Common.Util;
 
 namespace Numerous.Database.Entities;
@@ -21,7 +22,7 @@ public sealed class DbDiscordMessageVersion
     [Comment("If NULL, the clean content is the same as the raw content.")]
     public string? CleanContent { get; set; }
 
-    public required DateTimeOffset Timestamp { get; set; }
+    public required Instant Timestamp { get; set; }
 
     public DbDiscordMessage Message { get; set; } = null!;
     public ulong MessageId { get; set; }

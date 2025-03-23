@@ -6,6 +6,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace Numerous.Database.Entities;
 
@@ -13,7 +14,7 @@ namespace Numerous.Database.Entities;
 [Index(nameof(ChannelId))]
 public sealed class DbDiscordMessage : DbEntity<ulong>
 {
-    public DateTimeOffset? DeletedAt { get; set; }
+    public Instant? DeletedAt { get; set; }
 
     [DefaultValue(false)]
     public bool IsHidden { get; set; }

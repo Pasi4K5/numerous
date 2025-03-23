@@ -15,7 +15,7 @@ public sealed class NumerousDbContextFactory(IConfigProvider cfgProvider) : IDbC
     public NumerousDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<NumerousDbContext>()
-            .UseNpgsql(cfgProvider.Get().DbConnectionString)
+            .UseNpgsql(cfgProvider.Get().DbConnectionString, o => o.UseNodaTime())
             .LogTo(Log.Logger.Information, LogLevel.Information)
             .Options;
 

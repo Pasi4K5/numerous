@@ -14,6 +14,7 @@ public interface IRepository<TDto>
     where TDto : class
 {
     Task InsertAsync(TDto dto, CancellationToken ct = default);
+    Task InsertManyAsync(IEnumerable<TDto> dtos, CancellationToken ct = default);
     Task<TDto[]> GetAllAsync(CancellationToken ct = default);
 }
 
@@ -28,6 +29,11 @@ public class Repository<TEntity, TDto>(NumerousDbContext context, IMapper mapper
     public virtual async Task InsertAsync(TDto dto, CancellationToken ct = default)
     {
         await Set.AddAsync(Mapper.Map<TEntity>(dto), ct);
+    }
+
+    public async Task InsertManyAsync(IEnumerable<TDto> dtos, CancellationToken ct = default)
+    {
+        await Set.AddRangeAsync(Mapper.Map<TEntity[]>(dtos), ct);
     }
 
     public async Task<TDto[]> GetAllAsync(CancellationToken ct = default)

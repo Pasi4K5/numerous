@@ -5,6 +5,8 @@
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
+using NodaTime.Extensions;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 using Numerous.Database.Entities;
@@ -22,7 +24,7 @@ public interface IBeatmapCompetitionRepository : IRepository<BeatmapCompetitionD
         CancellationToken ct = default
     );
 
-    Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAndCreatorAsync(ulong guildId, CancellationToken ct = default);
+    Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAsync(ulong guildId, CancellationToken ct = default);
 
     Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
         ulong guildId,
@@ -33,12 +35,12 @@ public interface IBeatmapCompetitionRepository : IRepository<BeatmapCompetitionD
     Task EndCompetitionAsync(ulong guildId);
 }
 
-public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMapper mapper)
+public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMapper mapper, IClock clock)
     : Repository<DbBeatmapCompetition, BeatmapCompetitionDto>(context, mapper), IBeatmapCompetitionRepository
 {
     public async Task<bool> HasActiveCompetitionAsync(ulong guildId, CancellationToken ct = default)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetCurrentInstant();
 
         return await Set
             .AnyAsync(
@@ -57,16 +59,15 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
             .AnyAsync(
                 x =>
                     x.GuildId == guildId
-                    && x.StartTime < endTime.ToUniversalTime()
-                    && x.EndTime > startTime.ToUniversalTime(),
+                    && x.StartTime < endTime.ToInstant()
+                    && x.EndTime > startTime.ToInstant(),
                 ct
             );
     }
 
-    public async Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAndCreatorAsync(ulong guildId, CancellationToken ct = default)
+    public async Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAsync(ulong guildId, CancellationToken ct = default)
     {
         var entity = await GetActiveCompetitionQuery(guildId)
-            .Include(x => x.LocalBeatmap.OnlineBeatmap!.Creator)
             .Include(x => x.LocalBeatmap.OnlineBeatmap!.OnlineBeatmapset.Creator)
             .FirstOrDefaultAsync(cancellationToken: ct);
 
@@ -94,7 +95,7 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
 
     public async Task EndCompetitionAsync(ulong guildId)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetCurrentInstant();
         var competition = await GetActiveCompetitionQuery(guildId)
             .FirstOrDefaultAsync();
 
@@ -115,7 +116,7 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
 
     private IQueryable<DbBeatmapCompetition> GetActiveCompetitionQuery(ulong guildId)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetCurrentInstant();
 
         return Set.Where(x => x.GuildId == guildId && x.StartTime < now && x.EndTime > now);
     }

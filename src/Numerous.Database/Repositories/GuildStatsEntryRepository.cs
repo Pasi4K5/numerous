@@ -22,6 +22,6 @@ public sealed class GuildStatsEntryRepository(NumerousDbContext context, IMapper
     public async Task<IDictionary<DateTimeOffset, int>> GetGuildStatsAsync(ulong guildId, CancellationToken ct = default)
     {
         return await Set.Where(x => x.GuildId == guildId)
-            .ToDictionaryAsync(x => x.Timestamp, x => x.MemberCount, ct);
+            .ToDictionaryAsync(x => x.Timestamp.ToDateTimeOffset(), x => x.MemberCount, ct);
     }
 }

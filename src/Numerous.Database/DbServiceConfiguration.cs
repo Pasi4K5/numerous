@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 using Numerous.Database.Context;
 
 namespace Numerous.Database;
@@ -13,6 +14,7 @@ public static class DbServiceConfiguration
     public static void Configure(IServiceCollection services)
     {
         services.AddDbContextFactory<NumerousDbContext, NumerousDbContextFactory>();
+        services.AddSingleton<IClock>(SystemClock.Instance);
         services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
         services.AddTransient<IUnitOfWork, UnitOfWork>();
         services.AddAutoMapper(typeof(DbMapperProfile));
