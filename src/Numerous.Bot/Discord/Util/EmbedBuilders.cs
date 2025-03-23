@@ -115,7 +115,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             apiMap = null;
         }
 
-        var eb = Beatmap(beatmap, competition.LocalBeatmap.OnlineBeatmap, apiSet, apiMap);
+        var eb = Beatmap(beatmap, competition.LocalBeatmap.OnlineBeatmap, apiSet /*, apiMap*/);
 
         eb.Description +=
             $"\n\nThe competition ends **{competition.EndTime.ToDiscordTimestampRel()}**.";
@@ -134,8 +134,8 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
     private static EmbedBuilder Beatmap(
         WorkingBeatmap beatmap,
         OnlineBeatmapDto? onlineBeatmap,
-        ApiBeatmapsetExtended? apiSet,
-        ApiBeatmap? apiMap
+        ApiBeatmapsetExtended? apiSet
+        // ApiBeatmap? apiMap
     )
     {
         var meta = beatmap.Metadata;
