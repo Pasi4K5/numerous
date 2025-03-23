@@ -3,22 +3,22 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper;
-using Numerous.Database.Context;
-using Numerous.Database.Dtos;
-using Numerous.Database.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using NodaTime;
+using osu.Game.Beatmaps;
 
-namespace Numerous.Database.Repositories;
+namespace Numerous.Database.Entities;
 
-public interface IOnlineBeatmapRepository : IIdRepository<OnlineBeatmapDto, uint>;
-
-public sealed class OnlineBeatmapRepository(NumerousDbContext context, IMapper mapper)
-    : IdRepository<DbOnlineBeatmap, OnlineBeatmapDto, uint>(context, mapper), IOnlineBeatmapRepository
+[Table("beatmapset_stats")]
+[PrimaryKey(nameof(BeatmapsetId), nameof(Timestamp))]
+public sealed class DbBeatmapsetStats
 {
-    public override async Task EnsureExistsAsync(OnlineBeatmapDto dto, CancellationToken ct = default)
-    {
-        await EnsureOsuUserExistsAsync(dto.CreatorId, ct);
+    public DbOnlineBeatmapset Beatmapset { get; set; } = null!;
+    public uint BeatmapsetId { get; set; }
 
-        await base.EnsureExistsAsync(dto, ct);
-    }
+    public Instant Timestamp { get; set; }
+
+    public BeatmapOnlineStatus Status { get; set; }
+    public int FavouriteCount { get; set; }
 }

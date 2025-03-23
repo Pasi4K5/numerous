@@ -6,6 +6,8 @@
 using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
+using NodaTime.Extensions;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 using Numerous.Database.Entities;
@@ -23,7 +25,7 @@ public interface IBeatmapCompetitionScoreRepository : IRepository<BeatmapCompeti
     Task<ulong?> FindTopPlayerDiscordIdAsync(ulong guildId, CancellationToken ct = default);
 }
 
-public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context, IMapper mapper)
+public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context, IMapper mapper, IClock clock)
     : Repository<DbBeatmapCompetitionScore, BeatmapCompetitionScoreDto>(context, mapper), IBeatmapCompetitionScoreRepository
 {
     public override Task InsertAsync(BeatmapCompetitionScoreDto score, CancellationToken ct = default)
@@ -36,7 +38,7 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
         var entity = Mapper.Map<DbBeatmapCompetitionScore>(score);
 
         entity.GuildId = competition.GuildId;
-        entity.StartTime = competition.StartTime;
+        entity.StartTime = competition.StartTime.ToInstant();
         entity.PlayerId = osuUserId;
 
         await Set.AddAsync(entity);
@@ -87,7 +89,7 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
 
     public async Task<int> GetRankOfAsync(BeatmapCompetitionScoreDto dto, ulong guildId, CancellationToken ct = default)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetCurrentInstant();
 
         return await Set
                    .Where(IsTopScore(guildId))
@@ -96,7 +98,7 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
                        && x.Competition.EndTime >= now
                        && (
                            x.TotalScore > dto.TotalScore
-                           || x.TotalScore == dto.TotalScore && x.DateTime < dto.DateTime
+                           || x.TotalScore == dto.TotalScore && x.DateTime < dto.DateTime.ToInstant()
                        ), ct)
                + 1;
     }

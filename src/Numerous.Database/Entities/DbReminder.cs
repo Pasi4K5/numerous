@@ -5,6 +5,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NodaTime;
 using Numerous.Common.Util;
 
 namespace Numerous.Database.Entities;
@@ -15,7 +16,7 @@ public sealed class DbReminder : DbEntity<uint>
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public override uint Id { get; set; }
 
-    public DateTimeOffset Timestamp { get; set; }
+    public Instant Timestamp { get; set; }
 
     [MaxLength(CharacterLimit.SlashCommandOption)]
     public string? Message { get; set; }

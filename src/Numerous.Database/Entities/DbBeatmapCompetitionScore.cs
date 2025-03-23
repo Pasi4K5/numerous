@@ -5,6 +5,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace Numerous.Database.Entities;
 
@@ -29,13 +30,13 @@ public sealed class DbBeatmapCompetitionScore : DbEntity<Guid>
     public uint MehCount { get; set; }
     public uint MissCount { get; set; }
 
-    public DateTimeOffset DateTime { get; set; }
+    public Instant DateTime { get; set; }
 
     [ForeignKey($"{nameof(GuildId)}, {nameof(StartTime)}")]
     public DbBeatmapCompetition Competition { get; set; } = null!;
 
     public ulong GuildId { get; set; }
-    public DateTimeOffset StartTime { get; set; }
+    public Instant StartTime { get; set; }
 
     public DbOsuUser Player { get; set; } = null!;
     public uint PlayerId { get; set; }

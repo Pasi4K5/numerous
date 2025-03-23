@@ -24,7 +24,7 @@ public sealed class DesignTimeNumerousDbContextFactory : IDesignTimeDbContextFac
             + $"Database={Env.GetString("POSTGRES_DB")}";
 
         var optionsBuilder = new DbContextOptionsBuilder<NumerousDbContext>()
-            .UseNpgsql(connectionString);
+            .UseNpgsql(connectionString, o => o.UseNodaTime());
 
         return new NumerousDbContext(optionsBuilder.Options);
     }

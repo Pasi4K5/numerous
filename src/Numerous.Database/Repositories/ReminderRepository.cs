@@ -5,6 +5,7 @@
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using NodaTime.Extensions;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 using Numerous.Database.Entities;
@@ -38,7 +39,7 @@ public sealed class ReminderRepository(NumerousDbContext context, IMapper mapper
     {
         return Mapper.Map<ReminderDto[]>(
             await Set
-                .Where(x => x.Timestamp < timestamp)
+                .Where(x => x.Timestamp < timestamp.ToInstant())
                 .ToArrayAsync(ct)
         );
     }

@@ -17,7 +17,7 @@ partial class CompetitionCommandModule
     {
         await DeferAsync();
 
-        var competition = await uow.BeatmapCompetitions.FindCurrentWithBeatmapAndCreatorAsync(Context.Guild.Id);
+        var competition = await uow.BeatmapCompetitions.FindCurrentWithBeatmapAsync(Context.Guild.Id);
 
         if (competition is null)
         {

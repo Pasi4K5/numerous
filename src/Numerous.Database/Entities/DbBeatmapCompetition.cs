@@ -5,6 +5,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace Numerous.Database.Entities;
 
@@ -15,9 +16,9 @@ public sealed class DbBeatmapCompetition
     public DbGuild Guild { get; set; } = null!;
     public ulong GuildId { get; set; }
 
-    public DateTimeOffset StartTime { get; set; }
+    public Instant StartTime { get; set; }
 
-    public DateTimeOffset EndTime { get; set; }
+    public Instant EndTime { get; set; }
 
     public DbLocalBeatmap LocalBeatmap { get; set; } = null!;
     public Guid LocalBeatmapId { get; set; }

@@ -29,7 +29,7 @@ partial class CompetitionCommandModule
 
         using var client = httpClientFactory.CreateClient();
         var replayData = await client.GetByteArrayAsync(attachment.Url);
-        var competition = await uow.BeatmapCompetitions.FindCurrentWithBeatmapAndCreatorAsync(Context.Guild.Id);
+        var competition = await uow.BeatmapCompetitions.FindCurrentWithBeatmapAsync(Context.Guild.Id);
 
         if (competition is null)
         {

@@ -9,7 +9,7 @@ namespace Numerous.Common.Util;
 
 public static class TaskUtil
 {
-    public static async Task WhenAll(params Task[] tasks)
+    public static async Task WhenAll(params IEnumerable<Task> tasks)
     {
         var allTasks = Task.WhenAll(tasks);
 

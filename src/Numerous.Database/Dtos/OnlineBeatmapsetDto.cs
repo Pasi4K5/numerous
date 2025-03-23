@@ -9,4 +9,6 @@ public sealed class OnlineBeatmapsetDto : IdDto<uint>
 {
     public OsuUserDto Creator { get; set; } = null!;
     public uint CreatorId { get; set; }
+
+    public ICollection<BeatmapStatsDto> Stats { get; set; } = [];
 }

@@ -41,7 +41,7 @@ public sealed class MapFeedService(
         await using var uow = uowFactory.Create();
 
         var channelIds = await uow.MessageChannels.GetAllMapfeedChannelIdsAsync(ct);
-        var osuUserDiscordIdDic = await uow.OsuUsers.GetVerifiedWithDiscordId(ct);
+        var osuUserDiscordIdDic = await uow.OsuUsers.GetVerifiedWithDiscordIdAsync(ct);
 
         if (channelIds.Length == 0 || osuUserDiscordIdDic.Count == 0)
         {

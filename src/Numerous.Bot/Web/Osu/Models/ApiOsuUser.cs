@@ -32,25 +32,25 @@ public record ApiOsuUser
     public required UserCover Cover { get; init; }
 
     [JsonProperty("follower_count")]
-    public uint FollowerCount { get; init; }
+    public int FollowerCount { get; init; }
 
     [JsonProperty("mapping_follower_count")]
-    public uint MappingFollowerCount { get; init; }
+    public int MappingFollowerCount { get; init; }
 
     [JsonProperty("graveyard_beatmapset_count")]
-    public uint GraveyardBeatmapsetCount { get; init; }
+    public int GraveyardBeatmapsetCount { get; init; }
 
     [JsonProperty("guest_beatmapset_count")]
-    public uint GuestBeatmapsetCount { get; init; }
+    public int GuestBeatmapsetCount { get; init; }
 
     [JsonProperty("loved_beatmapset_count")]
-    public uint LovedBeatmapsetCount { get; init; }
+    public int LovedBeatmapsetCount { get; init; }
 
     [JsonProperty("pending_beatmapset_count")]
-    public uint PendingBeatmapsetCount { get; init; }
+    public int PendingBeatmapsetCount { get; init; }
 
     [JsonProperty("ranked_beatmapset_count")]
-    public uint RankedBeatmapsetCount { get; init; }
+    public int RankedBeatmapsetCount { get; init; }
 
     [JsonProperty("kudosu")]
     public required UserKudosu Kudosu { get; init; }
@@ -69,13 +69,13 @@ public record ApiOsuUser
     public sealed record UserKudosu
     {
         [JsonProperty("total")]
-        public uint Total { get; init; }
+        public int Total { get; init; }
     }
 
     public sealed record Group
     {
         [JsonProperty("id")]
-        public uint Id { get; init; }
+        public int Id { get; init; }
     }
 }
 

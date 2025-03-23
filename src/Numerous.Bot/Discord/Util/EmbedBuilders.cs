@@ -156,16 +156,19 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             var setMapper = onlineBeatmap?.OnlineBeatmapset.Creator.DiscordUserId.HasValue == true
                 ? MentionUtils.MentionUser(onlineBeatmap.OnlineBeatmapset.Creator.DiscordUserId.Value)
                 : beatmap.Metadata.Author.Username.WithLink($"https://osu.ppy.sh/u/{apiSet.UserId}");
-            var diffMapper = onlineBeatmap?.Creator.DiscordUserId.HasValue == true
-                ? MentionUtils.MentionUser(onlineBeatmap.Creator.DiscordUserId.Value)
-                : apiSet.RelatedUsers?.FirstOrDefault(x => x.Id == apiMap?.UserId)?.Username
-                    .WithLink($"https://osu.ppy.sh/u/{apiMap!.UserId}");
+            // TODO: Implement this in a different way since beatmap owners are not being stored in the database anymore.
+            // var diffMappers = onlineBeatmap?.Creators.Select(creator =>
+            //     creator.DiscordUserId.HasValue
+            //         ? MentionUtils.MentionUser(creator.DiscordUserId.Value)
+            //         : apiSet.RelatedUsers?.FirstOrDefault(x => x.Id == apiMap?.UserId)?.Username
+            //             .WithLink($"https://osu.ppy.sh/u/{apiMap!.UserId}")
+            // ).Humanize();
 
             eb.WithImageUrl(apiSet.Covers.Card2X)
                 .WithAuthor(apiSet.Creator, url: $"https://osu.ppy.sh/u/{apiSet.UserId}");
             eb.Description =
-                $"**Host:** {setMapper}\n".OnlyIf(setMapper != diffMapper)
-                + $"**Mapper:** {diffMapper}\n"
+                $"**Host:** {setMapper}\n" // .OnlyIf(setMapper != diffMappers)
+                // + $"**Mapper:** {diffMappers}\n"
                 + eb.Description;
         }
 

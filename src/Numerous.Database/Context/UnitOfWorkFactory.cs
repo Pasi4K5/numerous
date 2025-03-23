@@ -5,6 +5,7 @@
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace Numerous.Database.Context;
 
@@ -13,7 +14,7 @@ public interface IUnitOfWorkFactory
     IUnitOfWork Create();
 }
 
-public sealed class UnitOfWorkFactory(IDbContextFactory<NumerousDbContext> contextFactory, IMapper mapper)
+public sealed class UnitOfWorkFactory(IDbContextFactory<NumerousDbContext> contextFactory, IMapper mapper, IClock clock)
     : IUnitOfWorkFactory
 {
     private static bool _migrated;
@@ -33,6 +34,6 @@ public sealed class UnitOfWorkFactory(IDbContextFactory<NumerousDbContext> conte
             }
         }
 
-        return new UnitOfWork(contextFactory, mapper);
+        return new UnitOfWork(contextFactory, mapper, clock);
     }
 }

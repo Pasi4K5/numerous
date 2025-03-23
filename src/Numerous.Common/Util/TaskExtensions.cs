@@ -14,6 +14,11 @@ public static class TaskExtensions
         return TaskUtil.WhenAll(tasks.Item1, tasks.Item2).GetAwaiter();
     }
 
+    public static TaskAwaiter GetAwaiter(this (Task, Task, Task) tasks)
+    {
+        return TaskUtil.WhenAll(tasks.Item1, tasks.Item2, tasks.Item3).GetAwaiter();
+    }
+
     public static TaskAwaiter<(T1, T2)> GetAwaiter<T1, T2>(this (Task<T1>, Task<T2>) tasks)
     {
         return CombineTasks().GetAwaiter();

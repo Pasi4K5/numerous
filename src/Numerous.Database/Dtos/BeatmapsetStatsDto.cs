@@ -3,21 +3,17 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using NodaTime;
+using osu.Game.Beatmaps;
 
-namespace Numerous.Database.Entities;
+namespace Numerous.Database.Dtos;
 
-[Table("guild_stats_entry")]
-[PrimaryKey(nameof(GuildId), nameof(Timestamp))]
-[Index(nameof(GuildId))]
-public sealed class DbGuildStatsEntry
+public sealed class BeatmapsetStatsDto
 {
-    public DbGuild Guild { get; set; } = null!;
-    public ulong GuildId { get; set; }
+    public OnlineBeatmapsetDto Beatmapset { get; set; } = null!;
+    public uint BeatmapsetId { get; set; }
 
-    public Instant Timestamp { get; set; }
+    public required DateTimeOffset Timestamp { get; set; }
 
-    public int MemberCount { get; set; }
+    public required BeatmapOnlineStatus Status { get; set; }
+    public required int FavouriteCount { get; set; }
 }

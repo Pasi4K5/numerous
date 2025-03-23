@@ -16,6 +16,7 @@ public interface IOsuApiRepository
     Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false);
     Task<ApiOsuUserExtended> GetUserByIdAsync(uint userId);
     Task<ApiScore[]> GetRecentScoresAsync(uint userId);
+    IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(uint userId);
     Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type);
     Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id);
     Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync();
@@ -48,6 +49,20 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
     public async Task<ApiScore[]> GetRecentScoresAsync(uint userId)
     {
         return await api.GetUserScoresAsync(userId, "recent", 1000);
+    }
+
+    public IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(uint userId)
+    {
+        ApiBeatmapType[] types =
+        [
+            ApiBeatmapType.Graveyard,
+            ApiBeatmapType.Guest,
+            ApiBeatmapType.Loved,
+            ApiBeatmapType.Pending,
+            ApiBeatmapType.Ranked,
+        ];
+
+        return types.ToAsyncEnumerable().SelectAwait(async type => await GetUserBeatmapsetsAsync(userId, type));
     }
 
     public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type)

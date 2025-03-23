@@ -55,6 +55,11 @@ try
     #region Services
 
     var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseDefaultServiceProvider(opt =>
+    {
+        opt.ValidateScopes = true;
+        opt.ValidateOnBuild = true;
+    });
 
     Env.TraversePath().Load(".env");
 

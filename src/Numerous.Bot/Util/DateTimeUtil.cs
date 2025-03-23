@@ -3,6 +3,8 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Security.Cryptography;
+
 namespace Numerous.Bot.Util;
 
 public static class DateTimeUtil
@@ -115,5 +117,14 @@ public static class DateTimeUtil
             dateTimeArray[4] = dateTime.Minute;
             dateTimeArray[5] = dateTime.Second;
         }
+    }
+
+    public static DateTimeOffset TimeOfDayFromUserId(uint id)
+    {
+        var hash = MD5.HashData(BitConverter.GetBytes(id));
+        var intHash = BitConverter.ToUInt128(hash.AsSpan()[..(128 / 8)]);
+        var totalMinutes = (int)(intHash % 1440);
+
+        return DateTimeOffset.MinValue.Date.AddMinutes(totalMinutes);
     }
 }

@@ -13,8 +13,6 @@ public sealed class DbOnlineBeatmap : DbEntity<uint>
     public DbOnlineBeatmapset OnlineBeatmapset { get; set; } = null!;
     public uint OnlineBeatmapsetId { get; set; }
 
-    public DbOsuUser Creator { get; set; } = null!;
-    public uint CreatorId { get; set; }
-
     public ICollection<DbLocalBeatmap> LocalBeatmaps { get; set; } = [];
+    public ICollection<DbBeatmapStats> Stats { get; set; } = [];
 }

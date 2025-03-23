@@ -5,6 +5,7 @@
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 using Numerous.Database.Entities;
@@ -19,7 +20,7 @@ public interface IDiscordMessageRepository : IIdRepository<DiscordMessageDto, ul
     Task HideAsync(ulong msgId, CancellationToken ct = default);
 }
 
-public sealed class DiscordMessageRepository(NumerousDbContext context, IMapper mapper)
+public sealed class DiscordMessageRepository(NumerousDbContext context, IMapper mapper, IClock clock)
     : IdRepository<DbDiscordMessage, DiscordMessageDto, ulong>(context, mapper), IDiscordMessageRepository
 {
     public override async Task InsertAsync(DiscordMessageDto msg, CancellationToken ct = default)
@@ -54,11 +55,12 @@ public sealed class DiscordMessageRepository(NumerousDbContext context, IMapper 
 
     public async Task SetDeletedAsync(ulong msgId, CancellationToken ct = default)
     {
+        var now = clock.GetCurrentInstant();
         var msg = await Set.FindAsync([msgId], ct);
 
         if (msg is not null)
         {
-            msg.DeletedAt = DateTime.UtcNow;
+            msg.DeletedAt = now;
         }
     }
 

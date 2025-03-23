@@ -3,29 +3,21 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using Numerous.Common.Util;
+using NodaTime;
 
 namespace Numerous.Database.Entities;
 
-[Table("join_message")]
-[PrimaryKey(nameof(GuildId))]
-public sealed class DbJoinMessage : DbEntity<ulong>
+[Table("beatmap_stats")]
+[PrimaryKey(nameof(BeatmapId), nameof(Timestamp))]
+public sealed class DbBeatmapStats
 {
-    [NotMapped]
-    public override ulong Id { get => GuildId; set => GuildId = value; }
+    public DbOnlineBeatmap Beatmap { get; set; } = null!;
+    public uint BeatmapId { get; set; }
 
-    public DbGuild Guild { get; init; } = null!;
-    public ulong GuildId { get; set; }
+    public Instant Timestamp { get; set; }
 
-    public DbMessageChannel Channel { get; set; } = null!;
-    public ulong ChannelId { get; set; }
-
-    [MaxLength(CharacterLimit.DiscordEmbedTitle)]
-    public string? Title { get; set; }
-
-    [MaxLength(CharacterLimit.DiscordEmbedDescription)]
-    public string? Description { get; set; }
+    public int PlayCount { get; set; }
+    public int PassCount { get; set; }
 }
