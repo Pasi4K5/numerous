@@ -5,7 +5,7 @@
 
 namespace Numerous.Database.Dtos;
 
-public sealed class ReminderDto : IdDto<uint>
+public sealed class ReminderDto : IdDto<int>
 {
     public required ulong UserId { get; set; }
     public required ulong? GuildId { internal get; set; }

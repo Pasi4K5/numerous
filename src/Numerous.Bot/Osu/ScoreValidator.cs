@@ -27,7 +27,7 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
 
     public async Task<(ValidationResult result, ulong? apiScoreId)> ValidateAsync(
         BeatmapCompetitionDto competition,
-        uint osuUserId,
+        int osuUserId,
         ScoreInfo score,
         WorkingBeatmap workingBeatmap
     )

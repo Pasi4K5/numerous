@@ -25,7 +25,7 @@ public sealed class OsuTokenProvider(IConfigProvider cfgProvider, IHttpClientFac
 
     private readonly HttpClient _client = clientFactory.CreateClient();
 
-    private uint ClientId => cfgProvider.Get().OsuClientId;
+    private int ClientId => cfgProvider.Get().OsuClientId;
     private string ClientSecret => cfgProvider.Get().OsuClientSecret;
 
     public async Task<string> GetTokenAsync()

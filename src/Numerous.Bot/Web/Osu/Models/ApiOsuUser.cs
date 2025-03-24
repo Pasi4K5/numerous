@@ -11,7 +11,7 @@ namespace Numerous.Bot.Web.Osu.Models;
 public record ApiOsuUser
 {
     [JsonProperty("id")]
-    public uint Id { get; init; }
+    public int Id { get; init; }
 
     [JsonProperty("is_bot")]
     public bool IsBot { get; init; }

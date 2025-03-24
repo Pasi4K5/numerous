@@ -10,10 +10,10 @@ using Numerous.Database.Entities;
 
 namespace Numerous.Database.Repositories;
 
-public interface IOnlineBeatmapsetRepository : IIdRepository<OnlineBeatmapsetDto, uint>;
+public interface IOnlineBeatmapsetRepository : IIdRepository<OnlineBeatmapsetDto, int>;
 
 public sealed class OnlineBeatmapsetRepository(NumerousDbContext context, IMapper mapper)
-    : IdRepository<DbOnlineBeatmapset, OnlineBeatmapsetDto, uint>(context, mapper), IOnlineBeatmapsetRepository
+    : IdRepository<DbOnlineBeatmapset, OnlineBeatmapsetDto, int>(context, mapper), IOnlineBeatmapsetRepository
 {
     public override async Task EnsureExistsAsync(OnlineBeatmapsetDto dto, CancellationToken ct = default)
     {

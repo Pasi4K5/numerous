@@ -10,7 +10,7 @@ namespace Numerous.Database.Entities;
 
 [Table("osu_user")]
 [Index(nameof(DiscordUserId), IsUnique = true)]
-public sealed class DbOsuUser : DbEntity<uint>
+public sealed class DbOsuUser : DbEntity<int>
 {
     public DbDiscordUser? DiscordUser { get; set; }
     public ulong? DiscordUserId { get; set; }

@@ -65,7 +65,7 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
         builder.Entity<DbAutoPingMapping>(e =>
         {
             const string idName = "Id";
-            e.Property<uint>(idName).ValueGeneratedOnAdd();
+            e.Property<int>(idName).ValueGeneratedOnAdd();
             e.HasKey(idName);
         });
 

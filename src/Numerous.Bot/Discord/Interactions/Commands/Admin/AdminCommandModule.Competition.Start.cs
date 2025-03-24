@@ -106,7 +106,7 @@ partial class AdminCommandModule
                 return;
             }
 
-            var id = uint.Parse(match.Groups[IdGroup].Value);
+            var id = int.Parse(match.Groups[IdGroup].Value);
             ApiBeatmapExtended beatmap;
 
             try

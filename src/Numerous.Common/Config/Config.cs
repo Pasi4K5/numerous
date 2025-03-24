@@ -17,7 +17,7 @@ public record Config
     public string DiscordClientSecret { get; init; } = null!;
     public string BotToken { get; init; } = null!;
     public string DbConnectionString { get; init; } = null!;
-    public uint OsuClientId { get; init; }
+    public int OsuClientId { get; init; }
     public string OsuClientSecret { get; init; } = null!;
     public bool GuildMode { get; init; }
     public ulong[] GuildIds { get; init; } = null!;

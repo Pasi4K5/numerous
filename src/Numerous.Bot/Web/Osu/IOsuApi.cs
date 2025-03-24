@@ -27,7 +27,7 @@ public interface IOsuApi
     /// </summary>
     [Get(Api + "/users/{user}/scores/{type}")]
     Task<ApiScore[]> GetUserScoresAsync(
-        uint user,
+        int user,
         string type,
         [Query] uint limit
     );
@@ -36,13 +36,13 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-user-beatmaps
     /// </summary>
     [Get(Api + "/users/{user}/beatmapsets/{type}")]
-    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint user, string type, [Query] string limit);
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int user, string type, [Query] string limit);
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-apiv2beatmapsetsbeatmapset
     /// </summary>
     [Get(Api + "/beatmapsets/{beatmapsetId}")]
-    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint beatmapsetId);
+    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int beatmapsetId);
 
     /// <returns>
     /// The first 50 beatmapsets matching the specified category.
@@ -57,7 +57,7 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-beatmap
     /// </summary>
     [Get(Api + "/beatmaps/{beatmapId}")]
-    Task<ApiBeatmapExtended> GetBeatmapAsync(uint beatmapId);
+    Task<ApiBeatmapExtended> GetBeatmapAsync(int beatmapId);
 
     public enum BeatmapsetCategory
     {

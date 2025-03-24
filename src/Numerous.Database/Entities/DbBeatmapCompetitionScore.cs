@@ -18,17 +18,17 @@ public sealed class DbBeatmapCompetitionScore : DbEntity<Guid>
 
     public ulong? OnlineId { get; set; }
 
-    public uint TotalScore { get; set; }
+    public long TotalScore { get; set; }
 
     [Column(TypeName = "char(2)[]")]
     public string[] Mods { get; set; } = [];
 
     public double Accuracy { get; set; }
-    public uint MaxCombo { get; set; }
-    public uint GreatCount { get; set; }
-    public uint OkCount { get; set; }
-    public uint MehCount { get; set; }
-    public uint MissCount { get; set; }
+    public int MaxCombo { get; set; }
+    public int GreatCount { get; set; }
+    public int OkCount { get; set; }
+    public int MehCount { get; set; }
+    public int MissCount { get; set; }
 
     public Instant DateTime { get; set; }
 
@@ -39,7 +39,7 @@ public sealed class DbBeatmapCompetitionScore : DbEntity<Guid>
     public Instant StartTime { get; set; }
 
     public DbOsuUser Player { get; set; } = null!;
-    public uint PlayerId { get; set; }
+    public int PlayerId { get; set; }
 
     public DbReplay? Replay { get; set; }
 }

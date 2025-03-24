@@ -18,7 +18,7 @@ public sealed class ReminderService(IHost host, IUnitOfWorkFactory uowFactory, D
 {
     private static readonly TimeSpan _cacheInterval = TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1);
 
-    private readonly Dictionary<uint, Timer> _timerCache = new();
+    private readonly Dictionary<int, Timer> _timerCache = new();
 
     public void Start(CancellationToken ct)
     {

@@ -17,7 +17,7 @@ namespace Numerous.Database.Repositories;
 
 public interface IBeatmapCompetitionScoreRepository : IRepository<BeatmapCompetitionScoreDto>
 {
-    Task InsertAsync(BeatmapCompetitionDto competition, uint osuUserId, BeatmapCompetitionScoreDto score);
+    Task InsertAsync(BeatmapCompetitionDto competition, int osuUserId, BeatmapCompetitionScoreDto score);
     Task<BeatmapCompetitionScoreDto> GetWithPlayerAndBeatmapAsync(Guid hash, CancellationToken ct = default);
     Task<List<BeatmapCompetitionScoreDto>> GetCurrentLeaderboardAsync(ulong guildId, int limit, int offset, CancellationToken ct = default);
     Task<int> GetNumTopScoresAsync(ulong guildId, CancellationToken ct = default);
@@ -33,7 +33,7 @@ public sealed class BeatmapCompetitionScoreRepository(NumerousDbContext context,
         throw new NotSupportedException($"Use {nameof(InsertAsync)}({nameof(BeatmapCompetitionDto)}, {nameof(ScoreInfo)}) instead.");
     }
 
-    public async Task InsertAsync(BeatmapCompetitionDto competition, uint osuUserId, BeatmapCompetitionScoreDto score)
+    public async Task InsertAsync(BeatmapCompetitionDto competition, int osuUserId, BeatmapCompetitionScoreDto score)
     {
         var entity = Mapper.Map<DbBeatmapCompetitionScore>(score);
 

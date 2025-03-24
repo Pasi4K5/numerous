@@ -54,7 +54,7 @@ public class Repository<TEntity, TDto>(NumerousDbContext context, IMapper mapper
         return user;
     }
 
-    protected async Task EnsureOsuUserExistsAsync(uint userId, CancellationToken ct)
+    protected async Task EnsureOsuUserExistsAsync(int userId, CancellationToken ct)
     {
         var user = await Context.OsuUsers.FindAsync([userId], ct);
 

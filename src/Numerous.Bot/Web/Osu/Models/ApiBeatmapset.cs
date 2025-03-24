@@ -14,7 +14,7 @@ public record ApiBeatmapset
     private readonly ICollection<string> _tags = new List<string>();
 
     [JsonProperty("id")]
-    public required uint Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonProperty("artist")]
     public required string Artist { get; init; }
@@ -23,7 +23,7 @@ public record ApiBeatmapset
     public required string Title { get; init; }
 
     [JsonProperty("user_id")]
-    public uint UserId { get; set; }
+    public int UserId { get; set; }
 
     [JsonProperty("creator")]
     public required string Creator { get; init; }

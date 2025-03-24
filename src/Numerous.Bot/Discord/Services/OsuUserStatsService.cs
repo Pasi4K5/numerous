@@ -31,7 +31,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
         }
     }
 
-    private async Task UpdateStatsAsync(uint userId, CancellationToken ct)
+    private async Task UpdateStatsAsync(int userId, CancellationToken ct)
     {
         var now = DateTimeOffset.UtcNow;
         var apiBeatmapsets = osuApi.GetUserUploadedBeatmapsetsAsync(userId);

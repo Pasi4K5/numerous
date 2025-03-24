@@ -11,10 +11,10 @@ using Numerous.Common.Util;
 namespace Numerous.Database.Entities;
 
 [Table("reminder")]
-public sealed class DbReminder : DbEntity<uint>
+public sealed class DbReminder : DbEntity<int>
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public override uint Id { get; set; }
+    public override int Id { get; set; }
 
     public Instant Timestamp { get; set; }
 

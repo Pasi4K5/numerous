@@ -8,7 +8,7 @@ namespace Numerous.Database.Dtos;
 public sealed class OsuUserStatsDto
 {
     public OsuUserDto User { get; set; } = null!;
-    public uint UserId { get; set; }
+    public int UserId { get; set; }
 
     public required DateTimeOffset Timestamp { get; set; }
 

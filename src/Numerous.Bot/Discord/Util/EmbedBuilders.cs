@@ -213,7 +213,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
 
             try
             {
-                var apiSet = await osuApi.GetBeatmapsetAsync((uint)beatmap.BeatmapSetInfo.OnlineID);
+                var apiSet = await osuApi.GetBeatmapsetAsync(beatmap.BeatmapSetInfo.OnlineID);
 
                 eb.WithImageUrl(apiSet.Covers.Card2X);
             }
