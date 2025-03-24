@@ -20,5 +20,6 @@ public sealed class DbBeatmapsetStats
     public Instant Timestamp { get; set; }
 
     public BeatmapOnlineStatus Status { get; set; }
+    public int PlayCount { get; set; }
     public int FavouriteCount { get; set; }
 }
