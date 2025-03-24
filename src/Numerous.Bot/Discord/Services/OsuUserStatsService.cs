@@ -75,6 +75,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
                 BeatmapsetId = set.Id,
                 Timestamp = now,
                 Status = set.Ranked,
+                PlayCount = set.PlayCount,
                 FavouriteCount = set.FavouriteCount,
             };
 
