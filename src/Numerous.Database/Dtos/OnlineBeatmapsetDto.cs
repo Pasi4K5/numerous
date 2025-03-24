@@ -5,10 +5,10 @@
 
 namespace Numerous.Database.Dtos;
 
-public sealed class OnlineBeatmapsetDto : IdDto<uint>
+public sealed class OnlineBeatmapsetDto : IdDto<int>
 {
     public OsuUserDto Creator { get; set; } = null!;
-    public uint CreatorId { get; set; }
+    public int CreatorId { get; set; }
 
     public ICollection<BeatmapStatsDto> Stats { get; set; } = [];
 }

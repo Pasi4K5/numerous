@@ -63,7 +63,7 @@ public sealed class OsuVerifier(
         }
     }
 
-    public async Task VerifyAsync(IUser discordUser, uint osuUserId)
+    public async Task VerifyAsync(IUser discordUser, int osuUserId)
     {
         await using var uow = uowFactory.Create();
 

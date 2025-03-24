@@ -14,7 +14,7 @@ namespace Numerous.Database.Entities;
 public sealed class DbOsuUserStats
 {
     public DbOsuUser User { get; set; } = null!;
-    public uint UserId { get; set; }
+    public int UserId { get; set; }
 
     public Instant Timestamp { get; set; }
 

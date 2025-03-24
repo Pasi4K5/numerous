@@ -15,10 +15,10 @@ public sealed class DbLocalBeatmap : DbEntity<Guid>
 
     public string OsuText { get; set; } = null!;
     public byte[] OszHash { get; set; } = null!;
-    public uint MaxCombo { get; set; }
+    public int MaxCombo { get; set; }
 
     public DbOnlineBeatmap? OnlineBeatmap { get; set; }
-    public uint OnlineBeatmapId { get; set; }
+    public int OnlineBeatmapId { get; set; }
 
     public ICollection<DbBeatmapCompetition> BeatmapCompetitions { get; set; } = [];
 }

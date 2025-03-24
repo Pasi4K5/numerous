@@ -10,7 +10,7 @@ namespace Numerous.Database.Dtos;
 public sealed class BeatmapsetStatsDto
 {
     public OnlineBeatmapsetDto Beatmapset { get; set; } = null!;
-    public uint BeatmapsetId { get; set; }
+    public int BeatmapsetId { get; set; }
 
     public required DateTimeOffset Timestamp { get; set; }
 

@@ -21,15 +21,15 @@ public sealed class BeatmapCompetitionScoreDto : IdDto<Guid>
     {
         OnlineId = onlineId;
         Md5Hash = scoreInfo.Hash;
-        PlayerId = (uint)scoreInfo.UserID;
-        TotalScore = (uint)scoreInfo.TotalScore;
+        PlayerId = scoreInfo.UserID;
+        TotalScore = scoreInfo.TotalScore;
         Mods = scoreInfo.Mods.Select(m => m.Acronym).ToArray();
         Accuracy = (float)scoreInfo.Accuracy;
-        MaxCombo = (uint)scoreInfo.MaxCombo;
-        GreatCount = (uint)scoreInfo.Statistics.GetValueOrDefault(HitResult.Great);
-        OkCount = (uint)scoreInfo.Statistics.GetValueOrDefault(HitResult.Ok);
-        MehCount = (uint)scoreInfo.Statistics.GetValueOrDefault(HitResult.Meh);
-        MissCount = (uint)scoreInfo.Statistics.GetValueOrDefault(HitResult.Miss);
+        MaxCombo = scoreInfo.MaxCombo;
+        GreatCount = scoreInfo.Statistics.GetValueOrDefault(HitResult.Great);
+        OkCount = scoreInfo.Statistics.GetValueOrDefault(HitResult.Ok);
+        MehCount = scoreInfo.Statistics.GetValueOrDefault(HitResult.Meh);
+        MissCount = scoreInfo.Statistics.GetValueOrDefault(HitResult.Miss);
         DateTime = scoreInfo.Date;
     }
 
@@ -40,16 +40,16 @@ public sealed class BeatmapCompetitionScoreDto : IdDto<Guid>
     public BeatmapCompetitionDto Competition { get; init; } = null!;
 
     public OsuUserDto Player { get; init; } = null!;
-    public uint PlayerId { get; init; }
+    public int PlayerId { get; init; }
 
-    public uint TotalScore { get; init; }
+    public long TotalScore { get; init; }
     public string[] Mods { get; init; } = [];
     public double Accuracy { get; init; }
-    public uint MaxCombo { get; init; }
-    public uint GreatCount { get; init; }
-    public uint OkCount { get; init; }
-    public uint MehCount { get; init; }
-    public uint MissCount { get; init; }
+    public int MaxCombo { get; init; }
+    public int GreatCount { get; init; }
+    public int OkCount { get; init; }
+    public int MehCount { get; init; }
+    public int MissCount { get; init; }
     public DateTimeOffset DateTime { get; init; }
 
     public string DisplayAccuracy => $"{Accuracy * 100:0.00}%";
@@ -58,10 +58,10 @@ public sealed class BeatmapCompetitionScoreDto : IdDto<Guid>
         Accuracy,
         new Dictionary<HitResult, int>
         {
-            { HitResult.Great, (int)GreatCount },
-            { HitResult.Ok, (int)OkCount },
-            { HitResult.Meh, (int)MehCount },
-            { HitResult.Miss, (int)MissCount },
+            { HitResult.Great, GreatCount },
+            { HitResult.Ok, OkCount },
+            { HitResult.Meh, MehCount },
+            { HitResult.Miss, MissCount },
         }
     );
 

@@ -8,7 +8,7 @@ namespace Numerous.Database.Dtos;
 public sealed class BeatmapStatsDto
 {
     public OnlineBeatmapDto Beatmap { get; set; } = null!;
-    public uint BeatmapId { get; set; }
+    public int BeatmapId { get; set; }
 
     public required DateTimeOffset Timestamp { get; set; }
 

@@ -10,7 +10,7 @@ namespace Numerous.Bot.Web.Osu.Models;
 public record ApiBeatmap
 {
     [JsonProperty("id")]
-    public uint Id { get; set; }
+    public int Id { get; set; }
 
     [JsonProperty("checksum")]
     public string? Checksum { get; set; }
@@ -19,7 +19,7 @@ public record ApiBeatmap
     public ApiBeatmapset? Beatmapset { get; init; }
 
     [JsonProperty("user_id")]
-    public uint UserId { get; init; }
+    public int UserId { get; init; }
 
     [JsonProperty("mode")]
     public required string Mode { get; init; }
@@ -40,7 +40,7 @@ public record ApiBeatmap
     public record Owner
     {
         [JsonProperty("id")]
-        public required uint Id { get; init; }
+        public required int Id { get; init; }
 
         [JsonProperty("username")]
         public required string Username { get; init; }
@@ -53,5 +53,5 @@ public sealed record ApiBeatmapExtended : ApiBeatmap
     public new ApiBeatmapsetExtended? Beatmapset { get; init; }
 
     [JsonProperty("max_combo")]
-    public uint MaxCombo { get; init; }
+    public int MaxCombo { get; init; }
 }

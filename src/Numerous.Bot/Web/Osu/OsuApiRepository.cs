@@ -14,13 +14,13 @@ namespace Numerous.Bot.Web.Osu;
 public interface IOsuApiRepository
 {
     Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false);
-    Task<ApiOsuUserExtended> GetUserByIdAsync(uint userId);
-    Task<ApiScore[]> GetRecentScoresAsync(uint userId);
-    IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(uint userId);
-    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type);
-    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id);
+    Task<ApiOsuUserExtended> GetUserByIdAsync(int userId);
+    Task<ApiScore[]> GetRecentScoresAsync(int userId);
+    IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId);
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type);
+    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id);
     Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync();
-    Task<ApiBeatmapExtended> GetBeatmapAsync(uint id);
+    Task<ApiBeatmapExtended> GetBeatmapAsync(int id);
 }
 
 public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
@@ -41,17 +41,17 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return await api.GetUserAsync(query);
     }
 
-    public async Task<ApiOsuUserExtended> GetUserByIdAsync(uint userId)
+    public async Task<ApiOsuUserExtended> GetUserByIdAsync(int userId)
     {
         return await api.GetUserAsync(userId.ToString(), "id");
     }
 
-    public async Task<ApiScore[]> GetRecentScoresAsync(uint userId)
+    public async Task<ApiScore[]> GetRecentScoresAsync(int userId)
     {
         return await api.GetUserScoresAsync(userId, "recent", 1000);
     }
 
-    public IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(uint userId)
+    public IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId)
     {
         ApiBeatmapType[] types =
         [
@@ -65,7 +65,7 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return types.ToAsyncEnumerable().SelectAwait(async type => await GetUserBeatmapsetsAsync(userId, type));
     }
 
-    public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(uint userId, ApiBeatmapType type)
+    public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type)
     {
         var typeStr = type switch
         {
@@ -96,7 +96,7 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return beatmapsets.ToArray();
     }
 
-    public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(uint id)
+    public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id)
     {
         return await api.GetBeatmapsetAsync(id);
     }
@@ -115,7 +115,7 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
             .ToArray();
     }
 
-    public async Task<ApiBeatmapExtended> GetBeatmapAsync(uint id)
+    public async Task<ApiBeatmapExtended> GetBeatmapAsync(int id)
     {
         return await api.GetBeatmapAsync(id);
     }

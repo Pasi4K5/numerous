@@ -13,13 +13,13 @@ public sealed record ApiScore
     public ulong Id { get; init; }
 
     [JsonProperty("total_score")]
-    public uint TotalScore { get; init; }
+    public int TotalScore { get; init; }
 
     [JsonProperty("accuracy")]
     public float Accuracy { get; init; }
 
     [JsonProperty("max_combo")]
-    public uint MaxCombo { get; init; }
+    public int MaxCombo { get; init; }
 
     [JsonProperty("statistics")]
     public required ApiStatistics Statistics { get; init; }
@@ -36,15 +36,15 @@ public sealed record ApiScore
     public sealed record ApiStatistics
     {
         [JsonProperty("great")]
-        public uint Great { get; init; }
+        public int Great { get; init; }
 
         [JsonProperty("ok")]
-        public uint Ok { get; init; }
+        public int Ok { get; init; }
 
         [JsonProperty("meh")]
-        public uint Meh { get; init; }
+        public int Meh { get; init; }
 
         [JsonProperty("miss")]
-        public uint Miss { get; init; }
+        public int Miss { get; init; }
     }
 }

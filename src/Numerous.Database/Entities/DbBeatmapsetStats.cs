@@ -15,7 +15,7 @@ namespace Numerous.Database.Entities;
 public sealed class DbBeatmapsetStats
 {
     public DbOnlineBeatmapset Beatmapset { get; set; } = null!;
-    public uint BeatmapsetId { get; set; }
+    public int BeatmapsetId { get; set; }
 
     public Instant Timestamp { get; set; }
 

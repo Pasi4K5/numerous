@@ -15,10 +15,10 @@ public sealed class LocalBeatmapDto : IdDto<Guid>
 
     public required string OsuText { get; set; }
     public required byte[] OszHash { get; set; }
-    public required uint MaxCombo { get; set; }
+    public required int MaxCombo { get; set; }
 
     public OnlineBeatmapDto? OnlineBeatmap { get; set; }
-    public uint OnlineBeatmapId { get; set; }
+    public int OnlineBeatmapId { get; set; }
 
     public ICollection<BeatmapCompetitionDto> BeatmapCompetitions { get; set; } = [];
 }

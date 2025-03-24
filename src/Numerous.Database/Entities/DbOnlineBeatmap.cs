@@ -8,10 +8,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Numerous.Database.Entities;
 
 [Table("online_beatmap")]
-public sealed class DbOnlineBeatmap : DbEntity<uint>
+public sealed class DbOnlineBeatmap : DbEntity<int>
 {
     public DbOnlineBeatmapset OnlineBeatmapset { get; set; } = null!;
-    public uint OnlineBeatmapsetId { get; set; }
+    public int OnlineBeatmapsetId { get; set; }
 
     public ICollection<DbLocalBeatmap> LocalBeatmaps { get; set; } = [];
     public ICollection<DbBeatmapStats> Stats { get; set; } = [];

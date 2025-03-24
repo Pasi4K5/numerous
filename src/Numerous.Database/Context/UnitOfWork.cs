@@ -28,7 +28,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IIdRepository<LocalBeatmapDto, Guid> LocalBeatmaps { get; }
     IMessageChannelRepository MessageChannels { get; }
     IIdRepository<JoinMessageDto, ulong> JoinMessages { get; }
-    IIdRepository<OnlineBeatmapDto, uint> OnlineBeatmaps { get; }
+    IIdRepository<OnlineBeatmapDto, int> OnlineBeatmaps { get; }
     IOnlineBeatmapsetRepository OnlineBeatmapsets { get; }
     IOsuUserRepository OsuUsers { get; }
     IRepository<OsuUserStatsDto> OsuUserStats { get; }
@@ -55,7 +55,7 @@ public sealed class UnitOfWork(IDbContextFactory<NumerousDbContext> contextProvi
     public IGuildStatsEntryRepository GuildStats => new GuildStatsEntryRepository(_context, mapper);
     public IIdRepository<LocalBeatmapDto, Guid> LocalBeatmaps => new IdRepository<DbLocalBeatmap, LocalBeatmapDto, Guid>(_context, mapper);
     public IIdRepository<JoinMessageDto, ulong> JoinMessages => new IdRepository<DbJoinMessage, JoinMessageDto, ulong>(_context, mapper);
-    public IIdRepository<OnlineBeatmapDto, uint> OnlineBeatmaps => new IdRepository<DbOnlineBeatmap, OnlineBeatmapDto, uint>(_context, mapper);
+    public IIdRepository<OnlineBeatmapDto, int> OnlineBeatmaps => new IdRepository<DbOnlineBeatmap, OnlineBeatmapDto, int>(_context, mapper);
     public IOnlineBeatmapsetRepository OnlineBeatmapsets => new OnlineBeatmapsetRepository(_context, mapper);
     public IMessageChannelRepository MessageChannels => new MessageChannelRepository(_context, mapper);
     public IOsuUserRepository OsuUsers => new OsuUserRepository(_context, mapper);

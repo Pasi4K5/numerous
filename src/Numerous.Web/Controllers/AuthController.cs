@@ -97,7 +97,7 @@ public sealed class AuthController(IConfigProvider cfgProvider) : ControllerBase
 
         response = await client.SendAsync(msg);
         var profileData = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync())!;
-        var osuId = profileData["id"]?.Value<uint>();
+        var osuId = profileData["id"]?.Value<int>();
 
         var discordUser = await discordClient.GetUserAsync(userId.Value);
 

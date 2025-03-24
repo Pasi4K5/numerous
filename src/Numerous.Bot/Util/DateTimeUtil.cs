@@ -119,7 +119,7 @@ public static class DateTimeUtil
         }
     }
 
-    public static DateTimeOffset TimeOfDayFromUserId(uint id)
+    public static DateTimeOffset TimeOfDayFromUserId(int id)
     {
         var hash = MD5.HashData(BitConverter.GetBytes(id));
         var intHash = BitConverter.ToUInt128(hash.AsSpan()[..(128 / 8)]);

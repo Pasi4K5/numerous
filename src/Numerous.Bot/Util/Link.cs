@@ -8,7 +8,7 @@ namespace Numerous.Bot.Util;
 // TODO: Use this for all links.
 public static class Link
 {
-    public static string OsuUser(uint userId, string text = "") =>
+    public static string OsuUser(int userId, string text = "") =>
         text.ToMdLink($"https://osu.ppy.sh/users/{userId}");
 
     public static string ToMdLink(this string text, string url)

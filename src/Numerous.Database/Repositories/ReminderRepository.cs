@@ -12,14 +12,14 @@ using Numerous.Database.Entities;
 
 namespace Numerous.Database.Repositories;
 
-public interface IReminderRepository : IIdRepository<ReminderDto, uint>
+public interface IReminderRepository : IIdRepository<ReminderDto, int>
 {
     Task<ReminderDto[]> GetRemindersBeforeAsync(DateTimeOffset timestamp, CancellationToken ct = default);
     Task<ReminderDto[]> GetOrderedRemindersAsync(ulong discordUserId, CancellationToken ct = default);
 }
 
 public sealed class ReminderRepository(NumerousDbContext context, IMapper mapper)
-    : IdRepository<DbReminder, ReminderDto, uint>(context, mapper), IReminderRepository
+    : IdRepository<DbReminder, ReminderDto, int>(context, mapper), IReminderRepository
 {
     public override async Task InsertAsync(ReminderDto dto, CancellationToken ct = default)
     {

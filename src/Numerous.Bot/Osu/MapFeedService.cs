@@ -27,7 +27,7 @@ public sealed class MapFeedService(
     private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
     private static readonly DateTimeOffset _startupTime = DateTime.Now;
 
-    private readonly Dictionary<uint, DateTimeOffset> _checkedSets = new();
+    private readonly Dictionary<int, DateTimeOffset> _checkedSets = new();
 
     public override Task StartAsync(CancellationToken ct)
     {

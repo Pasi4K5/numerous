@@ -11,16 +11,16 @@ using Numerous.Database.Entities;
 
 namespace Numerous.Database.Repositories;
 
-public interface IOsuUserRepository : IIdRepository<OsuUserDto, uint>
+public interface IOsuUserRepository : IIdRepository<OsuUserDto, int>
 {
     Task<OsuUserDto?> FindByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
-    Task<uint?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
-    Task<uint[]> GetVerifiedIdsAsync(CancellationToken ct = default);
-    Task<Dictionary<uint, ulong>> GetVerifiedWithDiscordIdAsync(CancellationToken ct = default);
+    Task<int?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
+    Task<int[]> GetVerifiedIdsAsync(CancellationToken ct = default);
+    Task<Dictionary<int, ulong>> GetVerifiedWithDiscordIdAsync(CancellationToken ct = default);
 }
 
 public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
-    : IdRepository<DbOsuUser, OsuUserDto, uint>(context, mapper), IOsuUserRepository
+    : IdRepository<DbOsuUser, OsuUserDto, int>(context, mapper), IOsuUserRepository
 {
     public override async Task InsertAsync(OsuUserDto dto, CancellationToken ct = default)
     {
@@ -33,7 +33,7 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
         return Mapper.Map<OsuUserDto>(await Set.FirstOrDefaultAsync(u => u.DiscordUserId == discordUserId, ct));
     }
 
-    public async Task<uint?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default)
+    public async Task<int?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default)
     {
         var result = await Set.Where(u => u.DiscordUserId == discordUserId)
             .Select(x => x.Id)
@@ -42,7 +42,7 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
         return result == default ? null : result;
     }
 
-    public async Task<uint[]> GetVerifiedIdsAsync(CancellationToken ct = default)
+    public async Task<int[]> GetVerifiedIdsAsync(CancellationToken ct = default)
     {
         return await Set
             .Where(u => u.DiscordUserId != null)
@@ -50,7 +50,7 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
             .ToArrayAsync(ct);
     }
 
-    public async Task<Dictionary<uint, ulong>> GetVerifiedWithDiscordIdAsync(CancellationToken ct = default)
+    public async Task<Dictionary<int, ulong>> GetVerifiedWithDiscordIdAsync(CancellationToken ct = default)
     {
         return await Set
             .Where(u => u.DiscordUserId != null)
