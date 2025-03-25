@@ -31,9 +31,4 @@ public static class Extensions
     {
         return s.Length > maxLength ? s[..(maxLength - 1)] + "…" : s;
     }
-
-    public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
-    {
-        return dictionary.TryGetValue(key, out var value) ? value : defaultValue;
-    }
 }

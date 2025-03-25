@@ -175,6 +175,18 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
+    public async Task<EmbedBuilder> ForumTopicAsync(ApiForumTopic topic)
+    {
+        var author = await osuApi.GetUserByIdAsync(topic.UserId);
+
+        return new EmbedBuilder()
+            .WithColor(0xff66aa)
+            .WithTitle(topic.Title)
+            .WithAuthor(author.Username, author.AvatarUrl, Link.OsuUser(author.Id))
+            .WithTimestamp(topic.CreatedAt)
+            .WithUrl(Link.OsuForumTopic(topic.Id));
+    }
+
     public async Task<EmbedBuilder> ExtendedScoreAsync(WorkingBeatmap beatmap, BeatmapCompetitionScoreDto score, int rank)
     {
         var metadata = beatmap.Metadata;
