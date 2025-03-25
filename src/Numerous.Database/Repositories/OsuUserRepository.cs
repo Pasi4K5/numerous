@@ -15,7 +15,6 @@ public interface IOsuUserRepository : IIdRepository<OsuUserDto, int>
 {
     Task<OsuUserDto?> FindByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
     Task<int?> FindIdByDiscordUserIdAsync(ulong discordUserId, CancellationToken ct = default);
-    Task<bool> VerifyAsync(int osuUserId, ulong discordUserId, CancellationToken ct = default);
     Task<int[]> GetVerifiedIdsAsync(CancellationToken ct = default);
     Task<Dictionary<int, ulong>> GetVerifiedWithDiscordIdAsync(CancellationToken ct = default);
 }
@@ -41,26 +40,6 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
             .FirstOrDefaultAsync(ct);
 
         return result == default ? null : result;
-    }
-
-    public async Task<bool> VerifyAsync(int osuUserId, ulong discordUserId, CancellationToken ct = default)
-    {
-        var alreadyVerified = false;
-        var user = await Set.FindAsync([osuUserId], cancellationToken: ct);
-
-        if (user is null)
-        {
-            await InsertAsync(new OsuUserDto { Id = osuUserId, DiscordUserId = discordUserId }, ct);
-        }
-        else
-        {
-            alreadyVerified = user.DiscordUserId is not null;
-            user.DiscordUserId = discordUserId;
-        }
-
-        await Context.SaveChangesAsync(ct);
-
-        return !alreadyVerified;
     }
 
     public async Task<int[]> GetVerifiedIdsAsync(CancellationToken ct = default)
