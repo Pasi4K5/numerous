@@ -7,28 +7,32 @@ using Coravel;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
-using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactory, IOsuApiRepository osuApi) : HostedService
+public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactory, IOsuApiRepository osuApi)
 {
-    public override async Task StartAsync(CancellationToken ct)
+    public async Task StartAsync(CancellationToken ct = default)
     {
         var uow = uowFactory.Create();
         var osuUsers = await uow.OsuUsers.GetVerifiedIdsAsync(ct);
 
         foreach (var userId in osuUsers)
         {
-            var time = DateTimeUtil.TimeOfDayFromUserId(userId);
-
-            host.Services.UseScheduler(s => s.ScheduleAsync(() =>
-                UpdateStatsAsync(userId, ct)
-            ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + userId));
+            StartTracking(userId, ct);
         }
+    }
+
+    public void StartTracking(int osuUserId, CancellationToken ct = default)
+    {
+        var time = DateTimeUtil.TimeOfDayFromUserId(osuUserId);
+
+        host.Services.UseScheduler(s => s.ScheduleAsync(() =>
+            UpdateStatsAsync(osuUserId, ct)
+        ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId));
     }
 
     private async Task UpdateStatsAsync(int userId, CancellationToken ct)

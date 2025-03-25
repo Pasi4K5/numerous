@@ -20,13 +20,16 @@ public sealed class Startup(
     ReminderService reminderService,
     OsuVerifier verifier,
     DiscordEventHandler eventHandler,
-    GuildStatsService guildStatsService
+    GuildStatsService guildStatsService,
+    OsuUserStatsService osuUserStatsService
 ) : HostedService
 {
     private Config Cfg => cfgProvider.Get();
 
     public override async Task StartAsync(CancellationToken ct)
     {
+        await osuUserStatsService.StartAsync(ct);
+
         discordClient.Log += Log;
 
         await discordClient.LoginAsync(TokenType.Bot, Cfg.BotToken);
