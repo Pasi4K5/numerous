@@ -83,12 +83,16 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         };
 
         var beatmapsets = new List<ApiBeatmapsetExtended>();
-        var newBeatmapsets = Array.Empty<ApiBeatmapsetExtended>();
 
-        for (var offset = 0; newBeatmapsets.Length == limit; offset += limit)
+        for (var offset = 0;; offset += limit)
         {
-            newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, limit.ToString(), offset: offset.ToString());
+            var newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, limit.ToString(), offset: offset.ToString());
             beatmapsets.AddRange(newBeatmapsets);
+
+            if (newBeatmapsets.Length < limit)
+            {
+                break;
+            }
         }
 
         return beatmapsets.ToArray();
