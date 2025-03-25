@@ -36,7 +36,12 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-user-beatmaps
     /// </summary>
     [Get(Api + "/users/{user}/beatmapsets/{type}")]
-    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int user, string type, [Query] string limit);
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(
+        int user,
+        string type,
+        [Query] string limit = "100",
+        [Query] string offset = "0"
+    );
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-apiv2beatmapsetsbeatmapset

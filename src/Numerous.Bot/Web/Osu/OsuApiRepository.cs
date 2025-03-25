@@ -67,6 +67,8 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
 
     public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type)
     {
+        const int limit = 100;
+
         var typeStr = type switch
         {
             ApiBeatmapType.Favourite => "favourite",
@@ -81,16 +83,12 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         };
 
         var beatmapsets = new List<ApiBeatmapsetExtended>();
+        var newBeatmapsets = Array.Empty<ApiBeatmapsetExtended>();
 
-        while (true)
+        for (var offset = 0; newBeatmapsets.Length == limit; offset += limit)
         {
-            var newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, "100");
+            newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, limit.ToString(), offset: offset.ToString());
             beatmapsets.AddRange(newBeatmapsets);
-
-            if (newBeatmapsets.Length < 100)
-            {
-                break;
-            }
         }
 
         return beatmapsets.ToArray();

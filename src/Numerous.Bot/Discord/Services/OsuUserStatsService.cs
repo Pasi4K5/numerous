@@ -63,6 +63,8 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
 
             await using var innerUow = uowFactory.Create();
 
+            await innerUow.OnlineBeatmapsets.EnsureExistsAsync(setDto, ct);
+
             foreach (var beatmap in set.Beatmaps)
             {
                 await innerUow.OnlineBeatmaps.EnsureExistsAsync(new()
@@ -71,8 +73,6 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
                     OnlineBeatmapsetId = set.Id,
                 }, ct);
             }
-
-            await innerUow.OnlineBeatmapsets.EnsureExistsAsync(setDto, ct);
 
             var setStats = new BeatmapsetStatsDto
             {
