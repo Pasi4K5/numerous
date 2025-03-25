@@ -63,9 +63,7 @@ public sealed class MessageChannelRepository(NumerousDbContext context, IMapper 
 
     public async Task SetSubscribedForumsAsync(ulong guildId, ulong channelId, IEnumerable<int> forumIds, CancellationToken ct = default)
     {
-        await EnsureChannelExistsAsync<DbMessageChannel>(guildId, channelId, ct);
-
-        var channel = await Set.FirstAsync(x => x.Id == channelId, ct);
+        var channel = await EnsureChannelExistsAsync<DbMessageChannel>(guildId, channelId, ct);
 
         channel.SubscribedForums = forumIds.Select(x => (byte)x).ToArray();
     }
