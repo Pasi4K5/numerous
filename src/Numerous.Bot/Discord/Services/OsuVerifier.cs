@@ -22,8 +22,7 @@ public sealed class OsuVerifier(
     ILogger logger,
     DiscordSocketClient discord,
     IUnitOfWorkFactory uowFactory,
-    IOsuApiRepository osuApi,
-    OsuUserStatsService osuUserStats
+    IOsuApiRepository osuApi
 )
 {
     public void Start(CancellationToken ct)
@@ -64,18 +63,19 @@ public sealed class OsuVerifier(
         }
     }
 
-    public async Task VerifyAsync(IUser discordUser, int osuUserId, CancellationToken ct = default)
+    public async Task VerifyAsync(IUser discordUser, int osuUserId)
     {
         await using var uow = uowFactory.Create();
 
-        if (await uow.OsuUsers.VerifyAsync(osuUserId, discordUser.Id, ct))
+        await uow.OsuUsers.InsertAsync(new()
         {
-            osuUserStats.StartTracking(osuUserId, ct);
-        }
+            Id = osuUserId,
+            DiscordUserId = discordUser.Id,
+        });
 
-        await uow.CommitAsync(ct);
+        await uow.CommitAsync();
 
-        await AssignRolesAsync(discordUser, ct);
+        await AssignRolesAsync(discordUser);
     }
 
     public async ValueTask<bool> UserIsVerifiedAsync(IUser user, OsuUserDto[]? osuUsers = null)
