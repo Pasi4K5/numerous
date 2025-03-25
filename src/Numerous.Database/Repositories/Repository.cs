@@ -65,12 +65,17 @@ public class Repository<TEntity, TDto>(NumerousDbContext context, IMapper mapper
         }
     }
 
-    protected async Task EnsureChannelExistsAsync<TChannel>(ulong guildId, ulong channelId, CancellationToken ct)
+    protected async Task<TChannel> EnsureChannelExistsAsync<TChannel>(ulong guildId, ulong channelId, CancellationToken ct)
         where TChannel : DbChannel, new()
     {
-        if (!await Context.Set<TChannel>().AnyAsync(x => x.Id == channelId, ct))
+        var channel = await Context.Set<TChannel>().FindAsync([channelId], ct);
+
+        if (channel is null)
         {
-            await Context.Set<TChannel>().AddAsync(new TChannel { Id = channelId, GuildId = guildId }, ct);
+            channel = new TChannel { Id = channelId, GuildId = guildId };
+            await Context.Set<TChannel>().AddAsync(channel, ct);
         }
+
+        return channel;
     }
 }
