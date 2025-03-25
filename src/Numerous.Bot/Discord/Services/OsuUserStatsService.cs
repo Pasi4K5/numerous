@@ -23,12 +23,17 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
 
         foreach (var userId in osuUsers)
         {
-            var time = DateTimeUtil.TimeOfDayFromUserId(userId);
-
-            host.Services.UseScheduler(s => s.ScheduleAsync(() =>
-                UpdateStatsAsync(userId, ct)
-            ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + userId));
+            StartTracking(userId, ct);
         }
+    }
+
+    public void StartTracking(int osuUserId, CancellationToken ct = default)
+    {
+        var time = DateTimeUtil.TimeOfDayFromUserId(osuUserId);
+
+        host.Services.UseScheduler(s => s.ScheduleAsync(() =>
+            UpdateStatsAsync(osuUserId, ct)
+        ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId));
     }
 
     private async Task UpdateStatsAsync(int userId, CancellationToken ct)
