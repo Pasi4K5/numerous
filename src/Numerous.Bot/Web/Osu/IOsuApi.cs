@@ -64,6 +64,14 @@ public interface IOsuApi
     [Get(Api + "/beatmaps/{beatmapId}")]
     Task<ApiBeatmapExtended> GetBeatmapAsync(int beatmapId);
 
+    /// <summary>
+    /// https://osu.ppy.sh/docs/index.html#get-topic-listing
+    /// </summary>
+    [Get(Api + "/forums/topics")]
+    Task<ApiForumTopicListing> GetForumTopicsAsync(
+        [Query] [AliasAs("forum_id")] string? forumId = null
+    );
+
     public enum BeatmapsetCategory
     {
         [EnumMember(Value = "any")] Any,

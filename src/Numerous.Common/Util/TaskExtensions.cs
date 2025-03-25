@@ -31,4 +31,14 @@ public static class TaskExtensions
             return (task1.Result, task2.Result);
         }
     }
+
+    public static TaskAwaiter<T[]> GetAwaiter<T>(this IEnumerable<ValueTask<T>> tasks)
+    {
+        return tasks.Select(t => t.AsTask()).GetAwaiter();
+    }
+
+    public static TaskAwaiter<T[]> GetAwaiter<T>(this IEnumerable<Task<T>> tasks)
+    {
+        return Task.WhenAll(tasks).GetAwaiter();
+    }
 }

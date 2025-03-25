@@ -3,23 +3,13 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Bot.Util;
+using Newtonsoft.Json;
 
-// TODO: Use this for all links.
-public static class Link
+namespace Numerous.Bot.Web.Osu.Models;
+
+[JsonObject(MemberSerialization.OptIn)]
+public sealed record ApiForumTopicListing
 {
-    public static string OsuUser(int userId, string text = "") =>
-        text.ToMdLink($"https://osu.ppy.sh/users/{userId}");
-
-    public static string OsuForumTopic(int topicId) =>
-        $"https://osu.ppy.sh/community/forums/topics/{topicId}";
-
-    public static string ToMdLink(this string text, string url)
-    {
-        return string.IsNullOrWhiteSpace(text)
-            ? url
-            : string.IsNullOrWhiteSpace(url)
-                ? text
-                : $"[{text}]({url})";
-    }
+    [JsonProperty("topics")]
+    public required ApiForumTopic[] Topics { get; init; }
 }

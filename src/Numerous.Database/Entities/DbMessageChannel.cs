@@ -14,5 +14,7 @@ public sealed class DbMessageChannel : DbChannel
     [DefaultValue(false)]
     public bool IsReadOnly { get; set; }
 
+    public byte[] SubscribedForums { get; set; } = [];
+
     public ICollection<DbDiscordMessage> Messages { get; set; } = [];
 }

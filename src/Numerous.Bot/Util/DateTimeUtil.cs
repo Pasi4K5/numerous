@@ -123,8 +123,8 @@ public static class DateTimeUtil
     {
         var hash = MD5.HashData(BitConverter.GetBytes(id));
         var intHash = BitConverter.ToUInt128(hash.AsSpan()[..(128 / 8)]);
-        var totalMinutes = (int)(intHash % 1440);
+        var totalMinutes = (int)(intHash % (60 * 24));
 
-        return DateTimeOffset.MinValue.Date.AddMinutes(totalMinutes);
+        return DateTimeOffset.MinValue.Date.AddDays(1).AddMinutes(totalMinutes);
     }
 }

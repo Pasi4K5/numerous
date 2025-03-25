@@ -17,7 +17,7 @@ public partial class ConfigCommandModule
     public sealed class MapfeedCommandModule(IUnitOfWork uow) : InteractionModule
     {
         [UsedImplicitly]
-        [SlashCommand("set-channel", "Adds a new auto-ping tag.")]
+        [SlashCommand("set-channel", "Sets the channel in which newly uploaded/qualified/ranked beatmaps should be posted.")]
         public async Task SetChannel(
             [Summary("channel", "The channel in which newly uploaded/qualified/ranked beatmaps should be posted.")]
             IMessageChannel? channel
@@ -26,7 +26,6 @@ public partial class ConfigCommandModule
             await DeferAsync();
 
             await uow.Guilds.SetMapfeedChannel(Context.Guild.Id, channel?.Id);
-
             await uow.CommitAsync();
 
             await FollowupWithEmbedAsync(
