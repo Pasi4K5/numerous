@@ -14,4 +14,7 @@ public sealed class BeatmapStatsDto
 
     public required int PlayCount { get; set; }
     public required int PassCount { get; set; }
+
+    public OsuUserDto User { get; set; } = null!;
+    public required int UserId { get; set; }
 }

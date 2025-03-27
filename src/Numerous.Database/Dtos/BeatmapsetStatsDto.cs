@@ -17,4 +17,7 @@ public sealed class BeatmapsetStatsDto
     public required BeatmapOnlineStatus Status { get; set; }
     public required int PlayCount { get; set; }
     public required int FavouriteCount { get; set; }
+
+    public OsuUserDto User { get; set; } = null!;
+    public required int UserId { get; set; }
 }
