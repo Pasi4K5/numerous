@@ -10,7 +10,7 @@ using NodaTime;
 namespace Numerous.Database.Entities;
 
 [Table("beatmap_stats")]
-[PrimaryKey(nameof(BeatmapId), nameof(Timestamp))]
+[PrimaryKey(nameof(BeatmapId), nameof(Timestamp), nameof(UserId))]
 public sealed class DbBeatmapStats
 {
     public DbOnlineBeatmap Beatmap { get; set; } = null!;
@@ -20,4 +20,7 @@ public sealed class DbBeatmapStats
 
     public int PlayCount { get; set; }
     public int PassCount { get; set; }
+
+    public DbOsuUser User { get; set; } = null!;
+    public int UserId { get; set; }
 }

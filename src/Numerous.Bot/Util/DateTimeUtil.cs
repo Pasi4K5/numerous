@@ -125,6 +125,6 @@ public static class DateTimeUtil
         var intHash = BitConverter.ToUInt128(hash.AsSpan()[..(128 / 8)]);
         var totalMinutes = (int)(intHash % (60 * 24));
 
-        return DateTimeOffset.MinValue.Date.AddDays(1).AddMinutes(totalMinutes);
+        return DateTimeOffset.MinValue.AddMinutes(totalMinutes);
     }
 }

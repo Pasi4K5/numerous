@@ -11,7 +11,7 @@ using osu.Game.Beatmaps;
 namespace Numerous.Database.Entities;
 
 [Table("beatmapset_stats")]
-[PrimaryKey(nameof(BeatmapsetId), nameof(Timestamp))]
+[PrimaryKey(nameof(BeatmapsetId), nameof(Timestamp), nameof(UserId))]
 public sealed class DbBeatmapsetStats
 {
     public DbOnlineBeatmapset Beatmapset { get; set; } = null!;
@@ -22,4 +22,7 @@ public sealed class DbBeatmapsetStats
     public BeatmapOnlineStatus Status { get; set; }
     public int PlayCount { get; set; }
     public int FavouriteCount { get; set; }
+
+    public DbOsuUser User { get; set; } = null!;
+    public int UserId { get; set; }
 }

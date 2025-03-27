@@ -16,4 +16,6 @@ public sealed class DbOsuUser : DbEntity<int>
     public ulong? DiscordUserId { get; set; }
 
     public ICollection<DbOnlineBeatmapset> OnlineBeatmapsets { get; set; } = [];
+    public ICollection<DbBeatmapsetStats> BeatmapsetsStats { get; set; } = [];
+    public ICollection<DbBeatmapStats> BeatmapStats { get; set; } = [];
 }

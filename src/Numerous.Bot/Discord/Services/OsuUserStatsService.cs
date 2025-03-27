@@ -81,6 +81,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
                 Status = set.Ranked,
                 PlayCount = set.PlayCount,
                 FavouriteCount = set.FavouriteCount,
+                UserId = userId,
             };
 
             await innerUow.BeatmapsetStats.InsertAsync(setStats, ct);
@@ -91,6 +92,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
                 Timestamp = now,
                 PlayCount = beatmap.PlayCount,
                 PassCount = beatmap.PassCount,
+                UserId = userId,
             });
 
             await innerUow.BeatmapStats.InsertManyAsync(beatmapStats, ct);
