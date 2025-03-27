@@ -11,6 +11,7 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Config;
+using Numerous.Common.Util;
 using Numerous.Database.Dtos;
 using Numerous.Database.Util;
 using osu.Game.Beatmaps;
@@ -175,16 +176,24 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
-    public async Task<EmbedBuilder> ForumTopicAsync(ApiForumTopic topic)
+    public async Task<EmbedBuilder> ForumPostAsync(ApiForumTopicMeta meta, ApiForumPost post)
     {
-        var author = await osuApi.GetUserByIdAsync(topic.UserId);
+        const string newTopicMarker = "✨";
+        const string replyMarker = "⮌";
+
+        var author = await osuApi.GetUserByIdAsync(post.UserId);
+        var isFirstPost = post.Id == meta.FirstPostId;
+
+        var color = isFirstPost ? 0x99eb47u : 0xff66aau;
+        var marker = isFirstPost ? newTopicMarker : replyMarker;
 
         return new EmbedBuilder()
-            .WithColor(0xff66aa)
-            .WithTitle(topic.Title)
+            .WithColor(color)
+            .WithTitle($"{marker} {meta.Title}")
             .WithAuthor(author.Username, author.AvatarUrl, Link.OsuUser(author.Id))
-            .WithTimestamp(topic.CreatedAt)
-            .WithUrl(Link.OsuForumTopic(topic.Id));
+            .WithDescription(MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw).LimitLength(CharacterLimit.DiscordEmbedDescription))
+            .WithTimestamp(post.CreatedAt)
+            .WithUrl(Link.OsuForumTopic(meta.Id));
     }
 
     public async Task<EmbedBuilder> ExtendedScoreAsync(WorkingBeatmap beatmap, BeatmapCompetitionScoreDto score, int rank)

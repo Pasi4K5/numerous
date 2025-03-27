@@ -72,6 +72,16 @@ public interface IOsuApi
         [Query] [AliasAs("forum_id")] string? forumId = null
     );
 
+    /// <summary>
+    /// https://osu.ppy.sh/docs/index.html#get-topic-and-posts
+    /// </summary>
+    [Get(Api + "/forums/topics/{topicId}")]
+    Task<ApiForumTopic> GetForumTopicAsync(
+        int topicId,
+        [Query] int limit = 50,
+        [Query] ForumPostSort sort = ForumPostSort.Asc
+    );
+
     public enum BeatmapsetCategory
     {
         [EnumMember(Value = "any")] Any,
@@ -101,5 +111,11 @@ public interface IOsuApi
         [EnumMember(Value = "plays_asc")] PlaysAsc,
         [EnumMember(Value = "favourites_desc")] FavouritesDesc,
         [EnumMember(Value = "favourites_asc")] FavouritesAsc,
+    }
+
+    public enum ForumPostSort
+    {
+        [EnumMember(Value = "id_asc")] Asc,
+        [EnumMember(Value = "id_desc")] Desc,
     }
 }

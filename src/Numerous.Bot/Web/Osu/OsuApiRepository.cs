@@ -21,7 +21,8 @@ public interface IOsuApiRepository
     Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id);
     Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync();
     Task<ApiBeatmapExtended> GetBeatmapAsync(int id);
-    Task<ApiForumTopic[]> GetForumTopicsAsync(int? forumId = null);
+    Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null);
+    Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort);
 }
 
 public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
@@ -128,8 +129,13 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return await api.GetUserAsync(username, "username");
     }
 
-    public async Task<ApiForumTopic[]> GetForumTopicsAsync(int? forumId = null)
+    public async Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null)
     {
         return (await api.GetForumTopicsAsync(forumId?.ToString())).Topics;
+    }
+
+    public async Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort)
+    {
+        return await api.GetForumTopicAsync(topicId, sort: sort);
     }
 }
