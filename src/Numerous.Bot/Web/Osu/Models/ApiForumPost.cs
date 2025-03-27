@@ -8,11 +8,27 @@ using Newtonsoft.Json;
 namespace Numerous.Bot.Web.Osu.Models;
 
 [JsonObject(MemberSerialization.OptIn)]
-public sealed record ApiForumTopic
+public sealed record ApiForumPost
 {
-    [JsonProperty("topic")]
-    public required ApiForumTopicMeta Meta { get; init; }
+    [JsonProperty("id")]
+    public required int Id { get; init; }
 
-    [JsonProperty("posts")]
-    public required IReadOnlyList<ApiForumPost> Posts { get; init; }
+    [JsonProperty("forum_id")]
+    public int ForumId { get; set; }
+
+    [JsonProperty("user_id")]
+    public required int UserId { get; init; }
+
+    [JsonProperty("created_at")]
+    public required DateTimeOffset CreatedAt { get; init; }
+
+    [JsonProperty("body")]
+    public required PostBody Body { get; init; }
+
+    [JsonObject(MemberSerialization.OptIn)]
+    public sealed class PostBody
+    {
+        [JsonProperty("raw")]
+        public required string Raw { get; init; }
+    }
 }

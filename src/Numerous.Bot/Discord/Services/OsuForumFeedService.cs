@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Web.Osu;
+using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
@@ -29,7 +30,7 @@ public sealed class OsuForumFeedService(
     {
         host.Services.UseScheduler(s => s.ScheduleAsync(() =>
             RunAsync(ct)
-        ).EveryTenSeconds().PreventOverlapping(nameof(OsuForumFeedService)).RunOnceAtStart());
+        ).EveryTenSeconds().PreventOverlapping(nameof(OsuForumFeedService)));
 
         return Task.CompletedTask;
     }
@@ -43,31 +44,49 @@ public sealed class OsuForumFeedService(
             await osuApi.GetForumTopicsAsync()
         );
 
-        var newTopics = topics
-            .Where(t => t.CreatedAt > _lastChecked)
+        var newTopicMeta = topics
+            .Where(t => t.UpdatedAt > _lastChecked)
             .ToArray();
 
-        if (newTopics.Length == 0)
+        if (newTopicMeta.Length == 0)
         {
             return;
         }
 
+        var newTopics = await newTopicMeta.Select(t => osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc));
+
+        List<(ApiForumPost post, ApiForumTopicMeta meta)> newPosts = new();
+
+        foreach (var topic in newTopics)
+        {
+            var posts = topic.Posts
+                .Where(p => p.CreatedAt > _lastChecked)
+                .Select(p => (p, topic.Meta))
+                .ToList();
+
+            if (posts.Count > 0)
+            {
+                newPosts.AddRange(posts);
+            }
+        }
+
         var channels = (await subscriptions.Values
                 .SelectMany(ids => ids)
+                .Distinct()
                 .Select(id => discordClient.GetChannelAsync(id))
             ).Select(ch => (IMessageChannel)ch)
             .ToArray();
 
-        var topicEmbeds = (await newTopics.Select(async t => (topic: t, embedBuilder: await eb.ForumTopicAsync(t))))
-            .ToDictionary(x => x.topic, x => x.embedBuilder.Build());
+        var postEmbeds = (await newPosts.Select(async x => (x.post, embedBuilder: await eb.ForumPostAsync(x.meta, x.post))))
+            .ToDictionary(x => x.post, x => x.embedBuilder.Build());
 
-        foreach (var (topic, embed) in topicEmbeds.OrderBy(e => e.Key.CreatedAt))
+        foreach (var (post, embed) in postEmbeds.OrderBy(e => e.Key.CreatedAt))
         {
             await channels
-                .Where(c => subscriptions.TryGetValue(topic.ForumId, out var ids) && ids.Contains(c.Id))
+                .Where(c => subscriptions.TryGetValue(post.ForumId, out var ids) && ids.Contains(c.Id))
                 .Select(c => c.SendMessageAsync(embed: embed));
         }
 
-        _lastChecked = newTopics.Max(x => x.CreatedAt);
+        _lastChecked = newPosts.Max(x => x.post.CreatedAt);
     }
 }

@@ -11,5 +11,5 @@ namespace Numerous.Bot.Web.Osu.Models;
 public sealed record ApiForumTopicListing
 {
     [JsonProperty("topics")]
-    public required ApiForumTopic[] Topics { get; init; }
+    public required ApiForumTopicMeta[] Topics { get; init; }
 }
