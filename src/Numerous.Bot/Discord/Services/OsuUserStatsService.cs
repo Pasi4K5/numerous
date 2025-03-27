@@ -31,20 +31,13 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
         var time = DateTimeUtil.TimeOfDayFromUserId(osuUserId);
 
         host.Services.UseScheduler(s => s.ScheduleAsync(() =>
-            UpdateStatsAsync(osuUserId, time, ct)
+            UpdateStatsAsync(osuUserId, ct)
         ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId));
     }
 
-    private async Task UpdateStatsAsync(int userId, DateTimeOffset time, CancellationToken ct)
+    private async Task UpdateStatsAsync(int userId, CancellationToken ct)
     {
-        var now = DateTimeOffset.UtcNow;
-        var dateTime = now.Date + time.TimeOfDay;
-
-        if (now < dateTime)
-        {
-            dateTime = dateTime.AddDays(-1);
-        }
-
+        var dateTime = DateTimeUtil.TimeOfDayFromUserId(userId);
         var apiBeatmapsets = osuApi.GetUserUploadedBeatmapsetsAsync(userId);
         var apiUser = await osuApi.GetUserByIdAsync(userId);
 
