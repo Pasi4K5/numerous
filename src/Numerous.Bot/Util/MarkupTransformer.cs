@@ -9,9 +9,6 @@ namespace Numerous.Bot.Util;
 
 public static partial class MarkupTransformer
 {
-    [GeneratedRegex("^", RegexOptions.Multiline)]
-    private static partial Regex LineStartRegex();
-
     [GeneratedRegex(@"\[url=(?<url>.+?)\](?<text>.+?)\[/url\]", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex BbCodeUrlRegex();
 
