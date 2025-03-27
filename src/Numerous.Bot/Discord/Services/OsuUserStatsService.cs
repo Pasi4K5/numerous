@@ -37,14 +37,14 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
 
     private async Task UpdateStatsAsync(int userId, CancellationToken ct)
     {
-        var now = DateTimeOffset.UtcNow;
+        var dateTime = DateTimeUtil.TimeOfDayFromUserId(userId);
         var apiBeatmapsets = osuApi.GetUserUploadedBeatmapsetsAsync(userId);
         var apiUser = await osuApi.GetUserByIdAsync(userId);
 
         var userStats = new OsuUserStatsDto
         {
             UserId = userId,
-            Timestamp = now,
+            Timestamp = dateTime,
             FollowerCount = apiUser.FollowerCount,
             SubscriberCount = apiUser.MappingFollowerCount,
         };
@@ -77,7 +77,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
             var setStats = new BeatmapsetStatsDto
             {
                 BeatmapsetId = set.Id,
-                Timestamp = now,
+                Timestamp = dateTime,
                 Status = set.Ranked,
                 PlayCount = set.PlayCount,
                 FavouriteCount = set.FavouriteCount,
@@ -88,7 +88,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
             var beatmapStats = set.Beatmaps.Select(beatmap => new BeatmapStatsDto
             {
                 BeatmapId = beatmap.Id,
-                Timestamp = now,
+                Timestamp = dateTime,
                 PlayCount = beatmap.PlayCount,
                 PassCount = beatmap.PassCount,
             });
