@@ -39,25 +39,27 @@ public sealed class OsuForumFeedService(
     {
         await using var uow = uowFactory.Create();
 
-        var (subscriptions, topics) = (
+        var (subscriptions, topicMetas) = (
             await uow.MessageChannels.GetForumSubscriptionsAsync(ct),
             await osuApi.GetForumTopicsAsync()
         );
 
-        var newTopicMeta = topics
+        var updatedTopicsMeta = topicMetas
             .Where(t => t.UpdatedAt > _lastChecked)
             .ToArray();
 
-        if (newTopicMeta.Length == 0)
+        if (updatedTopicsMeta.Length == 0)
         {
             return;
         }
 
-        var newTopics = await newTopicMeta.Select(t => osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc));
+        var updatedTopics = await updatedTopicsMeta.Select(t =>
+            osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc)
+        );
 
         List<(ApiForumPost post, ApiForumTopicMeta meta)> newPosts = new();
 
-        foreach (var topic in newTopics)
+        foreach (var topic in updatedTopics)
         {
             var posts = topic.Posts
                 .Where(p => p.CreatedAt > _lastChecked)
@@ -87,6 +89,6 @@ public sealed class OsuForumFeedService(
                 .Select(c => c.SendMessageAsync(embed: embed));
         }
 
-        _lastChecked = newPosts.Max(x => x.post.CreatedAt);
+        _lastChecked = updatedTopics.Max(x => x.Meta.UpdatedAt);
     }
 }
