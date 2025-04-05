@@ -28,6 +28,9 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbBeatmapCompetitionScore, BeatmapCompetitionScoreDto>();
         CreateMap<BeatmapCompetitionScoreDto, DbBeatmapCompetitionScore>();
 
+        CreateMap<DbBeatmapOwnershipStat, BeatmapOwnershipStatDto>();
+        CreateMap<BeatmapOwnershipStatDto, DbBeatmapOwnershipStat>();
+
         CreateMap<DbBeatmapsetStats, BeatmapsetStatsDto>();
         CreateMap<BeatmapsetStatsDto, DbBeatmapsetStats>();
 

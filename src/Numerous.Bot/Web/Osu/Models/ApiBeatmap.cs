@@ -34,7 +34,7 @@ public record ApiBeatmap
     public required int PassCount { get; init; }
 
     [JsonProperty("owners")]
-    public required IReadOnlyCollection<Owner> Owners { get; init; }
+    public required IReadOnlyCollection<Owner>? Owners { get; init; }
 
     [JsonObject(MemberSerialization.OptIn)]
     public record Owner
@@ -49,9 +49,12 @@ public record ApiBeatmap
 
 public sealed record ApiBeatmapExtended : ApiBeatmap
 {
+    [JsonProperty("beatmapset_id")]
+    public int BeatmapsetId { get; init; }
+
     [JsonProperty("beatmapset")]
     public new ApiBeatmapsetExtended? Beatmapset { get; init; }
 
     [JsonProperty("max_combo")]
-    public int MaxCombo { get; init; }
+    public int? MaxCombo { get; init; }
 }

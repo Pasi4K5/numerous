@@ -9,20 +9,17 @@ using NodaTime;
 
 namespace Numerous.Database.Entities;
 
-[Table("beatmap_stats")]
-[PrimaryKey(nameof(BeatmapId), nameof(Timestamp), nameof(UserId))]
-public sealed class DbBeatmapStats
+[Table("beatmap_ownership_stats")]
+[PrimaryKey(nameof(OwnerId), nameof(BeatmapId), nameof(UserId), nameof(Timestamp))]
+public sealed class DbBeatmapOwnershipStat
 {
-    public DbOnlineBeatmap Beatmap { get; set; } = null!;
+    public DbOsuUser Owner { get; set; } = null!;
+    public int OwnerId { get; set; }
+
+    [ForeignKey($"{nameof(BeatmapId)},{nameof(Timestamp)},{nameof(UserId)}")]
+    public DbBeatmapStats Stats { get; set; } = null!;
+
     public int BeatmapId { get; set; }
-
     public Instant Timestamp { get; set; }
-
-    public int PlayCount { get; set; }
-    public int PassCount { get; set; }
-
-    public DbOsuUser User { get; set; } = null!;
     public int UserId { get; set; }
-
-    public ICollection<DbBeatmapOwnershipStat> Ownerships { get; set; } = null!;
 }

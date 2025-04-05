@@ -8,6 +8,7 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbAutoPingMapping> AutoPingMappings { get; set; }
     public DbSet<DbBeatmapCompetition> BeatmapCompetitions { get; set; }
     public DbSet<DbBeatmapCompetitionScore> BeatmapCompetitionScores { get; set; }
+    public DbSet<DbBeatmapOwnershipStat> BeatmapOwnershipStats { get; set; }
     public DbSet<DbBeatmapsetStats> BeatmapsetStats { get; set; }
     public DbSet<DbBeatmapStats> BeatmapStats { get; set; }
     public DbSet<DbChannel> Channels { get; set; }

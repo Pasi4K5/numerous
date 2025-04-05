@@ -21,6 +21,7 @@ public interface IOsuApiRepository
     Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id);
     Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync();
     Task<ApiBeatmapExtended> GetBeatmapAsync(int id);
+    Task<ApiBeatmapExtended[]> BulkBeatmapLookupAsync(ICollection<int> beatmapIds);
     Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null);
     Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort);
 }
@@ -122,6 +123,24 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
     public async Task<ApiBeatmapExtended> GetBeatmapAsync(int id)
     {
         return await api.GetBeatmapAsync(id);
+    }
+
+    public async Task<ApiBeatmapExtended[]> BulkBeatmapLookupAsync(ICollection<int> beatmapIds)
+    {
+        const int maxBeatmapIds = 50;
+
+        if (!beatmapIds.Any())
+        {
+            return [];
+        }
+
+        return (await beatmapIds
+                .Distinct()
+                .Chunk(maxBeatmapIds)
+                .Select(api.GetBeatmapsAsync)
+            )
+            .SelectMany(x => x.Beatmaps)
+            .ToArray();
     }
 
     private async Task<ApiOsuUserExtended> GetUserByUsernameAsync(string username)

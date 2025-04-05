@@ -18,4 +18,5 @@ public sealed class DbOsuUser : DbEntity<int>
     public ICollection<DbOnlineBeatmapset> OnlineBeatmapsets { get; set; } = [];
     public ICollection<DbBeatmapsetStats> BeatmapsetsStats { get; set; } = [];
     public ICollection<DbBeatmapStats> BeatmapStats { get; set; } = [];
+    public ICollection<DbBeatmapOwnershipStat> BeatmapOwnershipStats { get; set; } = [];
 }
