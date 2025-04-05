@@ -33,7 +33,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
 
         host.Services.UseScheduler(s => s.ScheduleAsync(() =>
             UpdateStatsAsync(osuUserId, ct)
-        ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId).RunOnceAtStart());
+        ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId));
     }
 
     private async Task UpdateStatsAsync(int userId, CancellationToken ct)
