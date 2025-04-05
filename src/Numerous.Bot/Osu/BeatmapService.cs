@@ -64,7 +64,7 @@ public sealed class BeatmapService(IConfigProvider cfgProvider, IUnitOfWork uow,
                 Md5Hash = checksum,
                 OsuText = osuText,
                 OszHash = oszHash,
-                MaxCombo = beatmap.MaxCombo,
+                MaxCombo = beatmap.MaxCombo ?? 0,
                 OnlineBeatmapId = beatmap.Id,
             });
             await uow.BeatmapCompetitions.InsertAsync(new()

@@ -17,4 +17,6 @@ public sealed class BeatmapStatsDto
 
     public OsuUserDto User { get; set; } = null!;
     public required int UserId { get; set; }
+
+    public ICollection<BeatmapOwnershipStatDto> Ownerships { get; set; } = null!;
 }

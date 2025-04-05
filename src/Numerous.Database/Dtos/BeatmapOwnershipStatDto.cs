@@ -3,26 +3,12 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using NodaTime;
+namespace Numerous.Database.Dtos;
 
-namespace Numerous.Database.Entities;
-
-[Table("beatmap_stats")]
-[PrimaryKey(nameof(BeatmapId), nameof(Timestamp), nameof(UserId))]
-public sealed class DbBeatmapStats
+public sealed class BeatmapOwnershipStatDto
 {
-    public DbOnlineBeatmap Beatmap { get; set; } = null!;
-    public int BeatmapId { get; set; }
-
-    public Instant Timestamp { get; set; }
-
-    public int PlayCount { get; set; }
-    public int PassCount { get; set; }
-
-    public DbOsuUser User { get; set; } = null!;
-    public int UserId { get; set; }
-
-    public ICollection<DbBeatmapOwnershipStat> Ownerships { get; set; } = null!;
+    public required int OwnerId { get; set; }
+    public required int BeatmapId { get; set; }
+    public required int UserId { get; set; }
+    public required DateTimeOffset Timestamp { get; set; }
 }

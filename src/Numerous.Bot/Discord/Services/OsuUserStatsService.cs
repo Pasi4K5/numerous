@@ -4,6 +4,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Coravel;
+using Discord;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
@@ -32,75 +33,123 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
 
         host.Services.UseScheduler(s => s.ScheduleAsync(() =>
             UpdateStatsAsync(osuUserId, ct)
-        ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId));
+        ).DailyAt(time.Hour, time.Minute).PreventOverlapping(nameof(OsuUserStatsService) + osuUserId).RunOnceAtStart());
     }
 
     private async Task UpdateStatsAsync(int userId, CancellationToken ct)
     {
         var now = DateTimeOffset.UtcNow;
-        var apiBeatmapsets = osuApi.GetUserUploadedBeatmapsetsAsync(userId);
-        var apiUser = await osuApi.GetUserByIdAsync(userId);
 
-        var userStats = new OsuUserStatsDto
+        var userStatsTask = Task.Run(async () =>
         {
-            UserId = userId,
-            Timestamp = now,
-            FollowerCount = apiUser.FollowerCount,
-            SubscriberCount = apiUser.MappingFollowerCount,
-        };
+            var apiUser = await osuApi.GetUserByIdAsync(userId);
 
-        await using var uow = uowFactory.Create();
-
-        var userStatsTask = uow.OsuUserStats.InsertAsync(userStats, ct);
-
-        var mapStatsTask = apiBeatmapsets.SelectMany(x => x.ToAsyncEnumerable()).ForEachAwaitAsync(async set =>
-        {
-            var setDto = new OnlineBeatmapsetDto
+            var userStats = new OsuUserStatsDto
             {
-                Id = set.Id,
-                CreatorId = set.UserId,
+                UserId = userId,
+                Timestamp = now,
+                FollowerCount = apiUser.FollowerCount,
+                SubscriberCount = apiUser.MappingFollowerCount,
             };
 
-            await using var innerUow = uowFactory.Create();
+            await using var uow = uowFactory.Create();
 
-            await innerUow.OnlineBeatmapsets.EnsureExistsAsync(setDto, ct);
+            await uow.OsuUserStats.InsertAsync(userStats, ct);
+            await uow.CommitAsync(ct);
+        }, ct);
 
-            foreach (var beatmap in set.Beatmaps)
+        var mapStatsTask = Task.Run(async () =>
+        {
+            var apiBeatmapsets = await osuApi
+                .GetUserUploadedBeatmapsetsAsync(userId)
+                .Flatten()
+                .ToArrayAsync(ct);
+            var beatmaps = await osuApi.BulkBeatmapLookupAsync(apiBeatmapsets
+                .SelectMany(s => s.Beatmaps)
+                .Select(x => x.Id)
+                .ToArray()
+            );
+
+            await using var uow = uowFactory.Create();
+
+            // Ensure all users exist
+
+            var userIds = beatmaps
+                .SelectMany(x => x.Owners!)
+                .Select(x => x.Id)
+                .Concat(apiBeatmapsets
+                    .Select(x => x.UserId)
+                )
+                .Distinct()
+                .ToArray();
+
+            foreach (var id in userIds)
             {
-                await innerUow.OnlineBeatmaps.EnsureExistsAsync(new()
+                await uow.OsuUsers.EnsureExistsAsync(new()
                 {
-                    Id = beatmap.Id,
-                    OnlineBeatmapsetId = set.Id,
+                    Id = id,
                 }, ct);
             }
 
-            var setStats = new BeatmapsetStatsDto
+            // Ensure all beatmap(set)s exist
+            foreach (var beatmapset in apiBeatmapsets)
             {
-                BeatmapsetId = set.Id,
-                Timestamp = now,
-                Status = set.Ranked,
-                PlayCount = set.PlayCount,
-                FavouriteCount = set.FavouriteCount,
-                UserId = userId,
-            };
+                foreach (var beatmap in beatmapset.Beatmaps)
+                {
+                    await uow.OnlineBeatmaps.EnsureExistsAsync(new()
+                    {
+                        Id = beatmap.Id,
+                        OnlineBeatmapsetId = beatmapset.Id,
+                    }, ct);
+                }
 
-            await innerUow.BeatmapsetStats.InsertAsync(setStats, ct);
+                await uow.OnlineBeatmapsets.EnsureExistsAsync(new()
+                {
+                    Id = beatmapset.Id,
+                    CreatorId = beatmapset.UserId,
+                }, ct);
+            }
 
-            var beatmapStats = set.Beatmaps.Select(beatmap => new BeatmapStatsDto
+            foreach (var set in apiBeatmapsets)
             {
-                BeatmapId = beatmap.Id,
-                Timestamp = now,
-                PlayCount = beatmap.PlayCount,
-                PassCount = beatmap.PassCount,
-                UserId = userId,
-            });
+                var currentMaps = beatmaps
+                    .Where(x => x.BeatmapsetId == set.Id)
+                    .ToArray();
 
-            await innerUow.BeatmapStats.InsertManyAsync(beatmapStats, ct);
+                var setStats = new BeatmapsetStatsDto
+                {
+                    BeatmapsetId = set.Id,
+                    Timestamp = now,
+                    Status = set.Ranked,
+                    PlayCount = set.PlayCount,
+                    FavouriteCount = set.FavouriteCount,
+                    UserId = userId,
+                };
 
-            await innerUow.CommitAsync(ct);
+                await uow.BeatmapsetStats.InsertAsync(setStats, ct);
+
+                var beatmapStats = currentMaps.Select(beatmap => new BeatmapStatsDto
+                {
+                    BeatmapId = beatmap.Id,
+                    Timestamp = now,
+                    PlayCount = beatmap.PlayCount,
+                    PassCount = beatmap.PassCount,
+                    UserId = userId,
+                    Ownerships = beatmap.Owners!.Select(x => new BeatmapOwnershipStatDto
+                    {
+                        OwnerId = x.Id,
+                        BeatmapId = beatmap.Id,
+                        UserId = userId,
+                        Timestamp = now,
+                    }).ToArray(),
+                });
+
+                await uow.BeatmapStats.InsertManyAsync(beatmapStats, ct);
+            }
+
+            await uow.CommitAsync(ct);
         }, ct);
 
         await (userStatsTask, mapStatsTask);
-        await uow.CommitAsync(ct);
     }
 }

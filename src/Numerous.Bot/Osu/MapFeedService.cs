@@ -69,7 +69,7 @@ public sealed class MapFeedService(
             var fullSet = await api.GetBeatmapsetAsync(set.Id);
 
             var gdMapperIds = fullSet.Beatmaps
-                .SelectMany(b => b.Owners)
+                .SelectMany(b => b.Owners!)
                 .Where(o => o.Id != fullSet.UserId)
                 .Select(o => o.Id)
                 .ToHashSet();

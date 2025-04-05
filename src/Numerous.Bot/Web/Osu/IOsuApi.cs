@@ -65,6 +65,16 @@ public interface IOsuApi
     Task<ApiBeatmapExtended> GetBeatmapAsync(int beatmapId);
 
     /// <summary>
+    /// https://osu.ppy.sh/docs/index.html#get-beatmaps
+    /// </summary>
+    [Get(Api + "/beatmaps")]
+    Task<ApiBeatmapsResponse> GetBeatmapsAsync(
+        [Query(CollectionFormat.Multi)]
+        [AliasAs("ids[]")]
+        int[] ids
+    );
+
+    /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-topic-listing
     /// </summary>
     [Get(Api + "/forums/topics")]
