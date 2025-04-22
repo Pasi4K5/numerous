@@ -42,7 +42,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
 
         var userStatsTask = Task.Run(async () =>
         {
-            var apiUser = await osuApi.GetUserByIdAsync(userId);
+            var apiUser = await osuApi.GetUserByIdAsync(userId, ct);
 
             var userStats = new OsuUserStatsDto
             {
@@ -62,13 +62,15 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
         var mapStatsTask = Task.Run(async () =>
         {
             var apiBeatmapsets = await osuApi
-                .GetUserUploadedBeatmapsetsAsync(userId)
+                .GetUserUploadedBeatmapsetsAsync(userId, ct)
                 .Flatten()
                 .ToArrayAsync(ct);
-            var beatmaps = await osuApi.BulkBeatmapLookupAsync(apiBeatmapsets
-                .SelectMany(s => s.Beatmaps)
-                .Select(x => x.Id)
-                .ToArray()
+            var beatmaps = await osuApi.BulkBeatmapLookupAsync(
+                apiBeatmapsets
+                    .SelectMany(s => s.Beatmaps)
+                    .Select(x => x.Id)
+                    .ToArray(),
+                ct
             );
 
             await using var uow = uowFactory.Create();

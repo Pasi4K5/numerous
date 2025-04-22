@@ -34,7 +34,8 @@ public sealed class OsuVerifier(
         discord.GuildMemberUpdated += async (_, user) => await AssignRolesInGuildAsync(
             user,
             await GetOsuUsersAsync(user, ct),
-            await GetGroupRoleMappingsAsync(user.Guild, ct)
+            await GetGroupRoleMappingsAsync(user.Guild, ct),
+            ct: ct
         );
     }
 
@@ -47,7 +48,7 @@ public sealed class OsuVerifier(
         {
             try
             {
-                await AssignRolesInGuildAsync(guildUser, osuUsers, mappings);
+                await AssignRolesInGuildAsync(guildUser, osuUsers, mappings, ct: ct);
             }
             catch (Exception e)
             {
@@ -57,7 +58,7 @@ public sealed class OsuVerifier(
                 );
             }
 
-            if (await UserIsVerifiedAsync(guildUser, osuUsers))
+            if (await UserIsVerifiedAsync(guildUser, osuUsers, ct))
             {
                 await Task.Delay(5000, ct);
             }
@@ -78,7 +79,7 @@ public sealed class OsuVerifier(
         await AssignRolesAsync(discordUser, ct);
     }
 
-    public async ValueTask<bool> UserIsVerifiedAsync(IUser user, OsuUserDto[]? osuUsers = null)
+    public async ValueTask<bool> UserIsVerifiedAsync(IUser user, OsuUserDto[]? osuUsers = null, CancellationToken ct = default)
     {
         if (osuUsers is not null)
         {
@@ -87,12 +88,12 @@ public sealed class OsuVerifier(
 
         await using var uow = uowFactory.Create();
 
-        var dbUser = await uow.OsuUsers.FindByDiscordUserIdAsync(user.Id);
+        var dbUser = await uow.OsuUsers.FindByDiscordUserIdAsync(user.Id, ct);
 
         return dbUser is not null;
     }
 
-    public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role)
+    public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role, CancellationToken ct = default)
     {
         var mapping = new GroupRoleMappingDto
         {
@@ -103,18 +104,18 @@ public sealed class OsuVerifier(
 
         await using var uow = uowFactory.Create();
 
-        await uow.GroupRoleMappings.UpsertAsync(mapping);
+        await uow.GroupRoleMappings.UpsertAsync(mapping, ct);
 
-        await uow.CommitAsync();
+        await uow.CommitAsync(ct);
     }
 
-    public async Task UnlinkRoleAsync(IGuild guild, OsuUserGroup group)
+    public async Task UnlinkRoleAsync(IGuild guild, OsuUserGroup group, CancellationToken ct = default)
     {
         await using var uow = uowFactory.Create();
 
-        await uow.GroupRoleMappings.DeleteAsync(guild.Id, group);
+        await uow.GroupRoleMappings.DeleteAsync(guild.Id, group, ct);
 
-        await uow.CommitAsync();
+        await uow.CommitAsync(ct);
     }
 
     private async Task<OsuUserDto[]> GetOsuUsersAsync(IGuildUser? user = null, CancellationToken ct = default)
@@ -156,15 +157,15 @@ public sealed class OsuVerifier(
 
             if (guildUser is not null)
             {
-                var osuUser = await GetOsuUserAsync(user, osuUsers);
-                await AssignRolesInGuildAsync(guildUser, osuUsers, mappings, osuUser);
+                var osuUser = await GetOsuUserAsync(user, osuUsers, ct);
+                await AssignRolesInGuildAsync(guildUser, osuUsers, mappings, osuUser, ct);
             }
         }
     }
 
-    private async Task AssignRolesInGuildAsync(IGuildUser guildUser, OsuUserDto[] osuUsers, GroupRoleMappingDto[] mappings, ApiOsuUser? osuUser = null)
+    private async Task AssignRolesInGuildAsync(IGuildUser guildUser, OsuUserDto[] osuUsers, GroupRoleMappingDto[] mappings, ApiOsuUser? osuUser = null, CancellationToken ct = default)
     {
-        osuUser ??= await GetOsuUserAsync(guildUser, osuUsers);
+        osuUser ??= await GetOsuUserAsync(guildUser, osuUsers, ct);
 
         await AssignRoleAsync(mappings, OsuUserGroup.Verified, osuUser is not null);
 
@@ -197,7 +198,7 @@ public sealed class OsuVerifier(
         var isRanked =
             osuUser.HasRankedSets()
             || (osuUser.HasLeaderboardGds()
-                && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest))
+                && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest, ct))
                 .Any(
                     s => s.Ranked is BeatmapOnlineStatus.Ranked
                         or BeatmapOnlineStatus.Approved
@@ -213,7 +214,7 @@ public sealed class OsuVerifier(
                 OsuUserGroup.LovedMapper,
                 osuUser.HasLovedSets()
                 || (osuUser.HasLeaderboardGds()
-                    && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest))
+                    && (await osuApi.GetUserBeatmapsetsAsync(osuUser.Id, ApiBeatmapType.Guest, ct))
                     .Any(s => s.Ranked == BeatmapOnlineStatus.Loved)
                 )
             )
@@ -255,7 +256,7 @@ public sealed class OsuVerifier(
         }
     }
 
-    private async Task<ApiOsuUserExtended?> GetOsuUserAsync(IUser discordUser, OsuUserDto[] osuUsers)
+    private async Task<ApiOsuUserExtended?> GetOsuUserAsync(IUser discordUser, OsuUserDto[] osuUsers, CancellationToken ct = default)
     {
         var user = osuUsers.FirstOrDefault(x => x.DiscordUserId == discordUser.Id);
 
@@ -264,7 +265,7 @@ public sealed class OsuVerifier(
             return null;
         }
 
-        var osuUser = await osuApi.GetUserByIdAsync(user.Id);
+        var osuUser = await osuApi.GetUserByIdAsync(user.Id, ct);
 
         if (osuUser is null)
         {

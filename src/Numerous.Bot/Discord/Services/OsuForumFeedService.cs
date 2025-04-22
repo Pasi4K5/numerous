@@ -41,7 +41,7 @@ public sealed class OsuForumFeedService(
 
         var (subscriptions, topicMetas) = (
             await uow.MessageChannels.GetForumSubscriptionsAsync(ct),
-            await osuApi.GetForumTopicsAsync()
+            await osuApi.GetForumTopicsAsync(ct: ct)
         );
 
         var updatedTopicsMeta = topicMetas
@@ -54,7 +54,7 @@ public sealed class OsuForumFeedService(
         }
 
         var updatedTopics = await updatedTopicsMeta.Select(t =>
-            osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc)
+            osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc, ct)
         );
 
         List<(ApiForumPost post, ApiForumTopicMeta meta)> newPosts = new();
