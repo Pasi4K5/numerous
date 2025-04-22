@@ -20,7 +20,7 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-user
     /// </summary>
     [Get(Api + "/users/{user}")]
-    Task<ApiOsuUserExtended> GetUserAsync(string user, [Query] string? key = null);
+    Task<ApiOsuUserExtended> GetUserAsync(string user, [Query] string? key = null, CancellationToken ct = default);
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-user-scores
@@ -29,7 +29,8 @@ public interface IOsuApi
     Task<ApiScore[]> GetUserScoresAsync(
         int user,
         string type,
-        [Query] uint limit
+        [Query] uint limit,
+        CancellationToken ct = default
     );
 
     /// <summary>
@@ -40,14 +41,15 @@ public interface IOsuApi
         int user,
         string type,
         [Query] string limit = "100",
-        [Query] string offset = "0"
+        [Query] string offset = "0",
+        CancellationToken ct = default
     );
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-apiv2beatmapsetsbeatmapset
     /// </summary>
     [Get(Api + "/beatmapsets/{beatmapsetId}")]
-    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int beatmapsetId);
+    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int beatmapsetId, CancellationToken ct = default);
 
     /// <returns>
     /// The first 50 beatmapsets matching the specified category.
@@ -55,14 +57,15 @@ public interface IOsuApi
     [Get(Api + "/beatmapsets/search")]
     Task<ApiBeatmapsetSearchResponse> SearchBeatmapsetsAsync(
         [Query] [AliasAs("s")] BeatmapsetCategory category,
-        [Query] BeatmapsetSort sort = BeatmapsetSort.UpdatedDesc
+        [Query] BeatmapsetSort sort = BeatmapsetSort.UpdatedDesc,
+        CancellationToken ct = default
     );
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-beatmap
     /// </summary>
     [Get(Api + "/beatmaps/{beatmapId}")]
-    Task<ApiBeatmapExtended> GetBeatmapAsync(int beatmapId);
+    Task<ApiBeatmapExtended> GetBeatmapAsync(int beatmapId, CancellationToken ct = default);
 
     /// <summary>
     /// https://osu.ppy.sh/docs/index.html#get-beatmaps
@@ -71,7 +74,8 @@ public interface IOsuApi
     Task<ApiBeatmapsResponse> GetBeatmapsAsync(
         [Query(CollectionFormat.Multi)]
         [AliasAs("ids[]")]
-        int[] ids
+        int[] ids,
+        CancellationToken ct = default
     );
 
     /// <summary>
@@ -79,7 +83,8 @@ public interface IOsuApi
     /// </summary>
     [Get(Api + "/forums/topics")]
     Task<ApiForumTopicListing> GetForumTopicsAsync(
-        [Query] [AliasAs("forum_id")] string? forumId = null
+        [Query] [AliasAs("forum_id")] string? forumId = null,
+        CancellationToken ct = default
     );
 
     /// <summary>
@@ -89,7 +94,8 @@ public interface IOsuApi
     Task<ApiForumTopic> GetForumTopicAsync(
         int topicId,
         [Query] int limit = 50,
-        [Query] ForumPostSort sort = ForumPostSort.Asc
+        [Query] ForumPostSort sort = ForumPostSort.Asc,
+        CancellationToken ct = default
     );
 
     public enum BeatmapsetCategory

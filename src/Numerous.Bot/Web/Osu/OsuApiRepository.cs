@@ -13,48 +13,48 @@ namespace Numerous.Bot.Web.Osu;
 
 public interface IOsuApiRepository
 {
-    Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false);
-    Task<ApiOsuUserExtended> GetUserByIdAsync(int userId);
-    Task<ApiScore[]> GetRecentScoresAsync(int userId);
-    IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId);
-    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type);
-    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id);
-    Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync();
-    Task<ApiBeatmapExtended> GetBeatmapAsync(int id);
-    Task<ApiBeatmapExtended[]> BulkBeatmapLookupAsync(ICollection<int> beatmapIds);
-    Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null);
-    Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort);
+    Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false, CancellationToken ct = default);
+    Task<ApiOsuUserExtended> GetUserByIdAsync(int userId, CancellationToken ct = default);
+    Task<ApiScore[]> GetRecentScoresAsync(int userId, CancellationToken ct = default);
+    IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId, CancellationToken ct = default);
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type, CancellationToken ct = default);
+    Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id, CancellationToken ct = default);
+    Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync(CancellationToken ct = default);
+    Task<ApiBeatmapExtended> GetBeatmapAsync(int id, CancellationToken ct = default);
+    Task<ApiBeatmapExtended[]> BulkBeatmapLookupAsync(ICollection<int> beatmapIds, CancellationToken ct = default);
+    Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null, CancellationToken ct = default);
+    Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort, CancellationToken ct = default);
 }
 
 public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
 {
-    public async Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false)
+    public async Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false, CancellationToken ct = default)
     {
         if (prioritizeUsername)
         {
             try
             {
-                return await GetUserByUsernameAsync(query);
+                return await GetUserByUsernameAsync(query, ct);
             }
             catch (ApiException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
             }
         }
 
-        return await api.GetUserAsync(query);
+        return await api.GetUserAsync(query, ct: ct);
     }
 
-    public async Task<ApiOsuUserExtended> GetUserByIdAsync(int userId)
+    public async Task<ApiOsuUserExtended> GetUserByIdAsync(int userId, CancellationToken ct = default)
     {
-        return await api.GetUserAsync(userId.ToString(), "id");
+        return await api.GetUserAsync(userId.ToString(), "id", ct);
     }
 
-    public async Task<ApiScore[]> GetRecentScoresAsync(int userId)
+    public async Task<ApiScore[]> GetRecentScoresAsync(int userId, CancellationToken ct = default)
     {
-        return await api.GetUserScoresAsync(userId, "recent", 1000);
+        return await api.GetUserScoresAsync(userId, "recent", 1000, ct);
     }
 
-    public IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId)
+    public IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId, CancellationToken ct = default)
     {
         ApiBeatmapType[] types =
         [
@@ -65,10 +65,10 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
             ApiBeatmapType.Ranked,
         ];
 
-        return types.ToAsyncEnumerable().SelectAwait(async type => await GetUserBeatmapsetsAsync(userId, type));
+        return types.ToAsyncEnumerable().SelectAwait(async type => await GetUserBeatmapsetsAsync(userId, type, ct));
     }
 
-    public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type)
+    public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type, CancellationToken ct = default)
     {
         const int limit = 100;
 
@@ -89,7 +89,7 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
 
         for (var offset = 0;; offset += limit)
         {
-            var newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, limit.ToString(), offset: offset.ToString());
+            var newBeatmapsets = await api.GetUserBeatmapsetsAsync(userId, typeStr, limit.ToString(), offset: offset.ToString(), ct: ct);
             beatmapsets.AddRange(newBeatmapsets);
 
             if (newBeatmapsets.Length < limit)
@@ -101,17 +101,17 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return beatmapsets.ToArray();
     }
 
-    public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id)
+    public async Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id, CancellationToken ct = default)
     {
-        return await api.GetBeatmapsetAsync(id);
+        return await api.GetBeatmapsetAsync(id, ct);
     }
 
-    public async Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync()
+    public async Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync(CancellationToken ct = default)
     {
         var updatedMapsTask =
-            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any);
+            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, ct: ct);
         var rankedQualifiedMapsTask =
-            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, IOsuApi.BeatmapsetSort.RankedDesc);
+            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, IOsuApi.BeatmapsetSort.RankedDesc, ct);
 
         var (updatedMaps, rankedQualifiedMaps) = await (updatedMapsTask, rankedQualifiedMapsTask);
 
@@ -120,12 +120,12 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
             .ToArray();
     }
 
-    public async Task<ApiBeatmapExtended> GetBeatmapAsync(int id)
+    public async Task<ApiBeatmapExtended> GetBeatmapAsync(int id, CancellationToken ct = default)
     {
-        return await api.GetBeatmapAsync(id);
+        return await api.GetBeatmapAsync(id, ct);
     }
 
-    public async Task<ApiBeatmapExtended[]> BulkBeatmapLookupAsync(ICollection<int> beatmapIds)
+    public async Task<ApiBeatmapExtended[]> BulkBeatmapLookupAsync(ICollection<int> beatmapIds, CancellationToken ct = default)
     {
         const int maxBeatmapIds = 50;
 
@@ -137,24 +137,24 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return (await beatmapIds
                 .Distinct()
                 .Chunk(maxBeatmapIds)
-                .Select(api.GetBeatmapsAsync)
+                .Select(ids => api.GetBeatmapsAsync(ids, ct))
             )
             .SelectMany(x => x.Beatmaps)
             .ToArray();
     }
 
-    private async Task<ApiOsuUserExtended> GetUserByUsernameAsync(string username)
+    private async Task<ApiOsuUserExtended> GetUserByUsernameAsync(string username, CancellationToken ct = default)
     {
-        return await api.GetUserAsync(username, "username");
+        return await api.GetUserAsync(username, "username", ct);
     }
 
-    public async Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null)
+    public async Task<ApiForumTopicMeta[]> GetForumTopicsAsync(int? forumId = null, CancellationToken ct = default)
     {
-        return (await api.GetForumTopicsAsync(forumId?.ToString())).Topics;
+        return (await api.GetForumTopicsAsync(forumId?.ToString(), ct)).Topics;
     }
 
-    public async Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort)
+    public async Task<ApiForumTopic> GetForumTopicAsync(int topicId, IOsuApi.ForumPostSort sort, CancellationToken ct = default)
     {
-        return await api.GetForumTopicAsync(topicId, sort: sort);
+        return await api.GetForumTopicAsync(topicId, sort: sort, ct: ct);
     }
 }

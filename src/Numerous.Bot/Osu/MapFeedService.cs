@@ -48,7 +48,7 @@ public sealed class MapFeedService(
             return;
         }
 
-        var beatmapSets = (await api.SearchRecentlyChangedBeatmapsetsAsync())
+        var beatmapSets = (await api.SearchRecentlyChangedBeatmapsetsAsync(ct))
             .Where(s =>
                 (s.RankedDate ?? s.SubmittedDate) >= DtMath.Max(_startupTime, DateTimeOffset.UtcNow - _cacheDuration)
                 && !_checkedSets.ContainsKey(s.Id)
@@ -66,7 +66,7 @@ public sealed class MapFeedService(
                 continue;
             }
 
-            var fullSet = await api.GetBeatmapsetAsync(set.Id);
+            var fullSet = await api.GetBeatmapsetAsync(set.Id, ct);
 
             var gdMapperIds = fullSet.Beatmaps
                 .SelectMany(b => b.Owners!)
