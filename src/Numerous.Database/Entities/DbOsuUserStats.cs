@@ -20,4 +20,5 @@ public sealed class DbOsuUserStats
 
     public int FollowerCount { get; set; }
     public int SubscriberCount { get; set; }
+    public int? Kudosu { get; set; }
 }

@@ -50,6 +50,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
                 Timestamp = now,
                 FollowerCount = apiUser.FollowerCount,
                 SubscriberCount = apiUser.MappingFollowerCount,
+                Kudosu = apiUser.Kudosu.Total,
             };
 
             await using var uow = uowFactory.Create();
