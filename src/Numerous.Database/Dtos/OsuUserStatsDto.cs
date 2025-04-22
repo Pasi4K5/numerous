@@ -14,4 +14,5 @@ public sealed class OsuUserStatsDto
 
     public int FollowerCount { get; set; }
     public int SubscriberCount { get; set; }
+    public int? Kudosu { get; set; }
 }
