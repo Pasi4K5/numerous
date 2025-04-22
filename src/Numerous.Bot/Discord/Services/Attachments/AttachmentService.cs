@@ -36,7 +36,7 @@ public sealed class AttachmentService(IConfigProvider cfgProvider, IFileService 
 
         if (!files.DirectoryExists(imgDirPath))
         {
-            return Array.Empty<FileAttachmentInfo>();
+            return [];
         }
 
         return files.GetFiles(imgDirPath, $"{msgId}_*")
