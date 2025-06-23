@@ -42,7 +42,7 @@ try
             fileSizeLimitBytes: null,
             buffered: true
         ).Enrich.WithExceptionDetails()
-        .MinimumLevel.Debug();
+        .MinimumLevel.Information();
 
     Log.Logger = logCfg.CreateLogger();
 
