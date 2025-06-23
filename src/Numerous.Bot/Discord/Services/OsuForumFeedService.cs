@@ -45,7 +45,7 @@ public sealed class OsuForumFeedService(
         );
 
         var updatedTopicsMeta = topicMetas
-            .Where(t => t.UpdatedAt > _lastChecked)
+            .Where(t => t.UpdatedAt > _lastChecked && subscriptions.ContainsKey(t.ForumId))
             .ToArray();
 
         if (updatedTopicsMeta.Length == 0)
@@ -72,6 +72,8 @@ public sealed class OsuForumFeedService(
             }
         }
 
+        _lastChecked = topicMetas.Max(t => t.UpdatedAt);
+
         var channels = (await subscriptions.Values
                 .SelectMany(ids => ids)
                 .Distinct()
@@ -88,7 +90,5 @@ public sealed class OsuForumFeedService(
                 .Where(c => subscriptions.TryGetValue(post.ForumId, out var ids) && ids.Contains(c.Id))
                 .Select(c => c.SendMessageAsync(embed: embed));
         }
-
-        _lastChecked = updatedTopics.Max(x => x.Meta.UpdatedAt);
     }
 }
