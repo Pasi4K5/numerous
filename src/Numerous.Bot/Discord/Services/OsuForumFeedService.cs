@@ -26,7 +26,7 @@ public sealed class OsuForumFeedService(
 {
     private static readonly int[] _ignoreRepliesForumIds =
     [
-        53, 78, 115,
+        53, 87, 115,
     ];
 
     private DateTimeOffset _lastChecked = DateTimeOffset.UtcNow;
