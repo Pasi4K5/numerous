@@ -23,7 +23,7 @@ public sealed record ApiForumTopicMeta
     public required DateTimeOffset CreatedAt { get; init; }
 
     [JsonProperty("updated_at")]
-    public required DateTimeOffset UpdatedAt { get; init; }
+    public required DateTimeOffset UpdatedAt { get; set; }
 
     [JsonProperty("title")]
     public required string Title { get; init; }

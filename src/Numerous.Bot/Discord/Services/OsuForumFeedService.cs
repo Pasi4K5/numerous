@@ -24,7 +24,12 @@ public sealed class OsuForumFeedService(
     EmbedBuilders eb
 ) : HostedService
 {
-    private static DateTimeOffset _lastChecked = DateTimeOffset.UtcNow;
+    private static readonly int[] _ignoreRepliesForumIds =
+    [
+        53, 78, 115,
+    ];
+
+    private DateTimeOffset _lastChecked = DateTimeOffset.UtcNow;
 
     public override Task StartAsync(CancellationToken ct)
     {
@@ -43,6 +48,12 @@ public sealed class OsuForumFeedService(
             await uow.MessageChannels.GetForumSubscriptionsAsync(ct),
             await osuApi.GetForumTopicsAsync(ct: ct)
         );
+
+        foreach (var topic in topicMetas.Where(t => _ignoreRepliesForumIds.Contains(t.ForumId)))
+        {
+            // Treat them as if they were not updated
+            topic.UpdatedAt = topic.CreatedAt;
+        }
 
         var updatedTopicsMeta = topicMetas
             .Where(t => t.UpdatedAt > _lastChecked && subscriptions.ContainsKey(t.ForumId))
