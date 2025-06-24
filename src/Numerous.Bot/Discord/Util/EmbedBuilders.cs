@@ -179,7 +179,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
     public async Task<EmbedBuilder> ForumPostAsync(ApiForumTopicMeta meta, ApiForumPost post)
     {
         const string newTopicMarker = "✨";
-        const string replyMarker = "⮌";
+        const string replyMarker = "↩️";
 
         var author = await osuApi.GetUserByIdAsync(post.UserId);
         var isFirstPost = post.Id == meta.FirstPostId;
