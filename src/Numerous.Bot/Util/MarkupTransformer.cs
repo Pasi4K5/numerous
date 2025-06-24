@@ -45,6 +45,9 @@ public static partial class MarkupTransformer
     [GeneratedRegex(@"\[size=(\d+?)\](?<text>.+?)\[/size\]", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex BbCodeSizeRegex();
 
+    [GeneratedRegex(@"\[notice\](?<text>.+?)\[/notice\]", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex BbCodeNoticeRegex();
+
     [GeneratedRegex(@"\[quote(=.+?)?\](?<text>.+?)\[/quote\]", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex BbCodeQuoteRegex();
 
@@ -130,6 +133,7 @@ public static partial class MarkupTransformer
         result = BbCodeImageMapRegex().Replace(result, "[*Image Map*](${url})");
         result = BbCodeHeadingRegex().Replace(result, "## ${text}");
         result = BbCodeSizeRegex().Replace(result, "${text}");
+        result = BbCodeNoticeRegex().Replace(result, "${text}");
         result = BbCodeQuoteRegex().Replace(result, m =>
             LineStartRegex().Replace(m.Groups["text"].Value, "> ")
         );
