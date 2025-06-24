@@ -9,8 +9,11 @@ namespace Numerous.Bot.Util;
 
 public static partial class MarkupTransformer
 {
+    [GeneratedRegex(@"\[url\](?<url>.+?)\[/url\]", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex BbCodeSimpleUrlRegex();
+
     [GeneratedRegex(@"\[url=(?<url>.+?)\](?<text>.+?)\[/url\]", RegexOptions.Compiled | RegexOptions.Singleline)]
-    private static partial Regex BbCodeUrlRegex();
+    private static partial Regex BbCodeUrlWithParamRegex();
 
     [GeneratedRegex(@"\[img\](?<url>.+?)\[/img\]", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex BbCodeImgRegex();
@@ -42,22 +45,81 @@ public static partial class MarkupTransformer
     [GeneratedRegex(@"\[size=(\d+?)\](?<text>.+?)\[/size\]", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex BbCodeSizeRegex();
 
-    // TODO: Temporarily disabled because it doesn't work on nested quotes
-    // [GeneratedRegex(@"\[quote(=.+?)?\](?<text>.+?)\[/quote\]", RegexOptions.Compiled | RegexOptions.Singleline)]
-    // private static partial Regex BbCodeQuoteRegex();
+    [GeneratedRegex(@"\[quote(=.+?)?\](?<text>.+?)\[/quote\]", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex BbCodeQuoteRegex();
+
+    [GeneratedRegex(@"\[quote(=.+?)?\]", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex BbCodeQuoteStartRegex();
+
+    [GeneratedRegex(@"\[/quote\]", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex BbCodeQuoteEndRegex();
+
+    [GeneratedRegex("^", RegexOptions.Compiled | RegexOptions.Multiline)]
+    private static partial Regex LineStartRegex();
 
     public static string BbCodeToDiscordMd(string bbCode)
     {
-        var result = bbCode;
+        // Step 1: (Pre-processing) Remove nested quotes to avoid long quotes using up all the characters.
+
+        var nestingLevel = 0;
+        var lines = bbCode.Split("\n").ToList();
+        var removedLines = 0;
+
+        foreach (var (line, i) in lines.ToArray().WithIndexes())
+        {
+            if (BbCodeQuoteEndRegex().IsMatch(line))
+            {
+                RemoveIfNested();
+                nestingLevel--;
+            }
+            else
+            {
+                if (BbCodeQuoteStartRegex().IsMatch(line))
+                {
+                    nestingLevel++;
+                }
+
+                RemoveIfNested();
+            }
+
+            continue;
+
+            void RemoveIfNested()
+            {
+                if (nestingLevel > 1)
+                {
+                    lines.RemoveAt(i - removedLines++);
+                }
+            }
+        }
+
+        // Step 2: Escape special characters that have meaning in Discord Markdown.
+
+        lines = lines.Select(line =>
+        {
+            if (line.StartsWith('#'))
+            {
+                line = line.Replace("#", @"\#");
+            }
+            else if (line.StartsWith('>'))
+            {
+                line = LineStartRegex().Replace(line, "> ");
+            }
+
+            return line;
+        }).ToList();
+
+        var result = string.Join("\n", lines);
 
         result = result.Replace("*", @"\*")
             .Replace("_", @"\_")
             .Replace("~", @"\~")
-            .Replace("`", @"\`")
-            .Replace("#", @"\#")
-            .Replace(">", @"\>");
+            .Replace("`", @"\`");
 
-        result = BbCodeUrlRegex().Replace(result, "[${text}](${url})");
+        // Step 3: Replace BBCode with Discord Markdown equivalents.
+
+        result = BbCodeSimpleUrlRegex().Replace(result, "${url}");
+        result = BbCodeUrlWithParamRegex().Replace(result, "[${text}](${url})");
         result = BbCodeImgRegex().Replace(result, "[*Image*](${url})");
         result = BbCodeCodeRegex().Replace(result, "`${text}`");
         result = BbCodeCodeBlockRegex().Replace(result, "```${text}```");
@@ -68,15 +130,9 @@ public static partial class MarkupTransformer
         result = BbCodeImageMapRegex().Replace(result, "[*Image Map*](${url})");
         result = BbCodeHeadingRegex().Replace(result, "## ${text}");
         result = BbCodeSizeRegex().Replace(result, "${text}");
-
-        // TODO: Temporarily disabled because it doesn't work on nested quotes
-        // result = BbCodeQuoteRegex().Replace(result, m =>
-        // {
-        //     var quoteText = m.Groups["text"].Value;
-        //     var quotedLines = LineStartRegex().Replace(quoteText, "> ");
-        //
-        //     return quotedLines;
-        // });
+        result = BbCodeQuoteRegex().Replace(result, m =>
+            LineStartRegex().Replace(m.Groups["text"].Value, "> ")
+        );
 
         return result;
     }
