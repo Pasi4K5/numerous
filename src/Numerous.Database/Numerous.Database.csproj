@@ -10,16 +10,16 @@
 	<ItemGroup>
 	  <PackageReference Include="AutoMapper" Version="14.0.0" />
       <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.3" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
 	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
 	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="9.0.4" />
-	  <PackageReference Include="ppy.osu.Game" Version="2025.321.0" />
-	  <PackageReference Include="Serilog" Version="4.2.0" />
+	  <PackageReference Include="ppy.osu.Game" Version="2025.618.0" />
+	  <PackageReference Include="Serilog" Version="4.3.0" />
 	  <PackageReference Include="TimeZoneConverter" Version="7.0.0" />
 	</ItemGroup>
 	
