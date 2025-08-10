@@ -25,7 +25,7 @@ public sealed class MapFeedService(
 ) : HostedService
 {
     private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
-    private static readonly DateTimeOffset _startupTime = DateTime.Now;
+    private static readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
 
     private readonly Dictionary<int, DateTimeOffset> _checkedSets = new();
 
@@ -100,7 +100,7 @@ public sealed class MapFeedService(
             var usernames = fullSet.RelatedUsers?.ToDictionary(u => u.Id, u => u.Username)
                             ?? [];
 
-            var sendTasks = channelIds.Select(id => Task.Run(async () =>
+            var sendTasks = channelIds.Select(async id =>
             {
                 var channel = (IMessageChannel)await discordClient.GetChannelAsync(id);
                 var guild = ((IGuildChannel)channel).Guild;
@@ -120,7 +120,7 @@ public sealed class MapFeedService(
 
                 var (eb, cb) = EmbedBuilders.BeatmapSetUpdate(fullSet, mapper, gdMappersInGuild);
                 await channel.SendMessageAsync(embed: eb.Build(), components: cb.Build());
-            }, ct));
+            });
 
             await Task.WhenAll(sendTasks);
         }
