@@ -8,12 +8,12 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-	  <PackageReference Include="Discord.Net.Interactions" Version="3.17.2" />
+	  <PackageReference Include="Discord.Net.Interactions" Version="3.18.0" />
 	  <PackageReference Include="DotNetEnv" Version="3.1.1" />
-	  <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
+	  <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.8" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	  <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2025.321.0" />
+	  <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2025.618.0" />
 	  <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
 	</ItemGroup>
 

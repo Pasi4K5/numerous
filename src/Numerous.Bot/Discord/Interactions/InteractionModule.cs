@@ -20,11 +20,12 @@ public abstract class InteractionModule : InteractionModuleBase<SocketInteractio
         RequestOptions? options = null,
         MessageComponent? components = null,
         Embed? embed = null,
-        PollProperties? poll = null)
+        PollProperties? poll = null,
+        MessageFlags flags = MessageFlags.None)
     {
         try
         {
-            await base.RespondAsync(text, embeds, isTts, ephemeral, allowedMentions, options, components, embed, poll);
+            await base.RespondAsync(text, embeds, isTts, ephemeral, allowedMentions, options, components, embed, poll, flags);
         }
         catch (HttpException e) when (e.DiscordCode == DiscordErrorCode.CannotSendEmptyMessage)
         {
