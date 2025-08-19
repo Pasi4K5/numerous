@@ -13,7 +13,7 @@ namespace Numerous.Database.Repositories;
 
 public interface IGuildStatsEntryRepository : IRepository<GuildStatsEntryDto>
 {
-    public Task<IDictionary<DateTimeOffset, int>> GetGuildStatsAsync(ulong guildId, CancellationToken ct = default);
+    Task<IDictionary<DateTimeOffset, int>> GetGuildStatsAsync(ulong guildId, CancellationToken ct = default);
 }
 
 public sealed class GuildStatsEntryRepository(NumerousDbContext context, IMapper mapper)

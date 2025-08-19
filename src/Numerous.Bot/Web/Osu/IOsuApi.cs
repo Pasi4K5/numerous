@@ -98,7 +98,7 @@ public interface IOsuApi
         CancellationToken ct = default
     );
 
-    public enum BeatmapsetCategory
+    enum BeatmapsetCategory
     {
         [EnumMember(Value = "any")] Any,
         [EnumMember(Value = "ranked")] Ranked,
@@ -109,7 +109,7 @@ public interface IOsuApi
         [EnumMember(Value = "graveyard")] Graveyard,
     }
 
-    public enum BeatmapsetSort
+    enum BeatmapsetSort
     {
         [EnumMember(Value = "title_desc")] TitleDesc,
         [EnumMember(Value = "title_asc")] TitleAsc,
@@ -129,7 +129,7 @@ public interface IOsuApi
         [EnumMember(Value = "favourites_asc")] FavouritesAsc,
     }
 
-    public enum ForumPostSort
+    enum ForumPostSort
     {
         [EnumMember(Value = "id_asc")] Asc,
         [EnumMember(Value = "id_desc")] Desc,
