@@ -18,7 +18,7 @@ public interface IIdRepository<TDto, in TId> : IRepository<TDto>
     /// Inserts the given DTO, immediately calls <see cref="DbContext.SaveChangesAsync(System.Threading.CancellationToken)"/>,
     /// and sets the ID of the DTO to the ID of the entity.
     /// </summary>
-    public Task ExecuteInsertAsync(TDto dto, CancellationToken ct = default);
+    Task ExecuteInsertAsync(TDto dto, CancellationToken ct = default);
 
     Task<TDto?> FindAsync(TId id, CancellationToken ct = default);
     Task<TDto> GetAsync(TId id, CancellationToken ct = default);
