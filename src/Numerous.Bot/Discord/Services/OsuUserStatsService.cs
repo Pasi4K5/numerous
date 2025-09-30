@@ -4,17 +4,22 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Coravel;
-using Discord;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
+using Serilog;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactory, IOsuApiRepository osuApi)
+public sealed class OsuUserStatsService(
+    IHost host,
+    ILogger logger,
+    IUnitOfWorkFactory uowFactory,
+    IOsuApiRepository osuApi
+)
 {
     public async Task StartAsync(CancellationToken ct = default)
     {
@@ -30,6 +35,8 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
     public void StartTracking(int osuUserId, CancellationToken ct = default)
     {
         var time = DateTimeUtil.TimeOfDayFromUserId(osuUserId);
+
+        logger.Information("Starting to track stats for osu! user {UserId} at {Time}", osuUserId, time.TimeOfDay.ToString("hh\\:mm"));
 
         host.Services.UseScheduler(s => s.ScheduleAsync(() =>
             UpdateStatsAsync(osuUserId, ct)
@@ -62,8 +69,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
         var mapStatsTask = Task.Run(async () =>
         {
             var apiBeatmapsets = await osuApi
-                .GetUserUploadedBeatmapsetsAsync(userId, ct)
-                .Flatten()
+                .GetAllUserBeatmapsetsAsync(userId, ct)
                 .ToArrayAsync(ct);
             var beatmaps = await osuApi.BulkBeatmapLookupAsync(
                 apiBeatmapsets
