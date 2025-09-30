@@ -58,6 +58,8 @@ public interface IOsuApi
     Task<ApiBeatmapsetSearchResponse> SearchBeatmapsetsAsync(
         [Query] [AliasAs("s")] BeatmapsetCategory category,
         [Query] BeatmapsetSort sort = BeatmapsetSort.UpdatedDesc,
+        [Query] [AliasAs("q")] string? query = null,
+        [AliasAs("cursor_string")] string? cursorString = null,
         CancellationToken ct = default
     );
 

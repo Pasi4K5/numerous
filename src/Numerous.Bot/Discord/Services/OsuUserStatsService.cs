@@ -4,7 +4,6 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Coravel;
-using Discord;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
@@ -62,8 +61,7 @@ public sealed class OsuUserStatsService(IHost host, IUnitOfWorkFactory uowFactor
         var mapStatsTask = Task.Run(async () =>
         {
             var apiBeatmapsets = await osuApi
-                .GetUserUploadedBeatmapsetsAsync(userId, ct)
-                .Flatten()
+                .GetAllUserBeatmapsetsAsync(userId, ct)
                 .ToArrayAsync(ct);
             var beatmaps = await osuApi.BulkBeatmapLookupAsync(
                 apiBeatmapsets

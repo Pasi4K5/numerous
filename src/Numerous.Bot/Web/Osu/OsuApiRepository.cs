@@ -5,6 +5,7 @@
 
 using System.Diagnostics;
 using System.Net;
+using System.Runtime.CompilerServices;
 using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Util;
 using Refit;
@@ -16,7 +17,7 @@ public interface IOsuApiRepository
     Task<ApiOsuUserExtended> GetUserAsync(string query, bool prioritizeUsername = false, CancellationToken ct = default);
     Task<ApiOsuUserExtended> GetUserByIdAsync(int userId, CancellationToken ct = default);
     Task<ApiScore[]> GetRecentScoresAsync(int userId, CancellationToken ct = default);
-    IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId, CancellationToken ct = default);
+    IAsyncEnumerable<ApiBeatmapsetExtended> GetAllUserBeatmapsetsAsync(int userId, CancellationToken ct = default);
     Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type, CancellationToken ct = default);
     Task<ApiBeatmapsetExtended> GetBeatmapsetAsync(int id, CancellationToken ct = default);
     Task<ApiBeatmapsetExtended[]> SearchRecentlyChangedBeatmapsetsAsync(CancellationToken ct = default);
@@ -54,18 +55,21 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         return await api.GetUserScoresAsync(userId, "recent", 1000, ct);
     }
 
-    public IAsyncEnumerable<ApiBeatmapsetExtended[]> GetUserUploadedBeatmapsetsAsync(int userId, CancellationToken ct = default)
+    public async IAsyncEnumerable<ApiBeatmapsetExtended> GetAllUserBeatmapsetsAsync(int userId, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        ApiBeatmapType[] types =
-        [
-            ApiBeatmapType.Graveyard,
-            ApiBeatmapType.Guest,
-            ApiBeatmapType.Loved,
-            ApiBeatmapType.Pending,
-            ApiBeatmapType.Ranked,
-        ];
+        string? cursorString = null;
 
-        return types.ToAsyncEnumerable().SelectAwait(async type => await GetUserBeatmapsetsAsync(userId, type, ct));
+        do
+        {
+            var result = await api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, query: $"creator={userId}", cursorString: cursorString, ct: ct);
+
+            foreach (var beatmap in result.Beatmapsets)
+            {
+                yield return beatmap;
+            }
+
+            cursorString = result.CursorString;
+        } while (cursorString is not null);
     }
 
     public async Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(int userId, ApiBeatmapType type, CancellationToken ct = default)
@@ -111,7 +115,7 @@ public sealed class OsuApiRepository(IOsuApi api) : IOsuApiRepository
         var updatedMapsTask =
             api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, ct: ct);
         var rankedQualifiedMapsTask =
-            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, IOsuApi.BeatmapsetSort.RankedDesc, ct);
+            api.SearchBeatmapsetsAsync(IOsuApi.BeatmapsetCategory.Any, IOsuApi.BeatmapsetSort.RankedDesc, ct: ct);
 
         var (updatedMaps, rankedQualifiedMaps) = await (updatedMapsTask, rankedQualifiedMapsTask);
 
