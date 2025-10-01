@@ -91,4 +91,14 @@ public static partial class DiscordExtensions
     {
         return MentionUtils.MentionChannel(channel.Id);
     }
+
+    public static IComponentInteraction GetComponentInteraction(this IInteractionContext ctx)
+    {
+        return (IComponentInteraction)ctx.Interaction;
+    }
+
+    public static IModalInteraction GetModalInteraction(this IInteractionContext ctx)
+    {
+        return (IModalInteraction)ctx.Interaction;
+    }
 }

@@ -48,23 +48,22 @@ public abstract class InteractionModule : InteractionModuleBase<SocketInteractio
     protected async Task RespondWithEmbedAsync(string title = "", string message = "", ResponseType type = ResponseType.Info, bool ephemeral = false)
     {
         await RespondAsync(
-            embed: new EmbedBuilder()
-                .WithColor(GetTypeColor(type))
-                .WithTitle(title)
-                .WithDescription(message)
-                .Build(),
+            embed: CreateEmbed(title, message, type).Build(),
             ephemeral: ephemeral
         );
     }
 
     protected async Task FollowupWithEmbedAsync(string title = "", string message = "", ResponseType type = ResponseType.Info)
     {
-        await FollowupAsync(embed: new EmbedBuilder()
+        await FollowupAsync(embed: CreateEmbed(title, message, type).Build());
+    }
+
+    protected static EmbedBuilder CreateEmbed(string title = "", string message = "", ResponseType type = ResponseType.Info)
+    {
+        return new EmbedBuilder()
             .WithTitle(title)
             .WithColor(GetTypeColor(type))
-            .WithDescription(message)
-            .Build()
-        );
+            .WithDescription(message);
     }
 
     protected enum ResponseType
