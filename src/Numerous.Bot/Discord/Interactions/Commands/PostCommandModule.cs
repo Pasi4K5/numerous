@@ -11,7 +11,6 @@ using Numerous.Bot.Discord.Util;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-[UsedImplicitly]
 [RequireContext(ContextType.Guild)]
 [RequireUserPermission(GuildPermission.Administrator)]
 public sealed partial class PostCommandModule : InteractionModule
@@ -20,6 +19,7 @@ public sealed partial class PostCommandModule : InteractionModule
 
     private static readonly ConcurrentDictionary<Guid, CommandState> _states = new();
 
+    [UsedImplicitly]
     [MessageCommand("Post to channel")]
     public async Task Post(IMessage message)
     {
@@ -36,7 +36,7 @@ public sealed partial class PostCommandModule : InteractionModule
         }
 
         var guid = Guid.NewGuid();
-        _states[guid] = new CommandState(message.Content);
+        _states[guid] = new CommandState(Context.User.Id, message.Content);
 
         await RespondAsync(
             embed: CreateEmbed(
@@ -53,6 +53,13 @@ public sealed partial class PostCommandModule : InteractionModule
     [ComponentInteraction($"{CancelBtnId}:*", true)]
     public async Task Cancel(string guid)
     {
+        if (GetState(guid).ExecutorId != Context.User.Id)
+        {
+            await DeferAsync();
+
+            return;
+        }
+
         _states.TryRemove(Guid.Parse(guid), out _);
         await Context.GetComponentInteraction().Message.ModifyAsync(msg =>
         {
@@ -61,8 +68,11 @@ public sealed partial class PostCommandModule : InteractionModule
         });
     }
 
-    private sealed class CommandState(string content)
+    private static CommandState GetState(string guid) => _states[Guid.Parse(guid)];
+
+    private sealed class CommandState(ulong executorId, string content)
     {
+        public ulong ExecutorId { get; } = executorId;
         public string Content { get; } = content;
         public ulong? ChannelId { get; set; }
         public IUserMessage? InteractionMessage { get; set; }

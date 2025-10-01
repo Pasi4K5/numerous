@@ -20,10 +20,17 @@ partial class PostCommandModule
     [ComponentInteraction($"{PostNewBtnId}:*", true)]
     public async Task PostNew(string guid)
     {
+        if (GetState(guid).ExecutorId != Context.User.Id)
+        {
+            await DeferAsync();
+
+            return;
+        }
+
         await Context.GetComponentInteraction().Message.ModifyAsync(msg =>
         {
             msg.Embeds = Array.Empty<Embed>();
-            msg.Components = CreateChannelSelectComponent(Guid.Parse(guid));
+            msg.Components = CreateChannelSelectComponent(guid);
         });
     }
 
@@ -31,11 +38,20 @@ partial class PostCommandModule
     [ComponentInteraction($"{ChannelSelectId}:*", true)]
     public async Task ChannelSelect(string guid, string[] values)
     {
+        var state = GetState(guid);
+
+        if (state.ExecutorId != Context.User.Id)
+        {
+            await DeferAsync();
+
+            return;
+        }
+
         var selectedChannelId = ulong.Parse(values[0]);
-        _states[Guid.Parse(guid)].ChannelId = selectedChannelId;
+        state.ChannelId = selectedChannelId;
 
         await Context.GetComponentInteraction().Message.ModifyAsync(msg =>
-            msg.Components = CreateChannelSelectComponent(Guid.Parse(guid))
+            msg.Components = CreateChannelSelectComponent(guid)
         );
 
         await DeferAsync();
@@ -45,7 +61,14 @@ partial class PostCommandModule
     [ComponentInteraction($"{ConfirmNewBtnId}:*", true)]
     public async Task ConfirmNew(string guid)
     {
-        var state = _states[Guid.Parse(guid)];
+        var state = GetState(guid);
+
+        if (state.ExecutorId != Context.User.Id)
+        {
+            await DeferAsync();
+
+            return;
+        }
 
         if (state.ChannelId is null)
         {
@@ -70,9 +93,9 @@ partial class PostCommandModule
         await DeferAsync();
     }
 
-    private static MessageComponent CreateChannelSelectComponent(Guid guid)
+    private static MessageComponent CreateChannelSelectComponent(string guid)
     {
-        var channelSelected = _states[guid].ChannelId is not null;
+        var channelSelected = GetState(guid).ChannelId is not null;
 
         return new ComponentBuilder()
             .AddRow(new ActionRowBuilder()

@@ -27,7 +27,7 @@ partial class PostCommandModule
     [ComponentInteraction($"{PostEditBtnId}:*", true)]
     public async Task PostEdit(string guid)
     {
-        _states[Guid.Parse(guid)].InteractionMessage = Context.GetComponentInteraction().Message;
+        GetState(guid).InteractionMessage = Context.GetComponentInteraction().Message;
         await RespondWithModalAsync<MessageLinkModal>($"{MessageLinkModalId}:{guid}");
     }
 
@@ -64,7 +64,6 @@ partial class PostCommandModule
         }
 
         var channelId = ulong.Parse(match.Groups[2].Value);
-        var messageId = ulong.Parse(match.Groups[3].Value);
         var channel = await Context.Client.GetChannelAsync(channelId) as IMessageChannel;
 
         if (channel is null)
@@ -79,6 +78,7 @@ partial class PostCommandModule
             return;
         }
 
+        var messageId = ulong.Parse(match.Groups[3].Value);
         var message = (IUserMessage)await channel.GetMessageAsync(messageId);
 
         if (message is null)
@@ -105,7 +105,7 @@ partial class PostCommandModule
             return;
         }
 
-        var state = _states[Guid.Parse(guid)];
+        var state = GetState(guid);
         state.MessageToEdit = message;
 
         await state.InteractionMessage!.ModifyAsync(msg =>
@@ -126,7 +126,14 @@ partial class PostCommandModule
     [ComponentInteraction($"{ConfirmEditBtnId}:*", true)]
     public async Task ConfirmEdit(string guid)
     {
-        var state = _states[Guid.Parse(guid)];
+        var state = GetState(guid);
+
+        if (state.ExecutorId != Context.User.Id)
+        {
+            await DeferAsync();
+
+            return;
+        }
 
         if (state.MessageToEdit is null)
         {
