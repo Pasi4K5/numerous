@@ -58,7 +58,7 @@ public abstract class InteractionModule : InteractionModuleBase<SocketInteractio
         await FollowupAsync(embed: CreateEmbed(title, message, type).Build());
     }
 
-    protected EmbedBuilder CreateEmbed(string title = "", string message = "", ResponseType type = ResponseType.Info)
+    protected static EmbedBuilder CreateEmbed(string title = "", string message = "", ResponseType type = ResponseType.Info)
     {
         return new EmbedBuilder()
             .WithTitle(title)
