@@ -77,7 +77,7 @@ partial class AdminCommandModule
 
         private async Task UpdateResponseAsync(bool disabled, bool showCancelled)
         {
-            var response = ((IComponentInteraction)Context.Interaction).Message;
+            var response = Context.GetComponentInteraction().Message;
 
             await response.ModifyAsync(msg =>
             {

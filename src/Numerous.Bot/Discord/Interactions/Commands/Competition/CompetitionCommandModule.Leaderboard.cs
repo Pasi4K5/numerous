@@ -6,6 +6,7 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Bot.Discord.Util;
 using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
@@ -102,7 +103,7 @@ partial class CompetitionCommandModule
     /// <param name="page"><c>-1</c> for last page.</param>
     private async Task ModifyMessageAsync(int page, IUserMessage? message = null)
     {
-        message ??= ((IComponentInteraction)Context.Interaction).Message;
+        message ??= Context.GetComponentInteraction().Message;
         var numScores = await uow.BeatmapCompetitionScores.GetNumTopScoresAsync(Context.Guild.Id);
         var numPages = (numScores - 1) / PageSize;
 
