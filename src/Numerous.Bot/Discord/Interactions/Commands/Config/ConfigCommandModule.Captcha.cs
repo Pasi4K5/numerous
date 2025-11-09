@@ -261,11 +261,11 @@ partial class ConfigCommandModule
                    && (guild.VerifiedRoleId is null || !guildUser.RoleIds.Contains(guild.VerifiedRoleId.Value));
         }
 
-        [UsedImplicitly]
         private sealed class CaptchaModal : IModal
         {
             public string Title => "CAPTCHA";
 
+            [UsedImplicitly]
             [RequiredInput]
             [InputLabel("Answer")]
             [ModalTextInput(

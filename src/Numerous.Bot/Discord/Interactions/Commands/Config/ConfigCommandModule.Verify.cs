@@ -6,9 +6,7 @@
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Numerous.Bot.Discord.Services;
 using Numerous.Database.Context;
-using Numerous.Database.Dtos;
 
 namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 
