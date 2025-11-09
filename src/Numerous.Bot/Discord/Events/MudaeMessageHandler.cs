@@ -51,12 +51,12 @@ public sealed class MudaeMessageHandler(DiscordSocketClient client) : HostedServ
 
         var channelId = msg.Channel.Id;
 
-        _firstClaimMessageLinks.TryAdd(channelId, msg.GetLink());
+        _firstClaimMessageLinks.TryAdd(channelId, msg.GetJumpUrl());
         _lastRollTimes.TryAdd(channelId, msg.Timestamp);
 
         if (msg.Timestamp > _lastRollTimes[channelId] + _timeBetweenRollGroups)
         {
-            _firstClaimMessageLinks[channelId] = msg.GetLink();
+            _firstClaimMessageLinks[channelId] = msg.GetJumpUrl();
         }
 
         _lastRollTimes[channelId] = msg.Timestamp;

@@ -9,6 +9,6 @@ public sealed class GuildDto : IdDto<ulong>
 {
     public bool TrackMessages { get; set; }
 
-    public ulong? UnverifiedRoleId { get; set; }
-    public bool GreetOnAdded { get; set; } = true;
+    public ulong? VerifiedRoleId { get; set; }
+    public ulong? UserLogChannelId { get; set; }
 }

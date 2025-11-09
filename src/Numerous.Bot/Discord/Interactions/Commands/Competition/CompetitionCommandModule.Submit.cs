@@ -49,7 +49,7 @@ partial class CompetitionCommandModule
             await FollowupWithEmbedAsync(
                 "Not verified",
                 "You must verify your osu! account before submitting scores.\n"
-                + "You can do that with `/verify`",
+                + "You can do that with `/link`",
                 ResponseType.Error
             );
 

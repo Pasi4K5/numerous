@@ -88,9 +88,6 @@ public sealed class DbMapperProfile : Profile
         CreateMap<DbGuildStatsEntry, GuildStatsEntryDto>();
         CreateMap<GuildStatsEntryDto, DbGuildStatsEntry>();
 
-        CreateMap<DbJoinMessage, JoinMessageDto>();
-        CreateMap<JoinMessageDto, DbJoinMessage>();
-
         CreateMap<DbLocalBeatmap, LocalBeatmapDto>();
         CreateMap<LocalBeatmapDto, DbLocalBeatmap>();
 

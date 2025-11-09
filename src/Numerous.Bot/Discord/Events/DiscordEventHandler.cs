@@ -22,11 +22,14 @@ public sealed partial class DiscordEventHandler(
     IUnitOfWorkFactory uowFactory,
     AttachmentService attachmentService,
     OsuVerifier verifier,
-    IOsuApiRepository osuApi
+    IOsuApiRepository osuApi,
+    VerificationService verificationService
 )
 {
     public void Start()
     {
         this.Init();
+
+        client.UserJoined += verificationService.HandleUserJoined;
     }
 }

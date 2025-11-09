@@ -15,18 +15,19 @@
 	  <PackageReference Include="Discord.Net.Interactions" Version="3.18.0" />
 	  <PackageReference Include="Discord.Net.WebSocket" Version="3.18.0" />
 	  <PackageReference Include="Humanizer" Version="2.14.1" />
-	  <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
-	  <PackageReference Include="ppy.osu.Game" Version="2025.618.0" />
-	  <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2025.618.0" />
+	  <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+	  <PackageReference Include="ppy.osu.Game" Version="2025.1107.0" />
+	  <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2025.1107.0" />
 	  <PackageReference Include="Refit" Version="8.0.0" />
 	  <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 	  <PackageReference Include="Refit.Newtonsoft.Json" Version="8.0.0" />
 	  <PackageReference Include="Serilog" Version="4.3.0" />
 	  <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-	  <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+	  <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 	  <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-	  <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+	  <PackageReference Include="SimpleCaptchaDotNet" Version="1.1.1" />
+	  <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
 	</ItemGroup>
 	
 	<ItemGroup>

@@ -10,7 +10,7 @@ namespace Numerous.Common.Enums;
 
 public enum OsuUserGroup : sbyte
 {
-    [UsedImplicitly] [ChoiceDisplay("Verified")] Verified = 0,
+    [UsedImplicitly] [ChoiceDisplay("Linked Account")] LinkedAccount = 0,
     [UsedImplicitly] [ChoiceDisplay("Unranked Mapper")] UnrankedMapper = -1,
     [UsedImplicitly] [ChoiceDisplay("Ranked Mapper")] RankedMapper = -2,
     [UsedImplicitly] [ChoiceDisplay("Loved Mapper")] LovedMapper = -3,

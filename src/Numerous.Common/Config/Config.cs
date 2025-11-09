@@ -29,6 +29,7 @@ public record Config
 
     public record EmojiContainer
     {
+        public ulong Osu { get; init; }
         public ulong RankSilverSs { get; init; }
         public ulong RankSs { get; init; }
         public ulong RankSilverS { get; init; }
