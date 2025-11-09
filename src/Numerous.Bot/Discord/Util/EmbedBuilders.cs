@@ -225,7 +225,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             + $"**Difficulty:** {beatmap.BeatmapInfo.DifficultyName}\n"
             + $"**Mapper:** {metadata.Author.Username}\n"
             + $"**Star Rating:** {sr:N} :star:\n"
-            + $"# \\#{rank} \uff5c <:_:{GetRankEmojiId(score.Rank)}> {score.TotalScore:N0}"
+            + $"# \\#{rank} \uff5c {MentionRankEmote(score.Rank)} {score.TotalScore:N0}"
             + eb.Description;
 
         if (beatmap.BeatmapSetInfo?.OnlineID > 1)
@@ -250,7 +250,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
     {
         var eb = BasicScore(score);
 
-        eb.WithDescription($"## \\#{rank} \uff5c <:_:{GetRankEmojiId(score.Rank)}> {score.TotalScore:N0}{eb.Description}");
+        eb.WithDescription($"## \\#{rank} \uff5c {MentionRankEmote(score.Rank)} {score.TotalScore:N0}{eb.Description}");
 
         return eb;
     }
@@ -300,11 +300,11 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
-    private ulong GetRankEmojiId(ScoreRank rank)
+    private string MentionRankEmote(ScoreRank rank)
     {
         var emojis = Config.Emojis;
 
-        return rank switch
+        return DiscordUtil.MentionEmote(rank switch
         {
             ScoreRank.XH => emojis.RankSilverSs,
             ScoreRank.X => emojis.RankSs,
@@ -315,6 +315,16 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             ScoreRank.C => emojis.RankC,
             ScoreRank.D => emojis.RankD,
             _ => emojis.RankF,
-        };
+        });
     }
+
+    public static EmbedBuilder UserTimeoutKickLog(IUser usr) =>
+        UserLog(usr, "User Kicked", "has been kicked for not verifying in time.");
+
+    private static EmbedBuilder UserLog(IUser user, string title, string text) =>
+        new EmbedBuilder()
+            .WithColor(Color.Blue)
+            .WithTitle(title)
+            .WithDescription($"\n{user.Mention} (`{user.Username}`) {text}")
+            .WithThumbnailUrl(user.GetAvatarUrl());
 }

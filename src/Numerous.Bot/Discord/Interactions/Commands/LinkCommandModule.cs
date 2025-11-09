@@ -13,10 +13,10 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class VerifyCommandModule(IConfigProvider cfg, IUnitOfWork uow, OsuVerifier verifier) : InteractionModule
+public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, OsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
-    [SlashCommand("verify", "Links your osu! account to your Discord account.")]
+    [SlashCommand("link", "Links your osu! account to your Discord account.")]
     [CommandContextType(InteractionContextType.Guild, InteractionContextType.PrivateChannel)]
     public async Task Verify()
     {
@@ -28,7 +28,7 @@ public sealed class VerifyCommandModule(IConfigProvider cfg, IUnitOfWork uow, Os
         var rankedMapper = roles.FirstOrDefault(x => x.Group == OsuUserGroup.RankedMapper)?.RoleId;
         var bn = roles.FirstOrDefault(x => x.Group == OsuUserGroup.BeatmapNominators)?.RoleId;
         var rolesExist = new[] { unrankedMapper, rankedMapper, bn }.All(x => x is not null && x.Value != default);
-        var verifiedRole = roles.FirstOrDefault(x => x.Group == OsuUserGroup.Verified)?.RoleId;
+        var verifiedRole = roles.FirstOrDefault(x => x.Group == OsuUserGroup.LinkedAccount)?.RoleId;
 
         var isVerified = await verifier.UserIsVerifiedAsync(Context.User);
 

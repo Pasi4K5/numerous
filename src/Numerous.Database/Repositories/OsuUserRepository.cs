@@ -46,16 +46,22 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
     public async Task<bool> VerifyAsync(int osuUserId, ulong discordUserId, CancellationToken ct = default)
     {
         var alreadyVerified = false;
-        var user = await Set.FindAsync([osuUserId], cancellationToken: ct);
+        var osuUser = await Set.FindAsync([osuUserId], cancellationToken: ct);
 
-        if (user is null)
+        var discordUser = await EnsureDiscordUserExistsAsync(discordUserId, ct);
+
+        if (osuUser is null)
         {
-            await InsertAsync(new OsuUserDto { Id = osuUserId, DiscordUserId = discordUserId }, ct);
+            discordUser.OsuUser = new DbOsuUser
+            {
+                Id = osuUserId,
+                DiscordUserId = discordUserId,
+            };
         }
         else
         {
-            alreadyVerified = user.DiscordUserId is not null;
-            user.DiscordUserId = discordUserId;
+            alreadyVerified = osuUser.DiscordUserId is not null;
+            osuUser.DiscordUserId = discordUserId;
         }
 
         await Context.SaveChangesAsync(ct);

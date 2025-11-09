@@ -13,37 +13,18 @@ namespace Numerous.Database.Repositories;
 
 public interface IGuildRepository : IIdRepository<GuildDto, ulong>
 {
-    Task SetVerifiedRoleAsync(ulong guildId, ulong? roleId, bool greetOnAdded = true, CancellationToken ct = default);
-    Task SetJoinMessageAsync(JoinMessageDto dto, CancellationToken ct = default);
+    Task SetVerifiedRoleAsync(ulong guildId, ulong? roleId, CancellationToken ct = default);
     Task SetMapfeedChannel(ulong guildId, ulong? channelId, CancellationToken ct = default);
+    Task SetUserLogChannel(ulong guildId, ulong? channelId, CancellationToken ct = default);
 }
 
 public sealed class GuildRepository(NumerousDbContext context, IMapper mapper)
     : IdRepository<DbGuild, GuildDto, ulong>(context, mapper), IGuildRepository
 {
-    public async Task SetVerifiedRoleAsync(ulong guildId, ulong? roleId, bool greetOnAdded = true, CancellationToken ct = default)
+    public async Task SetVerifiedRoleAsync(ulong guildId, ulong? roleId, CancellationToken ct = default)
     {
         var guild = await Set.SingleAsync(x => x.Id == guildId, ct);
-        guild.UnverifiedRoleId = roleId;
-        guild.GreetOnAdded = greetOnAdded;
-    }
-
-    public async Task SetJoinMessageAsync(JoinMessageDto dto, CancellationToken ct = default)
-    {
-        var existing = await Context.JoinMessages.FindAsync([dto.GuildId], ct);
-
-        if (existing is null)
-        {
-            await EnsureChannelExistsAsync<DbMessageChannel>(dto.GuildId, dto.ChannelId, ct);
-
-            var entity = Mapper.Map<DbJoinMessage>(dto);
-            await Context.JoinMessages.AddAsync(entity, ct);
-        }
-        else
-        {
-            existing.Title = dto.Title;
-            existing.Description = dto.Description;
-        }
+        guild.VerifiedRoleId = roleId;
     }
 
     public async Task SetMapfeedChannel(ulong guildId, ulong? channelId, CancellationToken ct = default)
@@ -58,6 +39,21 @@ public sealed class GuildRepository(NumerousDbContext context, IMapper mapper)
         else
         {
             guild.MapfeedChannel = null;
+        }
+    }
+
+    public async Task SetUserLogChannel(ulong guildId, ulong? channelId, CancellationToken ct = default)
+    {
+        var guild = await Set.SingleAsync(x => x.Id == guildId, ct);
+
+        if (channelId is not null)
+        {
+            await EnsureChannelExistsAsync<DbMessageChannel>(guildId, channelId.Value, ct);
+            guild.UserLogChannelId = channelId;
+        }
+        else
+        {
+            guild.UserLogChannel = null;
         }
     }
 }

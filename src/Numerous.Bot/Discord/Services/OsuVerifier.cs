@@ -28,10 +28,16 @@ public sealed class OsuVerifier(
 {
     public void Start(CancellationToken ct)
     {
-        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(async () => await AssignAllRolesAsync(ct))
+        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(() => AssignAllRolesAsync(ct))
             .EveryMinute()
             .PreventOverlapping(nameof(OsuVerifier)));
         discord.GuildMemberUpdated += async (_, user) => await AssignRolesInGuildAsync(
+            user,
+            await GetOsuUsersAsync(user, ct),
+            await GetGroupRoleMappingsAsync(user.Guild, ct),
+            ct: ct
+        );
+        discord.UserJoined += async user => await AssignRolesInGuildAsync(
             user,
             await GetOsuUsersAsync(user, ct),
             await GetGroupRoleMappingsAsync(user.Guild, ct),
@@ -167,7 +173,20 @@ public sealed class OsuVerifier(
     {
         osuUser ??= await GetOsuUserAsync(guildUser, osuUsers, ct);
 
-        await AssignRoleAsync(mappings, OsuUserGroup.Verified, osuUser is not null);
+        if (osuUser is not null)
+        {
+            // User has linked account -> assign verified role
+            await using var uow = uowFactory.Create();
+            var verifiedRoleId = await uow.Guilds.GetAsync(guildUser.GuildId, ct);
+            var verifiedRole = guildUser.Guild.GetRole(verifiedRoleId.VerifiedRoleId ?? 0);
+
+            if (verifiedRole is not null)
+            {
+                await guildUser.AddRoleAsync(verifiedRole);
+            }
+        }
+
+        await AssignRoleAsync(mappings, OsuUserGroup.LinkedAccount, osuUser is not null);
 
         if (osuUser is null)
         {

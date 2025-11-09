@@ -151,7 +151,7 @@ partial class PostCommandModule
 
         await Context.GetComponentInteraction().Message.ModifyAsync(msg =>
         {
-            msg.Embed = CreateEmbed(message: $"Message {state.MessageToEdit.GetLink()} edited successfully.").Build();
+            msg.Embed = CreateEmbed(message: $"Message {state.MessageToEdit.GetJumpUrl()} edited successfully.").Build();
             msg.Components = new ComponentBuilder().Build();
         });
 

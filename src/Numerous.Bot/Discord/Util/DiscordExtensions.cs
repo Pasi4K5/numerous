@@ -20,13 +20,6 @@ public static partial class DiscordExtensions
         await message.Channel.SendMessageAsync(text, messageReference: new(message.Id));
     }
 
-    public static string GetLink(this IMessage msg)
-    {
-        var guildId = msg.Channel is IGuildChannel channel ? channel.Guild.Id.ToString() : "@me";
-
-        return $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
-    }
-
     public static ulong? ParseMessageId(this string linkOrId)
     {
         if (ulong.TryParse(linkOrId, out var id))

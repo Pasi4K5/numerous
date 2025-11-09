@@ -10,23 +10,19 @@ using Microsoft.EntityFrameworkCore;
 namespace Numerous.Database.Entities;
 
 [Table("guild")]
-[Index(nameof(UnverifiedRoleId), IsUnique = true)]
+[Index(nameof(VerifiedRoleId), IsUnique = true)]
 public sealed class DbGuild : DbEntity<ulong>
 {
     [DefaultValue(false)]
     public bool TrackMessages { get; set; }
 
-    public DbJoinMessage? JoinMessage { get; set; }
-
-    // TODO: Rename
-    public ulong? UnverifiedRoleId { get; set; }
-
-    // TODO: This is a hotfix. This, JoinMessage and UnverifiedRoleIed should be extracted into a separate entity.
-    [DefaultValue(true)]
-    public bool GreetOnAdded { get; set; }
+    public ulong? VerifiedRoleId { get; set; }
 
     public DbChannel? MapfeedChannel { get; set; }
     public ulong? MapfeedChannelId { get; set; }
+
+    public ulong? UserLogChannelId { get; set; }
+    public DbChannel? UserLogChannel { get; set; }
 
     public ICollection<DbChannel> Channels { get; set; } = [];
     public ICollection<DbGroupRoleMapping> GroupRoleMappings { get; set; } = [];

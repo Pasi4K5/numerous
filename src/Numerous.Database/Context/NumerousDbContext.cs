@@ -18,7 +18,6 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbForumChannel> ForumChannels { get; set; }
     public DbSet<DbGroupRoleMapping> GroupRoleMappings { get; set; }
     public DbSet<DbGuild> Guilds { get; set; }
-    public DbSet<DbJoinMessage> JoinMessages { get; set; }
     public DbSet<DbLocalBeatmap> LocalBeatmaps { get; set; }
     public DbSet<DbMessageChannel> MessageChannels { get; set; }
     public DbSet<DbOnlineBeatmap> OnlineBeatmaps { get; set; }
@@ -68,14 +67,6 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
             const string idName = "Id";
             e.Property<int>(idName).ValueGeneratedOnAdd();
             e.HasKey(idName);
-        });
-
-        builder.Entity<DbJoinMessage>(e =>
-        {
-            e.ToTable(t => t.HasCheckConstraint(
-                "CK_JoinMessage_HasText",
-                $"\"{nameof(DbJoinMessage.Title)}\" IS NOT NULL OR \"{nameof(DbJoinMessage.Description)}\" IS NOT NULL"
-            ));
         });
 
         builder.Entity<DbLocalBeatmap>(e =>

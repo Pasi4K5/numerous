@@ -47,6 +47,7 @@ public static class BotServiceConfiguration
         services.AddTransient<ScoreValidator>();
         services.AddHostedService<StarReactPreventionService>();
         services.AddHostedService<Startup>();
+        services.AddSingleton<VerificationService>();
 
         // TODO: Consider switching to System.Text.Json (for everything)
         services
