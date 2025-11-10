@@ -8,12 +8,13 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Discord.Util;
+using Numerous.Common.Util;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
 [RequireContext(ContextType.Guild)]
 [RequireUserPermission(GuildPermission.Administrator)]
-public sealed partial class PostCommandModule : InteractionModule
+public sealed partial class PostCommandModule(IHttpClientFactory clientFactory) : InteractionModule
 {
     private const string CancelBtnId = "cmd:admin:post:cancel";
 
@@ -36,7 +37,7 @@ public sealed partial class PostCommandModule : InteractionModule
         }
 
         var guid = Guid.NewGuid();
-        _states[guid] = new CommandState(Context.User.Id, message.Content);
+        _states[guid] = new CommandState(Context.User.Id, message);
 
         await RespondAsync(
             embed: CreateEmbed(
@@ -70,10 +71,19 @@ public sealed partial class PostCommandModule : InteractionModule
 
     private static CommandState GetState(string guid) => _states[Guid.Parse(guid)];
 
-    private sealed class CommandState(ulong executorId, string content)
+    private async Task<IEnumerable<FileAttachment>> GetAttachmentsAsync(IMessage message)
+    {
+        var client = clientFactory.CreateClient();
+
+        return await message.Attachments.Select(async attachment =>
+            new FileAttachment(await client.GetStreamAsync(attachment.Url), attachment.Filename)
+        );
+    }
+
+    private sealed class CommandState(ulong executorId, IMessage message)
     {
         public ulong ExecutorId { get; } = executorId;
-        public string Content { get; } = content;
+        public IMessage Message { get; set; } = message;
         public ulong? ChannelId { get; set; }
         public IUserMessage? InteractionMessage { get; set; }
         public IUserMessage? MessageToEdit { get; set; }

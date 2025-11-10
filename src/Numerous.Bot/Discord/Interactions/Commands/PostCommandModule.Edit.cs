@@ -146,7 +146,7 @@ partial class PostCommandModule
             msg.Components = new ComponentBuilder().Build();
         });
 
-        await state.MessageToEdit.ModifyAsync(msg => msg.Content = state.Content);
+        await state.MessageToEdit.ModifyAsync(msg => msg.Content = state.Message.Content);
         _states.TryRemove(Guid.Parse(guid), out _);
 
         await Context.GetComponentInteraction().Message.ModifyAsync(msg =>

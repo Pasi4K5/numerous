@@ -81,7 +81,10 @@ partial class PostCommandModule
         });
 
         var channel = (IMessageChannel)await Context.Client.GetChannelAsync(state.ChannelId.Value);
-        await channel.SendMessageAsync(state.Content);
+        await channel.SendFilesAsync(
+            await GetAttachmentsAsync(state.Message),
+            state.Message.Content
+        );
         _states.TryRemove(Guid.Parse(guid), out _);
 
         await Context.GetComponentInteraction().Message.ModifyAsync(msg =>
