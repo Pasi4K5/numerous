@@ -16,7 +16,7 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuForumFeedService(
+public sealed class OsuForumService(
     IHost host,
     IUnitOfWorkFactory uowFactory,
     IOsuApiRepository osuApi,
@@ -35,7 +35,7 @@ public sealed class OsuForumFeedService(
     {
         host.Services.UseScheduler(s => s.ScheduleAsync(() =>
             RunAsync(ct)
-        ).EveryTenSeconds().PreventOverlapping(nameof(OsuForumFeedService)));
+        ).EveryFifteenSeconds().PreventOverlapping(nameof(OsuForumService)));
 
         return Task.CompletedTask;
     }
@@ -49,28 +49,40 @@ public sealed class OsuForumFeedService(
             await osuApi.GetForumTopicsAsync(ct: ct)
         );
 
-        foreach (var topic in topicMetas.Where(t => _ignoreRepliesForumIds.Contains(t.ForumId)))
+        var updatedTopicMetas = topicMetas
+            .Where(t => t.UpdatedAt > _lastChecked)
+            .ToArray();
+
+        await RunForumFeedAsync(updatedTopicMetas, subscriptions, ct);
+        await RunTopicFeedAsync(updatedTopicMetas, ct);
+
+        _lastChecked = updatedTopicMetas.Max(t => t.UpdatedAt);
+    }
+
+    private async Task RunForumFeedAsync(ApiForumTopicMeta[] updatedTopicMetas, Dictionary<int, ulong[]> subscriptions, CancellationToken ct)
+    {
+        foreach (var topic in updatedTopicMetas.Where(t => _ignoreRepliesForumIds.Contains(t.ForumId)))
         {
             // Treat them as if they were not updated
             topic.UpdatedAt = topic.CreatedAt;
         }
 
-        var updatedTopicsMeta = topicMetas
-            .Where(t => t.UpdatedAt > _lastChecked && subscriptions.ContainsKey(t.ForumId))
+        var subscribedTopicMetas = updatedTopicMetas
+            .Where(t => subscriptions.ContainsKey(t.ForumId))
             .ToArray();
 
-        if (updatedTopicsMeta.Length == 0)
+        if (subscribedTopicMetas.Length == 0)
         {
             return;
         }
 
-        var updatedTopics = await updatedTopicsMeta.Select(t =>
+        var subscribedTopics = await subscribedTopicMetas.Select(t =>
             osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc, ct)
         );
 
         List<(ApiForumPost post, ApiForumTopicMeta meta)> newPosts = new();
 
-        foreach (var topic in updatedTopics)
+        foreach (var topic in subscribedTopics)
         {
             var posts = topic.Posts
                 .Where(p => p.CreatedAt > _lastChecked)
@@ -82,8 +94,6 @@ public sealed class OsuForumFeedService(
                 newPosts.AddRange(posts);
             }
         }
-
-        _lastChecked = topicMetas.Max(t => t.UpdatedAt);
 
         var channels = (await subscriptions.Values
                 .SelectMany(ids => ids)
@@ -100,6 +110,43 @@ public sealed class OsuForumFeedService(
             await channels
                 .Where(c => subscriptions.TryGetValue(post.ForumId, out var ids) && ids.Contains(c.Id))
                 .Select(c => c.SendMessageAsync(embed: embed));
+        }
+    }
+
+    private async Task RunTopicFeedAsync(ApiForumTopicMeta[] updatedTopicMetas, CancellationToken ct)
+    {
+        await using var uow = uowFactory.Create();
+        var subscriptions = await uow.MessageChannels.GetTopicSubscriptionsAsync().ToListAsync(ct);
+
+        var topicMetas = updatedTopicMetas
+            .Where(t => subscriptions.Any(s => s.TopicId == t.Id))
+            .ToArray();
+
+        var topics = await topicMetas.Select(t =>
+            osuApi.GetForumTopicAsync(t.Id, IOsuApi.ForumPostSort.Desc, ct)
+        );
+
+        var embeds = topics
+            .ToDictionary(
+                t => t.Meta.Id,
+                t => t.Posts
+                    .Where(p => p.CreatedAt > _lastChecked)
+                    .Select(async p => (await eb.ForumPostAsync(t.Meta, p)).Build())
+            );
+
+        foreach (var (topicId, channelId) in subscriptions)
+        {
+            if (!embeds.TryGetValue(topicId, out var topicEmbeds))
+            {
+                continue;
+            }
+
+            var channel = (IMessageChannel)await discordClient.GetChannelAsync(channelId);
+
+            foreach (var embedBuilder in await topicEmbeds)
+            {
+                await channel.SendMessageAsync(embed: embedBuilder);
+            }
         }
     }
 }
