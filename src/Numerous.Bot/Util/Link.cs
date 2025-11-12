@@ -11,8 +11,8 @@ public static class Link
     public static string OsuUser(int userId, string text = "") =>
         text.ToMdLink($"https://osu.ppy.sh/users/{userId}");
 
-    public static string OsuForumTopic(int topicId) =>
-        $"https://osu.ppy.sh/community/forums/topics/{topicId}";
+    public static string OsuForumPost(int postId) =>
+        $"https://osu.ppy.sh/community/forums/posts/{postId}";
 
     public static string ToMdLink(this string text, string url)
     {
