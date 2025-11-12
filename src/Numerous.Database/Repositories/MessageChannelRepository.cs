@@ -18,7 +18,6 @@ public interface IMessageChannelRepository : IIdRepository<MessageChannelDto, ul
     Task<ulong[]> GetAllMapfeedChannelIdsAsync(CancellationToken ct = default);
     Task SetSubscribedForumsAsync(ulong guildId, ulong channelId, IEnumerable<int> forumIds, CancellationToken ct = default);
     Task<Dictionary<int, ulong[]>> GetForumSubscriptionsAsync(CancellationToken ct = default);
-    IAsyncEnumerable<(int TopicId, ulong ChannelId)> GetTopicSubscriptionsAsync();
 }
 
 public sealed class MessageChannelRepository(NumerousDbContext context, IMapper mapper)
@@ -92,13 +91,5 @@ public sealed class MessageChannelRepository(NumerousDbContext context, IMapper 
         }
 
         return dict;
-    }
-
-    public IAsyncEnumerable<(int TopicId, ulong ChannelId)> GetTopicSubscriptionsAsync()
-    {
-        return Context.Set<DbForumTopicSubscription>()
-            .AsNoTracking()
-            .Select(x => new ValueTuple<int, ulong>(x.ForumTopicId, x.ChannelId))
-            .AsAsyncEnumerable();
     }
 }
