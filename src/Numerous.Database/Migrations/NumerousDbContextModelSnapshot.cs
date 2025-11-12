@@ -362,25 +362,6 @@ namespace Numerous.Database.Migrations
                     b.ToTable("discord_user", (string)null);
                 });
 
-            modelBuilder.Entity("Numerous.Database.Entities.DbForumTopicSubscription", b =>
-                {
-                    b.Property<int>("ForumTopicId")
-                        .HasColumnType("integer")
-                        .HasColumnName("forum_topic_id");
-
-                    b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("channel_id");
-
-                    b.HasKey("ForumTopicId", "ChannelId")
-                        .HasName("pk_forum_topic_subscription");
-
-                    b.HasIndex("ChannelId")
-                        .HasDatabaseName("ix_forum_topic_subscription_channel_id");
-
-                    b.ToTable("forum_topic_subscription", (string)null);
-                });
-
             modelBuilder.Entity("Numerous.Database.Entities.DbGroupRoleMapping", b =>
                 {
                     b.Property<decimal>("GuildId")
@@ -841,18 +822,6 @@ namespace Numerous.Database.Migrations
                         .HasConstraintName("fk_discord_message_version_discord_message_message_id");
 
                     b.Navigation("Message");
-                });
-
-            modelBuilder.Entity("Numerous.Database.Entities.DbForumTopicSubscription", b =>
-                {
-                    b.HasOne("Numerous.Database.Entities.DbMessageChannel", "Channel")
-                        .WithMany()
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_forum_topic_subscription_message_channel_channel_id");
-
-                    b.Navigation("Channel");
                 });
 
             modelBuilder.Entity("Numerous.Database.Entities.DbGroupRoleMapping", b =>

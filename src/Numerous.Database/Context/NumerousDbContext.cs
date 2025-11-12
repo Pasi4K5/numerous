@@ -16,7 +16,6 @@ public sealed class NumerousDbContext(DbContextOptions options) : DbContext(opti
     public DbSet<DbDiscordMessageVersion> DiscordMessageVersions { get; set; }
     public DbSet<DbDiscordUser> DiscordUsers { get; set; }
     public DbSet<DbForumChannel> ForumChannels { get; set; }
-    public DbSet<DbForumTopicSubscription> ForumTopicSubscriptions { get; set; }
     public DbSet<DbGroupRoleMapping> GroupRoleMappings { get; set; }
     public DbSet<DbGuild> Guilds { get; set; }
     public DbSet<DbLocalBeatmap> LocalBeatmaps { get; set; }

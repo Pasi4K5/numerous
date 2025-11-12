@@ -193,7 +193,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             .WithAuthor(author.Username, author.AvatarUrl, Link.OsuUser(author.Id))
             .WithDescription(MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw).LimitLength(CharacterLimit.DiscordEmbedDescription))
             .WithTimestamp(post.CreatedAt)
-            .WithUrl(Link.OsuForumPost(post.Id));
+            .WithUrl(Link.OsuForumTopic(meta.Id));
     }
 
     public async Task<EmbedBuilder> ExtendedScoreAsync(WorkingBeatmap beatmap, BeatmapCompetitionScoreDto score, int rank)
