@@ -127,7 +127,12 @@ public sealed class OsuForumService(
             .ToDictionary(
                 t => t.Meta.Id,
                 t => t.Posts
-                    .Where(p => p.CreatedAt > _lastChecked)
+                    .Where(p =>
+                        p.CreatedAt > _lastChecked
+                        // This feature is meant for modding queues,
+                        // so filter out everything that isn't a mod request.
+                        && p.Body.Raw.Contains("beatmaps", StringComparison.OrdinalIgnoreCase)
+                    )
                     .Select(async p => (await eb.ForumPostAsync(t.Meta, p)).Build())
             );
 
