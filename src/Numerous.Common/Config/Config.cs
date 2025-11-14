@@ -26,6 +26,7 @@ public record Config
     public string BaseUrl { get; init; } = null!;
     public string SauceNaoApiKey { get; set; } = null!;
     public EmojiContainer Emojis { get; init; } = null!;
+    public ModdingQueueConfig ModdingQueue { get; init; } = null!;
 
     public record EmojiContainer
     {
@@ -39,5 +40,12 @@ public record Config
         public ulong RankC { get; init; }
         public ulong RankD { get; init; }
         public ulong RankF { get; init; }
+    }
+
+    public record ModdingQueueConfig
+    {
+        public ulong ChannelId { get; init; }
+        public ulong LogChannelId { get; init; }
+        public ulong RoleId { get; init; }
     }
 }
