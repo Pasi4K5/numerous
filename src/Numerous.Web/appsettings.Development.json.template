@@ -32,6 +32,11 @@
             "RankC": 42,
             "RankD": 42,
             "RankF": 42
+        },
+        "ModdingQueue": {
+            "ChannelId": 42,
+            "LogChannelId": 42,
+            "RoleId": 42
         }
     }
 }

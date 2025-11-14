@@ -23,7 +23,8 @@ public sealed partial class DiscordEventHandler(
     AttachmentService attachmentService,
     OsuVerifier verifier,
     IOsuApiRepository osuApi,
-    VerificationService verificationService
+    VerificationService verificationService,
+    IConfigProvider configProvider
 )
 {
     public void Start()
