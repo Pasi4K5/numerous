@@ -40,8 +40,8 @@ public partial class DiscordEventHandler
                     if (!await verifier.UserIsVerifiedAsync(user))
                     {
                         await message.ReplyAsync(
-                            "You need link your osu! account to join the modding queue. " +
-                            $"Click {"here".ToMdLink(link)} to do that."
+                            "You need link your osu! account to join the modding queue. "
+                            + $"Click {"here".ToMdLink(link)} to do that."
                         );
 
                         break;
