@@ -48,15 +48,17 @@ public sealed class OsuUserRepository(NumerousDbContext context, IMapper mapper)
         var alreadyVerified = false;
         var osuUser = await Set.FindAsync([osuUserId], cancellationToken: ct);
 
-        var discordUser = await EnsureDiscordUserExistsAsync(discordUserId, ct);
+        await EnsureDiscordUserExistsAsync(discordUserId, ct);
 
         if (osuUser is null)
         {
-            discordUser.OsuUser = new DbOsuUser
+            osuUser = new DbOsuUser
             {
                 Id = osuUserId,
                 DiscordUserId = discordUserId,
             };
+
+            await Set.AddAsync(osuUser, ct);
         }
         else
         {
