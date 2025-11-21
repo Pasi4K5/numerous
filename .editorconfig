@@ -6,8 +6,6 @@ end_of_line = lf
 insert_final_newline = true
 indent_style = space
 
-[*.cs]
-
 # ReSharper properties
 resharper_blank_lines_before_block_statements = 1
 resharper_braces_redundant = true
@@ -22,6 +20,7 @@ resharper_indent_invocation_pars = inside
 resharper_wrap_before_declaration_rpar = false
 resharper_wrap_chained_binary_expressions = chop_if_long
 resharper_use_heuristics_for_body_style = true
+resharper_wrap_before_primary_constructor_declaration_lpar = true
 
 # Microsoft .NET properties
 csharp_prefer_braces = true:none

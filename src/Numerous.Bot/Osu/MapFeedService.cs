@@ -17,7 +17,8 @@ using osu.Game.Beatmaps;
 
 namespace Numerous.Bot.Osu;
 
-public sealed class MapFeedService(
+public sealed class MapFeedService
+(
     IHost host,
     DiscordSocketClient discordClient,
     IOsuApiRepository api,

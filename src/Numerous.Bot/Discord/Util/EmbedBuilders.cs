@@ -6,6 +6,7 @@
 using System.Net;
 using Discord;
 using Humanizer;
+using Numerous.Bot.Discord.Adapters.Messages.Embeds;
 using Numerous.Bot.Osu;
 using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
@@ -176,24 +177,31 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
-    public async Task<EmbedBuilder> ForumPostAsync(ApiForumTopicMeta meta, ApiForumPost post)
+    public async Task<DiscordMessageEmbed> ForumPostAsync(ApiForumTopicMeta meta, ApiForumPost post)
     {
-        const string newTopicMarker = "✨";
-        const string replyMarker = "↩️";
+        const string newTopicMarker = UnicodeCharacter.Sparkles;
+        const string replyMarker = UnicodeCharacter.RightArrowCurvingLeft;
 
         var author = await osuApi.GetUserByIdAsync(post.UserId);
         var isFirstPost = post.Id == meta.FirstPostId;
 
-        var color = isFirstPost ? 0x99eb47u : 0xff66aau;
+        var color = isFirstPost ? 0x99eb47 : 0xff66aa;
         var marker = isFirstPost ? newTopicMarker : replyMarker;
 
-        return new EmbedBuilder()
-            .WithColor(color)
-            .WithTitle($"{marker} {meta.Title}")
-            .WithAuthor(author.Username, author.AvatarUrl, Link.OsuUser(author.Id))
-            .WithDescription(MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw).LimitLength(CharacterLimit.DiscordEmbedDescription))
-            .WithTimestamp(post.CreatedAt)
-            .WithUrl(Link.OsuForumPost(post.Id));
+        return new()
+        {
+            Color = System.Drawing.Color.FromArgb(color),
+            Title = $"{marker} {meta.Title}",
+            Author = new()
+            {
+                Name = author.Username,
+                IconUrl = author.AvatarUrl,
+                Url = Link.OsuUser(author.Id),
+            },
+            Description = MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw)
+                .LimitLength(CharacterLimit.DiscordEmbedDescription),
+            Timestamp = post.CreatedAt,
+        };
     }
 
     public async Task<EmbedBuilder> ExtendedScoreAsync(WorkingBeatmap beatmap, BeatmapCompetitionScoreDto score, int rank)

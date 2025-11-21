@@ -17,7 +17,8 @@ using Serilog;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuVerifier(
+public sealed class OsuVerifier
+(
     IHost host,
     ILogger logger,
     DiscordSocketClient discord,
