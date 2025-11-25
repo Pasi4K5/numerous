@@ -15,7 +15,8 @@ using Serilog;
 namespace Numerous.Bot.Discord.Events;
 
 // TODO: This whole class fucking sucks.
-public sealed partial class DiscordEventHandler(
+public sealed partial class DiscordEventHandler
+(
     ILogger logger,
     IConfigProvider cfgProvider,
     DiscordSocketClient client,

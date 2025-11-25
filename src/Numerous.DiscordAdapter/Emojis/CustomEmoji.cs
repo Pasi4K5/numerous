@@ -3,11 +3,6 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Numerous.Database.Util;
+namespace Numerous.DiscordAdapter.Emojis;
 
-public static class UtilExtensions
-{
-    public static void Ignore<T>(this T _)
-    {
-    }
-}
+public sealed record CustomEmoji(ulong Id) : DiscordEmoji;

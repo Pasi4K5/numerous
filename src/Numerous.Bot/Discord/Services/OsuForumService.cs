@@ -5,14 +5,14 @@
 
 using Coravel;
 using Microsoft.Extensions.Hosting;
-using Numerous.Bot.Discord.Adapters;
-using Numerous.Bot.Discord.Adapters.Channels;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter;
+using Numerous.DiscordAdapter.Channels;
 
 namespace Numerous.Bot.Discord.Services;
 
@@ -90,14 +90,14 @@ public sealed class OsuForumService
             topic.Posts
                 .Where(p => p.CreatedAt > _lastChecked)
                 .Select(p => (post: p, meta: topic.Meta))
-                .ToList()
+                .ToArray()
         );
 
         var channels = (await subscriptions.Values
                 .SelectMany(ids => ids)
                 .Distinct()
                 .Select(discordClient.GetChannelAsync)
-            ).Select(ch => (IDiscordMessageChannelAdapter)ch)
+            ).Select(ch => (IDiscordMessageChannel)ch)
             .ToArray();
 
         var postEmbeds = (await newPosts.Select(async x => (x.post, embedBuilder: await eb.ForumPostAsync(x.meta, x.post))))
@@ -144,7 +144,7 @@ public sealed class OsuForumService
                 continue;
             }
 
-            var channel = (IDiscordMessageChannelAdapter)await discordClient.GetChannelAsync(channelId);
+            var channel = (IDiscordMessageChannel)await discordClient.GetChannelAsync(channelId);
 
             foreach (var embed in await topicEmbeds)
             {

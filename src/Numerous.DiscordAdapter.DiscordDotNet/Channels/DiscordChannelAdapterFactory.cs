@@ -3,11 +3,21 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Numerous.Bot.Discord.Adapters.Messages;
+using Discord;
+using Discord.WebSocket;
+using Numerous.DiscordAdapter.Channels;
 
-namespace Numerous.Bot.Discord.Adapters.Channels;
+namespace Numerous.DiscordAdapter.DiscordDotNet.Channels;
 
-public interface IDiscordMessageChannelAdapter : IDiscordChannelAdapter
+internal sealed class DiscordChannelAdapterFactory
+    : IAdapterFactory<IDiscordChannel, IChannel>
 {
-    Task<IDiscordUserMessageAdapter> SendMessageAsync(OutgoingDiscordMessage message);
+    public IDiscordChannel Wrap(IChannel channel) => channel switch
+    {
+        SocketTextChannel c => new DiscordTextChannelAdapter(c),
+        SocketGuildChannel c => new DiscordGuildChannelAdapter(c),
+        SocketChannel c => new DiscordChannelAdapter(c),
+        // TODO: Add remaining channel types
+        _ => throw new NotSupportedException($"Channel type '{channel.GetType().FullName}' is not supported."),
+    };
 }

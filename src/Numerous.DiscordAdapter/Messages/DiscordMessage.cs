@@ -3,23 +3,14 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Numerous.Bot.Discord.Adapters.Channels;
+using Numerous.DiscordAdapter.Messages.Components;
+using Numerous.DiscordAdapter.Messages.Embeds;
 
-namespace Numerous.Bot.Discord.Adapters;
+namespace Numerous.DiscordAdapter.Messages;
 
-public interface IDiscordClientAdapter
+public sealed class DiscordMessage
 {
-    Task<IDiscordChannelAdapter> GetChannelAsync(ulong id);
-}
-
-public sealed class DiscordClientAdapter
-(
-    DiscordSocketClient client,
-    IDiscordChannelAdapterFactory channelFactory
-)
-    : IDiscordClientAdapter
-{
-    public async Task<IDiscordChannelAdapter> GetChannelAsync(ulong id) =>
-        channelFactory.Wrap(await client.GetChannelAsync(id));
+    public string? Content { get; set; }
+    public ICollection<DiscordEmbed> Embeds { get; set; } = [];
+    public ICollection<DiscordMessageComponent> Components { get; set; } = [];
 }

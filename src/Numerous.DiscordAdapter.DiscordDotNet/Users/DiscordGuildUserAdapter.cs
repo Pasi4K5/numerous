@@ -4,19 +4,12 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord;
-using Discord.WebSocket;
+using Numerous.DiscordAdapter.Users;
 
-namespace Numerous.Bot.Discord.Adapters.Channels;
+namespace Numerous.DiscordAdapter.DiscordDotNet.Users;
 
-public interface IDiscordChannelAdapterFactory
-    : IAdapterFactory<IDiscordChannelAdapter, IChannel>;
-
-public sealed class DiscordChannelAdapterFactory : IDiscordChannelAdapterFactory
+internal sealed class DiscordGuildUserAdapter(IGuildUser user)
+    : IDiscordGuildUser
 {
-    public IDiscordChannelAdapter Wrap(IChannel channel) => channel switch
-    {
-        SocketTextChannel c => new DiscordTextChannelAdapter(c),
-        // TODO: Add channel types
-        _ => throw new NotSupportedException($"Channel type '{channel.GetType().FullName}' is not supported."),
-    };
+    public ulong Id => user.Id;
 }

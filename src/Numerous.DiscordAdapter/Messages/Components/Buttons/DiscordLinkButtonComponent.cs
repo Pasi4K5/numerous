@@ -3,16 +3,9 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
+namespace Numerous.DiscordAdapter.Messages.Components.Buttons;
 
-namespace Numerous.Bot.Discord.Adapters.Channels;
-
-public interface IDiscordChannelAdapter
+public class DiscordLinkButtonComponent : DiscordButtonComponent
 {
-    ulong Id { get; }
-}
-
-public class DiscordChannelAdapter(SocketChannel channel) : IDiscordChannelAdapter
-{
-    public ulong Id => channel.Id;
+    public required string Url { get; set; }
 }

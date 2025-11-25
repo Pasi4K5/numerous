@@ -3,19 +3,9 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.WebSocket;
-using Numerous.Bot.Discord.Adapters.Messages;
+namespace Numerous.DiscordAdapter.Channels;
 
-namespace Numerous.Bot.Discord.Adapters.Channels;
-
-public interface IDiscordTextChannelAdapter : IDiscordMessageChannelAdapter;
-
-public sealed class DiscordTextChannelAdapter(SocketTextChannel channel)
-    : DiscordChannelAdapter(channel), IDiscordTextChannelAdapter
+public interface IDiscordGuildChannel : IDiscordChannel
 {
-    public async Task<IDiscordUserMessageAdapter> SendMessageAsync(OutgoingDiscordMessage message) =>
-        new DiscordUserMessageAdapter(await channel.SendMessageAsync(
-            text: message.Content,
-            embeds: message.Embeds.Select(DiscordMapper.ToDiscordEmbed).ToArray()
-        ));
+    ulong GuildId { get; }
 }

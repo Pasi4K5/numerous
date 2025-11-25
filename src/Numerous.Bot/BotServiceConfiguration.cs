@@ -4,8 +4,6 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.DependencyInjection;
-using Numerous.Bot.Discord.Adapters;
-using Numerous.Bot.Discord.Adapters.Channels;
 using Numerous.Bot.Discord.Events;
 using Numerous.Bot.Discord.Interactions;
 using Numerous.Bot.Discord.Services;
@@ -18,6 +16,7 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.SauceNao;
+using Numerous.DiscordAdapter.DiscordDotNet.Util;
 using Refit;
 
 namespace Numerous.Bot;
@@ -26,32 +25,32 @@ public static class BotServiceConfiguration
 {
     public static void Configure(IServiceCollection services)
     {
-        services.AddSingleton<AttachmentService>();
-        services.AddTransient<BeatmapService>();
-        services.AddSingleton<CommandFinder>();
-        services.AddSingleton<IDiscordChannelAdapterFactory, DiscordChannelAdapterFactory>();
-        services.AddSingleton<IDiscordClientAdapter, DiscordClientAdapter>();
-        services.AddSingleton<DiscordEventHandler>();
-        services.AddTransient<EmbedBuilders>();
-        services.AddSingleton<IFileService, FileService>();
-        services.AddTransient<GuildStatsService>();
-        services.AddTransient<HttpLoggingHandler>();
-        services.AddHostedService<InteractionHandler>();
-        services.AddHostedService<MapFeedService>();
-        services.AddHostedService<MessageResponder>();
-        services.AddHostedService<MudaeMessageHandler>();
-        services.AddSingleton<IOsuApiRepository, OsuApiRepository>();
-        services.AddHostedService<OsuForumService>();
-        services.AddTransient<OsuHttpHandler>();
-        services.AddSingleton<OsuUserStatsService>();
-        services.AddSingleton<OsuVerifier>();
-        services.AddSingleton<IOsuTokenProvider, OsuTokenProvider>();
-        services.AddSingleton<ReminderService>();
-        services.AddSingleton<ISauceNaoClient, SauceNaoClient>();
-        services.AddTransient<ScoreValidator>();
-        services.AddHostedService<StarReactPreventionService>();
-        services.AddHostedService<Startup>();
-        services.AddSingleton<VerificationService>();
+        services
+            .AddDiscordDotNetAdapter()
+            .AddSingleton<AttachmentService>()
+            .AddTransient<BeatmapService>()
+            .AddSingleton<CommandFinder>()
+            .AddSingleton<DiscordEventHandler>()
+            .AddTransient<EmbedBuilders>()
+            .AddSingleton<IFileService, FileService>()
+            .AddTransient<GuildStatsService>()
+            .AddTransient<HttpLoggingHandler>()
+            .AddHostedService<InteractionHandler>()
+            .AddHostedService<MapFeedService>()
+            .AddHostedService<MessageResponder>()
+            .AddHostedService<MudaeMessageHandler>()
+            .AddSingleton<IOsuApiRepository, OsuApiRepository>()
+            .AddHostedService<OsuForumService>()
+            .AddTransient<OsuHttpHandler>()
+            .AddSingleton<OsuUserStatsService>()
+            .AddSingleton<OsuVerifier>()
+            .AddSingleton<IOsuTokenProvider, OsuTokenProvider>()
+            .AddSingleton<ReminderService>()
+            .AddSingleton<ISauceNaoClient, SauceNaoClient>()
+            .AddTransient<ScoreValidator>()
+            .AddHostedService<StarReactPreventionService>()
+            .AddHostedService<Startup>()
+            .AddSingleton<VerificationService>();
 
         // TODO: Consider switching to System.Text.Json (for everything)
         services

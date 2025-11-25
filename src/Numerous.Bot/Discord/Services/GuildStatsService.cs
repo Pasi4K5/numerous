@@ -8,7 +8,8 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class GuildStatsService(
+public sealed class GuildStatsService
+(
     DiscordSocketClient client,
     IUnitOfWorkFactory uowFactory
 )

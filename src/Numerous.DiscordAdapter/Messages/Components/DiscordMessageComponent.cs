@@ -3,23 +3,6 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Drawing;
+namespace Numerous.DiscordAdapter.Messages.Components;
 
-namespace Numerous.Bot.Discord.Adapters.Messages.Embeds;
-
-public sealed record DiscordMessageEmbed
-{
-    public string? Title { get; init; }
-    public string? Description { get; init; }
-    public Color Color { get; init; }
-    public DateTimeOffset? Timestamp { get; init; }
-
-    public DiscordMessageEmbedAuthor? Author { get; init; }
-}
-
-public sealed record DiscordMessageEmbedAuthor
-{
-    public required string Name { get; init; }
-    public string? Url { get; init; }
-    public string? IconUrl { get; init; }
-}
+public abstract class DiscordMessageComponent;

@@ -7,6 +7,20 @@ namespace Numerous.Common.Util;
 
 public static class Extensions
 {
+    public static void Ignore<T>(this T _)
+    {
+    }
+
+    public static T With<T>(this T obj, Action<T> action)
+    {
+        action(obj);
+
+        return obj;
+    }
+
+    public static TResult Let<TSource, TResult>(this TSource obj, Func<TSource, TResult> func) =>
+        func(obj);
+
     public static string ToHexString(this byte[] bytes)
     {
         return BitConverter.ToString(bytes).RemoveAll("-").ToLower();

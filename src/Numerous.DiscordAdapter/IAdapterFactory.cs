@@ -3,18 +3,10 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Discord.Rest;
-using Numerous.Database.Util;
+namespace Numerous.DiscordAdapter;
 
-namespace Numerous.Bot.Discord.Adapters.Messages;
-
-public interface IDiscordUserMessageAdapter;
-
-public sealed class DiscordUserMessageAdapter
-    : IDiscordUserMessageAdapter
+public interface IAdapterFactory<out TAdapter, in TSource>
+    where TAdapter : class
 {
-    public DiscordUserMessageAdapter(RestUserMessage message)
-    {
-        message.Ignore();
-    }
+    TAdapter Wrap(TSource source);
 }

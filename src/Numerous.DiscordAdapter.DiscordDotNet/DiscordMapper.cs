@@ -4,13 +4,15 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Discord;
-using Numerous.Bot.Discord.Adapters.Messages.Embeds;
+using Numerous.Common.Util;
+using Numerous.DiscordAdapter.Emojis;
+using Numerous.DiscordAdapter.Messages.Embeds;
 
-namespace Numerous.Bot.Discord.Adapters;
+namespace Numerous.DiscordAdapter.DiscordDotNet;
 
-public static class DiscordMapper
+internal static class DiscordMapper
 {
-    public static Embed ToDiscordEmbed(DiscordMessageEmbed embed) =>
+    public static Embed ToDiscordEmbed(DiscordEmbed embed) =>
         new EmbedBuilder
         {
             // TODO: Add remaining properties.
@@ -18,13 +20,21 @@ public static class DiscordMapper
             Description = embed.Description,
             Color = new(embed.Color.R, embed.Color.G, embed.Color.B),
             Timestamp = embed.Timestamp,
-            Author = embed.Author is not null
-                ? new EmbedAuthorBuilder
-                {
-                    Name = embed.Author.Name,
-                    IconUrl = embed.Author.IconUrl,
-                    Url = embed.Author.Url,
-                }
-                : null,
+            ImageUrl = embed.ImageUrl,
+            ThumbnailUrl = embed.ThumbnailUrl,
+            Author = embed.Author?.Let(author => new EmbedAuthorBuilder
+            {
+                Name = author.Name,
+                IconUrl = author.IconUrl,
+                Url = author.Url,
+            }),
         }.Build();
+
+    public static IEmote ToDiscordEmote(DiscordEmoji emoji) =>
+        emoji switch
+        {
+            StandardEmoji e => new Emoji(e.Unicode),
+            CustomEmoji e => new Emote(e.Id, ""),
+            _ => throw new NotSupportedException($"Unsupported emoji type: {emoji.GetType().FullName}"),
+        };
 }
