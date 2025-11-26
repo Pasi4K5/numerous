@@ -3,19 +3,22 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.Extensions.DependencyInjection;
-using Numerous.DiscordAdapter.DiscordDotNet.Channels;
+using Discord;
+using Numerous.DiscordAdapter.DiscordDotNet.Guilds;
+using Numerous.DiscordAdapter.Guilds;
+using Numerous.DiscordAdapter.Users;
 
-namespace Numerous.DiscordAdapter.DiscordDotNet.Util;
+namespace Numerous.DiscordAdapter.DiscordDotNet.Users;
 
-public static class Extensions
+internal sealed class DiscordGuildMemberAdapter(IGuildUser user)
+    : DiscordUserAdapter(user), IDiscordGuildMember
 {
-    public static IServiceCollection AddDiscordDotNetAdapter(this IServiceCollection services)
-    {
-        services
-            .AddSingleton<DiscordChannelAdapterFactory>()
-            .AddSingleton<IDiscordClient, DiscordClientAdapter>();
+    public IDiscordGuild Guild => new DiscordGuildAdapter(user.Guild);
+    public IReadOnlyCollection<ulong> RoleIds => user.RoleIds;
 
-        return services;
-    }
+    public Task AddRolesAsync(params IEnumerable<ulong> roleIds) =>
+        user.AddRolesAsync(roleIds);
+
+    public Task RemoveRolesAsync(params IEnumerable<ulong> roleIds) =>
+        user.RemoveRolesAsync(roleIds);
 }

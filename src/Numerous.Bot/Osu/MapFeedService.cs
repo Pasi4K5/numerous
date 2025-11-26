@@ -12,16 +12,16 @@ using Numerous.Bot.Web.Osu;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
-using Numerous.DiscordAdapter;
 using Numerous.DiscordAdapter.Channels;
 using osu.Game.Beatmaps;
+using IDiscordClient = Numerous.DiscordAdapter.IDiscordClient;
 
 namespace Numerous.Bot.Osu;
 
 public sealed class MapFeedService
 (
     IHost host,
-    IDiscordClientAdapter discordClient,
+    IDiscordClient discordClient,
     IOsuApiRepository api,
     IUnitOfWorkFactory uowFactory
 ) : HostedService
@@ -106,7 +106,7 @@ public sealed class MapFeedService
             {
                 var channel = (IDiscordTextChannel)await discordClient.GetChannelAsync(id);
                 var guildUserIds = await discordClient
-                    .GetGuildUsersAsync(channel.GuildId)
+                    .GetGuildMembersAsync(channel.GuildId)
                     .Select(u => u.Id)
                     .ToArrayAsync(ct);
 

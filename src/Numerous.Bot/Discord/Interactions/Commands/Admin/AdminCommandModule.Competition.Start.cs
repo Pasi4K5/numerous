@@ -28,7 +28,8 @@ partial class AdminCommandModule
 
         [UsedImplicitly]
         [SlashCommand("start", "Starts a new beatmap competition.")]
-        public async Task Start(
+        public async Task Start
+        (
             [Summary("beatmap", "The link or ID of the beatmap.")]
             string beatmapStr,
             [Summary("start_time", "The start time of the competition (in UTC).")]

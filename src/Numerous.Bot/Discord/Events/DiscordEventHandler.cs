@@ -22,7 +22,7 @@ public sealed partial class DiscordEventHandler
     DiscordSocketClient client,
     IUnitOfWorkFactory uowFactory,
     AttachmentService attachmentService,
-    OsuVerifier verifier,
+    IOsuVerifier verifier,
     IOsuApiRepository osuApi,
     VerificationService verificationService,
     IConfigProvider configProvider

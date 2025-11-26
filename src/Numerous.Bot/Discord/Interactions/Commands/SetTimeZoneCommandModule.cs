@@ -17,7 +17,8 @@ public sealed class SetTimeZoneCommandModule(IUnitOfWork uow) : InteractionModul
 
     [UsedImplicitly]
     [SlashCommand("settimezone", "Sets your time zone.")]
-    public async Task SetTimeZoneCommand(
+    public async Task SetTimeZoneCommand
+    (
         [Autocomplete<TimeZoneAutocompleteHandler>]
         [Summary(TimeZoneParamName, "Your time zone")]
         string tzId
@@ -36,7 +37,8 @@ public sealed class SetTimeZoneCommandModule(IUnitOfWork uow) : InteractionModul
     [UsedImplicitly]
     private sealed class TimeZoneAutocompleteHandler : AutocompleteHandler
     {
-        public override Task<AutocompletionResult> GenerateSuggestionsAsync(
+        public override Task<AutocompletionResult> GenerateSuggestionsAsync
+        (
             IInteractionContext context,
             IAutocompleteInteraction autocompleteInteraction,
             IParameterInfo parameter,

@@ -57,7 +57,7 @@ public partial class DiscordEventHandler
                 return;
             }
 
-            var isVerified = await verifier.UserIsVerifiedAsync(user);
+            var isVerified = await verifier.UserIsVerifiedAsync(user.Id);
 
             if (isVerified)
             {
@@ -70,7 +70,7 @@ public partial class DiscordEventHandler
             {
                 var osuUser = await osuApi.GetUserAsync(args[1]);
 
-                await verifier.VerifyAsync(user, osuUser.Id);
+                await verifier.VerifyAsync(user.Id, osuUser.Id);
 
                 await msg.ReplyAsync(
                     $"{user.Mention} has been manually verified as *[{osuUser.Username}](https://osu.ppy.sh/users/{osuUser.Id})*."

@@ -18,37 +18,39 @@ public partial class ConfigCommandModule
     {
         [UsedImplicitly]
         [SlashCommand("set", "Configures which role to assign to which users.")]
-        public async Task SetRole(
+        public async Task SetRole
+        (
             [Summary("group", "The group to set the role for.")] OsuUserGroup group,
             [Summary("role", "The role to assign to users in the group.")] IRole role
         )
         {
             await DeferAsync();
 
-            await verifier.LinkRoleAsync(Context.Guild, group, role);
+            await verifier.LinkRoleAsync(Context.Guild.Id, group, role.Id);
 
             await FollowupWithEmbedAsync(
                 message: $"Set role for group {group} to {role.Mention}.",
                 type: ResponseType.Success
             );
 
-            await verifier.AssignAllRolesAsync(Context.Guild);
+            await verifier.AssignAllRolesAsync(Context.Guild.Id);
         }
 
         [UsedImplicitly]
         [SlashCommand("remove", "Stops automatically assigning the given role.")]
-        public async Task RemoveRole(
+        public async Task RemoveRole
+        (
             [Summary("group", "The group to remove the role for.")] OsuUserGroup group
         )
         {
-            await verifier.UnlinkRoleAsync(Context.Guild, group);
+            await verifier.UnlinkRoleAsync(Context.Guild.Id, group);
 
             await RespondWithEmbedAsync(
                 $"Removed role for group {group}.",
                 type: ResponseType.Success
             );
 
-            await verifier.AssignAllRolesAsync(Context.Guild);
+            await verifier.AssignAllRolesAsync(Context.Guild.Id);
         }
     }
 }

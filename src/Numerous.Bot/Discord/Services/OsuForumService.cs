@@ -21,7 +21,7 @@ public sealed class OsuForumService
     IHost host,
     IUnitOfWorkFactory uowFactory,
     IOsuApiRepository osuApi,
-    IDiscordClientAdapter discordClient,
+    IDiscordClient discordClient,
     EmbedBuilders eb
 ) : HostedService
 {

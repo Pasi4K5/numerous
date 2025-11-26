@@ -32,7 +32,8 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
 
     private Config Config => cfgProvider.Get();
 
-    public static (DiscordEmbed, DiscordMessageComponent[]) BeatmapSetUpdate(
+    public static (DiscordEmbed, DiscordMessageComponent[]) BeatmapSetUpdate
+    (
         ApiBeatmapsetExtended beatmapSet,
         string mapper,
         string[] gdMappers
@@ -61,7 +62,8 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         );
     }
 
-    private static (DiscordEmbed, DiscordMessageComponent[]) BeatmapSet(
+    private static (DiscordEmbed, DiscordMessageComponent[]) BeatmapSet
+    (
         ApiBeatmapsetExtended beatmapSet,
         string mapper,
         string[] gdMappers
@@ -141,7 +143,8 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
-    private static EmbedBuilder Beatmap(
+    private static EmbedBuilder Beatmap
+    (
         WorkingBeatmap beatmap,
         OnlineBeatmapDto? onlineBeatmap,
         ApiBeatmapsetExtended? apiSet

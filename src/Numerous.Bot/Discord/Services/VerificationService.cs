@@ -13,15 +13,16 @@ namespace Numerous.Bot.Discord.Services;
 
 public sealed class VerificationService
 {
-    private readonly OsuVerifier _osuVerifier;
+    private readonly IOsuVerifier _osuVerifier;
     private readonly IUnitOfWork _uow;
 
     private static readonly TimeSpan _verificationTimeout = TimeSpan.FromHours(1);
 
-    public VerificationService(
+    public VerificationService
+    (
         IHost host,
         DiscordSocketClient discordClient,
-        OsuVerifier osuVerifier,
+        IOsuVerifier osuVerifier,
         IUnitOfWorkFactory uowFactory,
         IUnitOfWork uow)
     {
@@ -51,7 +52,7 @@ public sealed class VerificationService
                         member.JoinedAt is null
                         || member.IsBot
                         || member.RoleIds.Contains(verifiedRoleId.Value)
-                        || await _osuVerifier.UserIsVerifiedAsync(member, ct: ct)
+                        || await _osuVerifier.UserIsVerifiedAsync(member.Id, ct: ct)
                     )
                     {
                         continue;
@@ -92,7 +93,7 @@ public sealed class VerificationService
             return;
         }
 
-        if (await _osuVerifier.UserIsVerifiedAsync(user))
+        if (await _osuVerifier.UserIsVerifiedAsync(user.Id))
         {
             await AssignMemberRoleAsync();
         }

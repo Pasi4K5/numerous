@@ -43,7 +43,7 @@ public static class BotServiceConfiguration
             .AddHostedService<OsuForumService>()
             .AddTransient<OsuHttpHandler>()
             .AddSingleton<OsuUserStatsService>()
-            .AddSingleton<OsuVerifier>()
+            .AddSingleton<IOsuVerifier, OsuVerifier>()
             .AddSingleton<IOsuTokenProvider, OsuTokenProvider>()
             .AddSingleton<ReminderService>()
             .AddSingleton<ISauceNaoClient, SauceNaoClient>()

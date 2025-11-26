@@ -24,7 +24,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
     {
         [UsedImplicitly]
         [SlashCommand("in", "Sets a reminder after the specified time.")]
-        public async Task InCommand(
+        public async Task InCommand
+        (
             [Summary("years")] int? years = null,
             [Summary("months")] int? months = null,
             [Summary("days")] int? days = null,
@@ -108,7 +109,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
         [UsedImplicitly]
         [SlashCommand("at", "Sets a reminder at the specified time.")]
-        public async Task AtCommand(
+        public async Task AtCommand
+        (
             [Summary("year")] int? year = null,
             [Summary("month")] int? month = null,
             [Summary("day")] int? day = null,
@@ -250,7 +252,8 @@ public sealed class ReminderCommandModule(ReminderService reminderService, IUnit
 
     [UsedImplicitly]
     [SlashCommand("delete", "Removes a reminder.")]
-    public async Task DeleteCommand(
+    public async Task DeleteCommand
+    (
         [Summary("index", "The index of the reminder to remove.")]
         int index
     )

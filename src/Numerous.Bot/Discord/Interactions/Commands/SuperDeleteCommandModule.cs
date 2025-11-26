@@ -30,7 +30,8 @@ public sealed class SuperDeleteCommandModule(IUnitOfWork uow) : InteractionModul
     [UsedImplicitly]
     [SlashCommand("superdelete", "Deletes the given message. Also prevents it from being undeleted.")]
     [DefaultMemberPermissions(GuildPermission.ManageMessages)]
-    public async Task SuperDelete(
+    public async Task SuperDelete
+    (
         [Summary("message", "The message to delete. Can be a message ID or a link.")]
         string msgString
     )

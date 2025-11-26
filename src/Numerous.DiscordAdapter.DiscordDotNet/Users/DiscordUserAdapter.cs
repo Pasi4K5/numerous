@@ -3,13 +3,14 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Numerous.DiscordAdapter.Channels;
+using Discord;
 using Numerous.DiscordAdapter.Users;
 
-namespace Numerous.DiscordAdapter;
+namespace Numerous.DiscordAdapter.DiscordDotNet.Users;
 
-public interface IDiscordClientAdapter
+public class DiscordUserAdapter(IUser user)
+    : IDiscordUser
 {
-    Task<IDiscordChannel> GetChannelAsync(ulong id);
-    IAsyncEnumerable<IDiscordGuildUser> GetGuildUsersAsync(ulong guildId);
+    public ulong Id => user.Id;
+    public string Username => user.Username;
 }

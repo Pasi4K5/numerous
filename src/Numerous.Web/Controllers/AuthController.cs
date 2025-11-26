@@ -55,12 +55,13 @@ public sealed class AuthController(IConfigProvider cfgProvider) : ControllerBase
 
     [HttpGet("/redirect/osu")]
     [Authorize]
-    public async Task<IActionResult> OsuRedirect(
+    public async Task<IActionResult> OsuRedirect
+    (
         string code,
         string state,
         [FromServices] IHttpClientFactory clientFactory,
         [FromServices] DiscordSocketClient discordClient,
-        [FromServices] OsuVerifier verifier,
+        [FromServices] IOsuVerifier verifier,
         [FromServices] IHttpContextAccessor httpContextAccessor
     )
     {
@@ -106,7 +107,7 @@ public sealed class AuthController(IConfigProvider cfgProvider) : ControllerBase
             return Unauthorized();
         }
 
-        await verifier.VerifyAsync(discordUser, osuId.Value);
+        await verifier.VerifyAsync(discordUser.Id, osuId.Value);
 
         return Redirect("/");
     }

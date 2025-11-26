@@ -3,19 +3,20 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.Extensions.DependencyInjection;
-using Numerous.DiscordAdapter.DiscordDotNet.Channels;
+using Numerous.DiscordAdapter.Channels;
+using Numerous.DiscordAdapter.Guilds;
+using Numerous.DiscordAdapter.Users;
 
-namespace Numerous.DiscordAdapter.DiscordDotNet.Util;
+namespace Numerous.DiscordAdapter;
 
-public static class Extensions
+public interface IDiscordClient
 {
-    public static IServiceCollection AddDiscordDotNetAdapter(this IServiceCollection services)
-    {
-        services
-            .AddSingleton<DiscordChannelAdapterFactory>()
-            .AddSingleton<IDiscordClient, DiscordClientAdapter>();
+    IReadOnlyCollection<IDiscordGuild> Guilds { get; }
 
-        return services;
-    }
+    event Func<IDiscordGuildMember, Task>? GuildMemberAdd;
+    event Func<IDiscordGuildMember, Task>? GuildMemberUpdated;
+
+    Task<IDiscordChannel> GetChannelAsync(ulong id);
+    IAsyncEnumerable<IDiscordGuildMember> GetGuildMembersAsync(ulong guildId);
+    Task<IDiscordGuildMember?> GetGuildMemberAsync(ulong guildId, ulong userId);
 }

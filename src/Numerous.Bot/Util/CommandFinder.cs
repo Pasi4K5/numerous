@@ -11,7 +11,8 @@ namespace Numerous.Bot.Util;
 
 public sealed class CommandFinder(InteractionService interactions, IConfigProvider cfg)
 {
-    public async Task<string> GetCommandMentionAsync<TModule>(
+    public async Task<string> GetCommandMentionAsync<TModule>
+    (
         string methodName,
         SocketGuild guild
     ) where TModule : class
@@ -21,7 +22,8 @@ public sealed class CommandFinder(InteractionService interactions, IConfigProvid
         return id is null ? string.Empty : $"</{name}:{id}>";
     }
 
-    private async Task<(string? name, ulong? id)> GetCommandInfoAsync<TModule>(
+    private async Task<(string? name, ulong? id)> GetCommandInfoAsync<TModule>
+    (
         string methodName,
         SocketGuild guild
     ) where TModule : class

@@ -19,7 +19,7 @@ public sealed class Startup
     IConfigProvider cfgProvider,
     IUnitOfWorkFactory uowFactory,
     ReminderService reminderService,
-    OsuVerifier verifier,
+    IOsuVerifier verifier,
     DiscordEventHandler eventHandler,
     GuildStatsService guildStatsService,
     OsuUserStatsService osuUserStatsService

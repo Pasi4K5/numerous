@@ -18,7 +18,8 @@ public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuAp
 {
     [UsedImplicitly]
     [SlashCommand("mapper", "Shows mapping-related information about a user")]
-    public async Task MapperSlashCommand(
+    public async Task MapperSlashCommand
+    (
         [Summary("member", "The Discord user to display information about. Must be verified.")]
         IUser? discordUser = null,
         [Summary("osu_user", "The osu! username of the user to display information about. If left empty, it will display your own.")]

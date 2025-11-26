@@ -20,7 +20,8 @@ partial class CompetitionCommandModule
 {
     [UsedImplicitly]
     [SlashCommand("submit", "Submit a score by uploading a replay file.")]
-    public async Task Submit(
+    public async Task Submit
+    (
         [Summary("replay", "The replay file to submit.")]
         IAttachment attachment
     )

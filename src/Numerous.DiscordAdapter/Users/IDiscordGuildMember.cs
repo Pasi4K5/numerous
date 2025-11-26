@@ -3,6 +3,22 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Numerous.DiscordAdapter.Guilds;
+
 namespace Numerous.DiscordAdapter.Users;
 
-public interface IDiscordGuildUser : ISnowflakeEntity;
+public interface IDiscordGuildMember : IDiscordUser
+{
+    IDiscordGuild Guild { get; }
+    IReadOnlyCollection<ulong> RoleIds { get; }
+
+    Task AddRolesAsync(params IEnumerable<ulong> roleIds);
+
+    Task AddRolesAsync(params IEnumerable<IDiscordRole> roles) =>
+        AddRolesAsync(roles.Select(role => role.Id));
+
+    Task RemoveRolesAsync(params IEnumerable<ulong> roleIds);
+
+    Task RemoveRolesAsync(params IEnumerable<IDiscordRole> roles) =>
+        RemoveRolesAsync(roles.Select(role => role.Id));
+}

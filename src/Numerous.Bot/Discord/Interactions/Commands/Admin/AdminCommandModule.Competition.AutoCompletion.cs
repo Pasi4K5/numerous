@@ -15,7 +15,8 @@ partial class AdminCommandModule
     {
         private class DateTimeAutocompleteHandler : AutocompleteHandler
         {
-            public override Task<AutocompletionResult> GenerateSuggestionsAsync(
+            public override Task<AutocompletionResult> GenerateSuggestionsAsync
+            (
                 IInteractionContext context,
                 IAutocompleteInteraction interaction,
                 IParameterInfo parameter,

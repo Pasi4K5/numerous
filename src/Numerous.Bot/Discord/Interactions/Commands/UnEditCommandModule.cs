@@ -27,7 +27,8 @@ public sealed class UnEditCommandModule(IUnitOfWork uow, DiscordSocketClient cli
     [UsedImplicitly]
     [SlashCommand("unedit", "Reveals all versions of the given message.")]
     [CommandContextType(InteractionContextType.Guild, InteractionContextType.PrivateChannel)]
-    public async Task UnEdit(
+    public async Task UnEdit
+    (
         [Summary("message", "The message to reveal. Can be a message ID or a link.")]
         string msg
     )

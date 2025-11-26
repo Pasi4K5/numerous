@@ -14,7 +14,8 @@ partial class CompetitionCommandModule
 {
     [UsedImplicitly]
     [SlashCommand("topscore", "Shows a player's top score for the current beatmap competition.")]
-    public async Task TopScore(
+    public async Task TopScore
+    (
         [Summary("user", "The user to show the top score for. If left empty, it will show your score.")]
         IUser? user = null
     )
