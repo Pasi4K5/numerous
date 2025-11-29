@@ -14,7 +14,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 public partial class ConfigCommandModule
 {
     [Group("role", "Role configuration commands")]
-    public sealed class RoleCommandModule(OsuVerifier verifier) : InteractionModule
+    public sealed class RoleCommandModule(IOsuVerifier verifier) : InteractionModule
     {
         [UsedImplicitly]
         [SlashCommand("set", "Configures which role to assign to which users.")]
