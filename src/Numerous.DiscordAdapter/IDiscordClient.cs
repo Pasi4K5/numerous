@@ -19,4 +19,10 @@ public interface IDiscordClient
     Task<IDiscordChannel> GetChannelAsync(ulong id);
     IAsyncEnumerable<IDiscordGuildMember> GetGuildMembersAsync(ulong guildId);
     Task<IDiscordGuildMember?> GetGuildMemberAsync(ulong guildId, ulong userId);
+    IAsyncEnumerable<IDiscordGuildMember> SearchGuildMembersAsync(ulong guildId, GuildMemberSortType sortBy);
+}
+
+public enum GuildMemberSortType
+{
+    MemberSinceNewestFirst,
 }

@@ -14,7 +14,7 @@ public partial class DiscordEventHandler
     [Init]
     private void MessageRemover_Init()
     {
-        client.MessageReceived += RemoveMessage;
+        ddnClient.MessageReceived += RemoveMessage;
     }
 
     private async Task RemoveMessage(SocketMessage msg)

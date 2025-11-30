@@ -14,10 +14,10 @@ public partial class DiscordEventHandler
     [Init]
     private void MessageTracker_Init()
     {
-        client.MessageReceived += MessageTracker_StoreAsync;
-        client.MessageDeleted += async (message, channel) =>
+        ddnClient.MessageReceived += MessageTracker_StoreAsync;
+        ddnClient.MessageDeleted += async (message, channel) =>
             await MessageTracker_DeleteAsync(message.Id, await channel.GetOrDownloadAsync());
-        client.MessageUpdated += (_, after, channel) => MessageTracker_UpdateAsync(after, channel);
+        ddnClient.MessageUpdated += (_, after, channel) => MessageTracker_UpdateAsync(after, channel);
     }
 
     private async Task MessageTracker_StoreAsync(IMessage msg)

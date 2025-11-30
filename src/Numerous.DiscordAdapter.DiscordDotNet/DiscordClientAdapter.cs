@@ -71,4 +71,22 @@ internal sealed class DiscordClientAdapter : IDiscordClient
 
         return member is not null ? new DiscordGuildMemberAdapter(member) : null;
     }
+
+    public async IAsyncEnumerable<IDiscordGuildMember> SearchGuildMembersAsync(ulong guildId, GuildMemberSortType sortBy)
+    {
+        foreach
+        (
+            var member in (await _client.GetGuild(guildId).SearchUsersAsyncV2(args: new()
+            {
+                Sort = sortBy switch
+                {
+                    GuildMemberSortType.MemberSinceNewestFirst => Discord.MemberSearchV2SortType.MemberSinceNewestFirst,
+                    _ => throw new NotSupportedException($"Sort type {sortBy} is not supported."),
+                },
+            })).Members
+        )
+        {
+            yield return new DiscordGuildMemberAdapter(member.User);
+        }
+    }
 }

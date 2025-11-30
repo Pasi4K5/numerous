@@ -16,7 +16,7 @@ public partial class DiscordEventHandler
     [Init]
     private void MessageCommands_Init()
     {
-        client.MessageReceived += MessageCommands_HandleAsync;
+        ddnClient.MessageReceived += MessageCommands_HandleAsync;
     }
 
     private async Task MessageCommands_HandleAsync(IMessage msg)
@@ -48,7 +48,7 @@ public partial class DiscordEventHandler
                 return;
             }
 
-            var user = await client.GetUserAsync(discordId);
+            var user = await ddnClient.GetUserAsync(discordId);
 
             if (user is null)
             {

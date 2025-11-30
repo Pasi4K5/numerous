@@ -10,7 +10,11 @@ namespace Numerous.DiscordAdapter.Users;
 public interface IDiscordGuildMember : IDiscordUser
 {
     IDiscordGuild Guild { get; }
+    bool IsBot { get; }
+    DateTimeOffset? JoinedAt { get; }
     IReadOnlyCollection<ulong> RoleIds { get; }
+
+    string Mention => $"<@{Id}>";
 
     Task AddRolesAsync(params IEnumerable<ulong> roleIds);
 
@@ -21,4 +25,6 @@ public interface IDiscordGuildMember : IDiscordUser
 
     Task RemoveRolesAsync(params IEnumerable<IDiscordRole> roles) =>
         RemoveRolesAsync(roles.Select(role => role.Id));
+
+    Task KickAsync(string? reason = null);
 }

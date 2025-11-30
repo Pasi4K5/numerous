@@ -14,6 +14,8 @@ internal sealed class DiscordGuildMemberAdapter(IGuildUser user)
     : DiscordUserAdapter(user), IDiscordGuildMember
 {
     public IDiscordGuild Guild => new DiscordGuildAdapter(user.Guild);
+    public bool IsBot => user.IsBot;
+    public DateTimeOffset? JoinedAt => user.JoinedAt;
     public IReadOnlyCollection<ulong> RoleIds => user.RoleIds;
 
     public Task AddRolesAsync(params IEnumerable<ulong> roleIds) =>
@@ -21,4 +23,7 @@ internal sealed class DiscordGuildMemberAdapter(IGuildUser user)
 
     public Task RemoveRolesAsync(params IEnumerable<ulong> roleIds) =>
         user.RemoveRolesAsync(roleIds);
+
+    public Task KickAsync(string? reason = null) =>
+        user.KickAsync(reason);
 }

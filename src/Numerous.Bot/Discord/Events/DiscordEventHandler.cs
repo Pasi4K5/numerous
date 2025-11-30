@@ -10,6 +10,7 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Common.Config;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter;
 using Serilog;
 
 namespace Numerous.Bot.Discord.Events;
@@ -19,7 +20,8 @@ public sealed partial class DiscordEventHandler
 (
     ILogger logger,
     IConfigProvider cfgProvider,
-    DiscordSocketClient client,
+    IDiscordClient client,
+    DiscordSocketClient ddnClient,
     IUnitOfWorkFactory uowFactory,
     AttachmentService attachmentService,
     IOsuVerifier verifier,
@@ -32,6 +34,6 @@ public sealed partial class DiscordEventHandler
     {
         this.Init();
 
-        client.UserJoined += verificationService.HandleUserJoined;
+        client.GuildMemberAdd += verificationService.HandleUserJoined;
     }
 }

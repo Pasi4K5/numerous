@@ -14,7 +14,7 @@ public partial class DiscordEventHandler
     [Init]
     private void JoinHandler_Init()
     {
-        client.JoinedGuild += JoinHandler_Handle;
+        ddnClient.JoinedGuild += JoinHandler_Handle;
     }
 
     private async Task JoinHandler_Handle(SocketGuild guild)

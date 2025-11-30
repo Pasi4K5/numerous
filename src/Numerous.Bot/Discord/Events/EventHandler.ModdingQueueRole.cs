@@ -20,7 +20,7 @@ public partial class DiscordEventHandler
         var roleId = cfg.ModdingQueue.RoleId;
         var link = cfg.BaseUrl;
 
-        client.MessageReceived += async message =>
+        ddnClient.MessageReceived += async message =>
         {
             if (
                 message.Channel is not IGuildChannel channel

@@ -15,15 +15,15 @@ public partial class DiscordEventHandler
     [Init]
     private void Logger_Init()
     {
-        client.SlashCommandExecuted += LogSlashCommand;
-        client.MessageCommandExecuted += LogMessageCommand;
-        client.UserCommandExecuted += LogUserCommand;
+        ddnClient.SlashCommandExecuted += LogSlashCommand;
+        ddnClient.MessageCommandExecuted += LogMessageCommand;
+        ddnClient.UserCommandExecuted += LogUserCommand;
     }
 
     private async Task LogSlashCommand(SocketSlashCommand cmd)
     {
         var guild = cmd.GuildId is not null
-            ? await client.Rest.GetGuildAsync(cmd.GuildId.Value)
+            ? await ddnClient.Rest.GetGuildAsync(cmd.GuildId.Value)
             : null;
 
         logger.Information(
