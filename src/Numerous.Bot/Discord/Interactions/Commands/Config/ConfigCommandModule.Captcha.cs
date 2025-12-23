@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Discord;
 using Discord.Interactions;
+using Discord.Net;
 using JetBrains.Annotations;
 using Numerous.Bot.Discord.Services;
 using Numerous.Bot.Discord.Util;
@@ -221,13 +222,20 @@ partial class ConfigCommandModule
 
             var dm = await guildUser.CreateDMChannelAsync();
 
-            await dm.SendMessageAsync(
-                embed: CreateEmbed(
-                    "✅ Verification Successful",
-                    $"**Welcome to {Context.Guild.Name}!**\n"
-                    + $"If you want to link your osu! account later, use the `/link` command."
-                ).Build()
-            );
+            try
+            {
+                await dm.SendMessageAsync(
+                    embed: CreateEmbed(
+                        "✅ Verification Successful",
+                        $"**Welcome to {Context.Guild.Name}!**\n"
+                        + $"If you want to link your osu! account later, use the `/link` command."
+                    ).Build()
+                );
+            }
+            catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.CannotSendMessageToUser)
+            {
+                // ignored
+            }
         }
 
         [UsedImplicitly]
