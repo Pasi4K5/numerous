@@ -5,7 +5,7 @@
 
 namespace Numerous.DiscordAdapter.Messages.Components.Buttons;
 
-public class DiscordLinkButtonComponent : DiscordButtonComponent
+public sealed class DiscordLinkButtonComponent : DiscordButtonComponent
 {
     public required string Url { get; set; }
 }
