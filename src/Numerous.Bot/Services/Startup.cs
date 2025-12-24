@@ -13,12 +13,13 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Services;
 
-public sealed class Startup(
+public sealed class Startup
+(
     DiscordSocketClient discordClient,
     IConfigProvider cfgProvider,
     IUnitOfWorkFactory uowFactory,
     ReminderService reminderService,
-    OsuVerifier verifier,
+    IOsuVerifier verifier,
     DiscordEventHandler eventHandler,
     GuildStatsService guildStatsService,
     OsuUserStatsService osuUserStatsService

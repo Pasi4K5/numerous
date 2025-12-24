@@ -12,7 +12,8 @@ public interface ISauceNaoApi
     internal const string BaseUrl = "https://saucenao.com";
 
     [Post("/search.php")]
-    Task<SauceNaoResponse> SearchAsync(
+    Task<SauceNaoResponse> SearchAsync
+    (
         [AliasAs("api_key")] string apiKey,
         [AliasAs("output_type")] int outputType,
         int db,

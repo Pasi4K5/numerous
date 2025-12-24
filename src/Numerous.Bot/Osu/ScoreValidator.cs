@@ -27,7 +27,8 @@ public sealed class ScoreValidator(IOsuApiRepository osuApi)
         typeof(ModWindDown),
     ];
 
-    public async Task<(ValidationResult result, ulong? apiScoreId)> ValidateAsync(
+    public async Task<(ValidationResult result, ulong? apiScoreId)> ValidateAsync
+    (
         BeatmapCompetitionDto competition,
         int osuUserId,
         ScoreInfo score,

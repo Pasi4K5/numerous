@@ -14,7 +14,8 @@ using Serilog;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuUserStatsService(
+public sealed class OsuUserStatsService
+(
     IHost host,
     ILogger logger,
     IUnitOfWorkFactory uowFactory,

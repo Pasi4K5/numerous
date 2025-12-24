@@ -4,53 +4,68 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Coravel;
-using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Enums;
 using Numerous.Database.Context;
 using Numerous.Database.Dtos;
+using Numerous.DiscordAdapter;
+using Numerous.DiscordAdapter.Guilds;
+using Numerous.DiscordAdapter.Users;
 using osu.Game.Beatmaps;
 using Serilog;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuVerifier(
+public interface IOsuVerifier
+{
+    void Start(CancellationToken ct);
+    Task AssignAllRolesAsync(ulong guildId, CancellationToken ct = default);
+    Task VerifyAsync(ulong discordUserId, int osuUserId, CancellationToken ct = default);
+    ValueTask<bool> UserIsVerifiedAsync(ulong userId, OsuUserDto[]? osuUsers = null, CancellationToken ct = default);
+    Task LinkRoleAsync(ulong guildId, OsuUserGroup group, ulong roleId, CancellationToken ct = default);
+    Task UnlinkRoleAsync(ulong guildId, OsuUserGroup group, CancellationToken ct = default);
+}
+
+public sealed class OsuVerifier
+(
     IHost host,
     ILogger logger,
-    DiscordSocketClient discord,
+    IDiscordClient discord,
     IUnitOfWorkFactory uowFactory,
     IOsuApiRepository osuApi,
     OsuUserStatsService osuUserStats
 )
+    : IOsuVerifier
 {
     public void Start(CancellationToken ct)
     {
-        host.Services.UseScheduler(scheduler => scheduler.ScheduleAsync(() => AssignAllRolesAsync(ct))
-            .EveryMinute()
-            .PreventOverlapping(nameof(OsuVerifier)));
-        discord.GuildMemberUpdated += async (_, user) => await AssignRolesInGuildAsync(
+        host.Services.UseScheduler(
+            scheduler => scheduler.ScheduleAsync(() => AssignAllRolesAsync(ct))
+                .EveryMinute()
+                .PreventOverlapping(nameof(OsuVerifier))
+        );
+        discord.GuildMemberUpdated += async user => await AssignRolesInGuildAsync(
             user,
             await GetOsuUsersAsync(user, ct),
-            await GetGroupRoleMappingsAsync(user.Guild, ct),
+            await GetGroupRoleMappingsAsync(user.Guild.Id, ct),
             ct: ct
         );
-        discord.UserJoined += async user => await AssignRolesInGuildAsync(
+        discord.GuildMemberAdd += async user => await AssignRolesInGuildAsync(
             user,
             await GetOsuUsersAsync(user, ct),
-            await GetGroupRoleMappingsAsync(user.Guild, ct),
+            await GetGroupRoleMappingsAsync(user.Guild.Id, ct),
             ct: ct
         );
     }
 
-    public async Task AssignAllRolesAsync(SocketGuild guild, CancellationToken ct = default)
+    public async Task AssignAllRolesAsync(ulong guildId, CancellationToken ct = default)
     {
         var osuUsers = await GetOsuUsersAsync(ct: ct);
-        var mappings = await GetGroupRoleMappingsAsync(guild, ct);
+        var mappings = await GetGroupRoleMappingsAsync(guildId, ct);
 
-        foreach (var guildUser in await guild.GetUsersAsync().Flatten().ToListAsync(ct))
+        foreach (var guildUser in await discord.GetGuildMembersAsync(guildId).ToArrayAsync(ct))
         {
             try
             {
@@ -60,52 +75,57 @@ public sealed class OsuVerifier(
             {
                 logger.Warning(e,
                     "Failed to assign roles to user {User} in guild {Guild}",
-                    guildUser.Id, guild.Id
+                    guildUser.Id, guildId
                 );
             }
 
-            if (await UserIsVerifiedAsync(guildUser, osuUsers, ct))
+            if (await UserIsVerifiedAsync(guildUser.Id, osuUsers, ct))
             {
                 await Task.Delay(5000, ct);
             }
         }
     }
 
-    public async Task VerifyAsync(IUser discordUser, int osuUserId, CancellationToken ct = default)
+    public async Task VerifyAsync(ulong discordUserId, int osuUserId, CancellationToken ct = default)
     {
         await using var uow = uowFactory.Create();
 
-        if (await uow.OsuUsers.VerifyAsync(osuUserId, discordUser.Id, ct))
+        if (await uow.OsuUsers.VerifyAsync(osuUserId, discordUserId, ct))
         {
             osuUserStats.StartTracking(osuUserId, ct);
         }
 
         await uow.CommitAsync(ct);
 
-        await AssignRolesAsync(discordUser, ct);
+        await AssignRolesAsync(discordUserId, ct);
     }
 
-    public async ValueTask<bool> UserIsVerifiedAsync(IUser user, OsuUserDto[]? osuUsers = null, CancellationToken ct = default)
+    public async ValueTask<bool> UserIsVerifiedAsync
+    (
+        ulong userId,
+        OsuUserDto[]? osuUsers = null,
+        CancellationToken ct = default
+    )
     {
         if (osuUsers is not null)
         {
-            return osuUsers.Any(x => x.DiscordUserId == user.Id);
+            return osuUsers.Any(x => x.DiscordUserId == userId);
         }
 
         await using var uow = uowFactory.Create();
 
-        var dbUser = await uow.OsuUsers.FindByDiscordUserIdAsync(user.Id, ct);
+        var dbUser = await uow.OsuUsers.FindByDiscordUserIdAsync(userId, ct);
 
         return dbUser is not null;
     }
 
-    public async Task LinkRoleAsync(IGuild guild, OsuUserGroup group, IRole role, CancellationToken ct = default)
+    public async Task LinkRoleAsync(ulong guildId, OsuUserGroup group, ulong roleId, CancellationToken ct = default)
     {
         var mapping = new GroupRoleMappingDto
         {
-            GuildId = guild.Id,
+            GuildId = guildId,
             Group = group,
-            RoleId = role.Id,
+            RoleId = roleId,
         };
 
         await using var uow = uowFactory.Create();
@@ -115,16 +135,16 @@ public sealed class OsuVerifier(
         await uow.CommitAsync(ct);
     }
 
-    public async Task UnlinkRoleAsync(IGuild guild, OsuUserGroup group, CancellationToken ct = default)
+    public async Task UnlinkRoleAsync(ulong guildId, OsuUserGroup group, CancellationToken ct = default)
     {
         await using var uow = uowFactory.Create();
 
-        await uow.GroupRoleMappings.DeleteAsync(guild.Id, group, ct);
+        await uow.GroupRoleMappings.DeleteAsync(guildId, group, ct);
 
         await uow.CommitAsync(ct);
     }
 
-    private async Task<OsuUserDto[]> GetOsuUsersAsync(IGuildUser? user = null, CancellationToken ct = default)
+    private async Task<OsuUserDto[]> GetOsuUsersAsync(IDiscordGuildMember? user = null, CancellationToken ct = default)
     {
         await using var uow = uowFactory.Create();
 
@@ -135,54 +155,61 @@ public sealed class OsuVerifier(
                 : [];
     }
 
-    private async Task<GroupRoleMappingDto[]> GetGroupRoleMappingsAsync(IGuild? guild = null, CancellationToken ct = default)
+    private async Task<GroupRoleMappingDto[]> GetGroupRoleMappingsAsync(ulong? guildId = null, CancellationToken ct = default)
     {
         await using var uow = uowFactory.Create();
 
-        return guild is null
+        return guildId is null
             ? await uow.GroupRoleMappings.GetAllAsync(ct)
-            : await uow.GroupRoleMappings.GetByGuildAsync(guild.Id, ct);
+            : await uow.GroupRoleMappings.GetByGuildAsync(guildId.Value, ct);
     }
 
     private async Task AssignAllRolesAsync(CancellationToken ct = default)
     {
         foreach (var guild in discord.Guilds)
         {
-            await AssignAllRolesAsync(guild, ct);
+            await AssignAllRolesAsync(guild.Id, ct);
         }
     }
 
-    private async Task AssignRolesAsync(IUser user, CancellationToken ct = default)
+    private async Task AssignRolesAsync(ulong userId, CancellationToken ct = default)
     {
         var osuUsers = await GetOsuUsersAsync(ct: ct);
         var mappings = await GetGroupRoleMappingsAsync(ct: ct);
 
         foreach (var guild in discord.Guilds)
         {
-            var guildUser = (IGuildUser)guild.GetUser(user.Id);
+            var guildUser = await discord.GetGuildMemberAsync(guild.Id, userId);
 
             if (guildUser is not null)
             {
-                var osuUser = await GetOsuUserAsync(user, osuUsers, ct);
+                var osuUser = await GetOsuUserAsync(userId, osuUsers, ct);
                 await AssignRolesInGuildAsync(guildUser, osuUsers, mappings, osuUser, ct);
             }
         }
     }
 
-    private async Task AssignRolesInGuildAsync(IGuildUser guildUser, OsuUserDto[] osuUsers, GroupRoleMappingDto[] mappings, ApiOsuUser? osuUser = null, CancellationToken ct = default)
+    private async Task AssignRolesInGuildAsync
+    (
+        IDiscordGuildMember guildMember,
+        OsuUserDto[] osuUsers,
+        GroupRoleMappingDto[] mappings,
+        ApiOsuUser? osuUser = null,
+        CancellationToken ct = default
+    )
     {
-        osuUser ??= await GetOsuUserAsync(guildUser, osuUsers, ct);
+        osuUser ??= await GetOsuUserAsync(guildMember.Id, osuUsers, ct);
 
         if (osuUser is not null)
         {
             // User has linked account -> assign verified role
             await using var uow = uowFactory.Create();
-            var verifiedRoleId = await uow.Guilds.GetAsync(guildUser.GuildId, ct);
-            var verifiedRole = guildUser.Guild.GetRole(verifiedRoleId.VerifiedRoleId ?? 0);
+            var verifiedRoleId = await uow.Guilds.GetAsync(guildMember.Guild.Id, ct);
+            var verifiedRole = guildMember.Guild.GetRole(verifiedRoleId.VerifiedRoleId ?? 0);
 
             if (verifiedRole is not null)
             {
-                await guildUser.AddRoleAsync(verifiedRole);
+                await guildMember.AddRolesAsync(verifiedRole.Id);
             }
         }
 
@@ -195,22 +222,22 @@ public sealed class OsuVerifier(
 
         foreach (var osuRole in mappings.Where(osuRole => osuRole.Group > 0))
         {
-            var role = guildUser.Guild.GetRole(osuRole.RoleId);
+            var role = guildMember.Guild.GetRole(osuRole.RoleId);
             var userGroups = osuUser.GetGroups();
 
             if (userGroups.Contains(osuRole.Group))
             {
-                if (role is not null && !guildUser.RoleIds.Contains(osuRole.RoleId))
+                if (role is not null && !guildMember.RoleIds.Contains(osuRole.RoleId))
                 {
-                    await guildUser.AddRoleAsync(role);
+                    await guildMember.AddRolesAsync(role);
                 }
             }
             else if (
                 role is not null
-                && guildUser.RoleIds.Contains(osuRole.RoleId)
+                && guildMember.RoleIds.Contains(osuRole.RoleId)
                 && userGroups.All(g => mappings.FirstOrDefault(r => r.Group == g)?.RoleId != role.Id))
             {
-                await guildUser.RemoveRoleAsync(role);
+                await guildMember.RemoveRolesAsync(role);
             }
         }
 
@@ -250,7 +277,7 @@ public sealed class OsuVerifier(
                 return;
             }
 
-            var role = guildUser.Guild.GetRole(roleId.Value);
+            var role = guildMember.Guild.GetRole(roleId.Value);
 
             if (role is not null)
             {
@@ -258,26 +285,31 @@ public sealed class OsuVerifier(
             }
         }
 
-        async Task AddRoleAsync(IRole role)
+        async Task AddRoleAsync(IDiscordRole role)
         {
-            if (!guildUser.RoleIds.Contains(role.Id))
+            if (!guildMember.RoleIds.Contains(role.Id))
             {
-                await guildUser.AddRoleAsync(role);
+                await guildMember.AddRolesAsync(role);
             }
         }
 
-        async Task RemoveRoleAsync(IRole role)
+        async Task RemoveRoleAsync(IDiscordRole role)
         {
-            if (guildUser.RoleIds.Contains(role.Id))
+            if (guildMember.RoleIds.Contains(role.Id))
             {
-                await guildUser.RemoveRoleAsync(role);
+                await guildMember.RemoveRolesAsync(role);
             }
         }
     }
 
-    private async Task<ApiOsuUserExtended?> GetOsuUserAsync(IUser discordUser, OsuUserDto[] osuUsers, CancellationToken ct = default)
+    private async Task<ApiOsuUserExtended?> GetOsuUserAsync
+    (
+        ulong discordUserId,
+        OsuUserDto[] osuUsers,
+        CancellationToken ct = default
+    )
     {
-        var user = osuUsers.FirstOrDefault(x => x.DiscordUserId == discordUser.Id);
+        var user = osuUsers.FirstOrDefault(x => x.DiscordUserId == discordUserId);
 
         if (user is null)
         {
@@ -290,7 +322,7 @@ public sealed class OsuVerifier(
         {
             throw new Exception(
                 $"Failed to get osu! user \"{user.Id}\" "
-                + $"for Discord user \"{discordUser.Username}\" (ID: {discordUser.Id})."
+                + $"for Discord user (ID: {discordUserId})."
             );
         }
 

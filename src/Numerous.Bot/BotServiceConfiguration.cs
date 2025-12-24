@@ -16,6 +16,7 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.SauceNao;
+using Numerous.DiscordAdapter.DiscordDotNet.Util;
 using Refit;
 
 namespace Numerous.Bot;
@@ -24,30 +25,32 @@ public static class BotServiceConfiguration
 {
     public static void Configure(IServiceCollection services)
     {
-        services.AddSingleton<AttachmentService>();
-        services.AddTransient<BeatmapService>();
-        services.AddSingleton<CommandFinder>();
-        services.AddSingleton<DiscordEventHandler>();
-        services.AddTransient<EmbedBuilders>();
-        services.AddSingleton<IFileService, FileService>();
-        services.AddTransient<GuildStatsService>();
-        services.AddTransient<HttpLoggingHandler>();
-        services.AddHostedService<InteractionHandler>();
-        services.AddHostedService<MapFeedService>();
-        services.AddHostedService<MessageResponder>();
-        services.AddHostedService<MudaeMessageHandler>();
-        services.AddSingleton<IOsuApiRepository, OsuApiRepository>();
-        services.AddHostedService<OsuForumService>();
-        services.AddTransient<OsuHttpHandler>();
-        services.AddSingleton<OsuUserStatsService>();
-        services.AddSingleton<OsuVerifier>();
-        services.AddSingleton<IOsuTokenProvider, OsuTokenProvider>();
-        services.AddSingleton<ReminderService>();
-        services.AddSingleton<ISauceNaoClient, SauceNaoClient>();
-        services.AddTransient<ScoreValidator>();
-        services.AddHostedService<StarReactPreventionService>();
-        services.AddHostedService<Startup>();
-        services.AddSingleton<VerificationService>();
+        services
+            .AddDiscordDotNetAdapter()
+            .AddSingleton<AttachmentService>()
+            .AddTransient<BeatmapService>()
+            .AddSingleton<CommandFinder>()
+            .AddSingleton<DiscordEventHandler>()
+            .AddTransient<EmbedBuilders>()
+            .AddSingleton<IFileService, FileService>()
+            .AddTransient<GuildStatsService>()
+            .AddTransient<HttpLoggingHandler>()
+            .AddHostedService<InteractionHandler>()
+            .AddHostedService<MapFeedService>()
+            .AddHostedService<MessageResponder>()
+            .AddHostedService<MudaeMessageHandler>()
+            .AddSingleton<IOsuApiRepository, OsuApiRepository>()
+            .AddHostedService<OsuForumService>()
+            .AddTransient<OsuHttpHandler>()
+            .AddSingleton<OsuUserStatsService>()
+            .AddSingleton<IOsuVerifier, OsuVerifier>()
+            .AddSingleton<IOsuTokenProvider, OsuTokenProvider>()
+            .AddSingleton<ReminderService>()
+            .AddSingleton<ISauceNaoClient, SauceNaoClient>()
+            .AddTransient<ScoreValidator>()
+            .AddHostedService<StarReactPreventionService>()
+            .AddHostedService<Startup>()
+            .AddSingleton<VerificationService>();
 
         // TODO: Consider switching to System.Text.Json (for everything)
         services

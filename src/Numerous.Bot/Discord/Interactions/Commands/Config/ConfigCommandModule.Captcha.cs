@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Discord;
 using Discord.Interactions;
+using Discord.Net;
 using JetBrains.Annotations;
 using Numerous.Bot.Discord.Services;
 using Numerous.Bot.Discord.Util;
@@ -20,7 +21,7 @@ namespace Numerous.Bot.Discord.Interactions.Commands.Config;
 partial class ConfigCommandModule
 {
     [Group("captcha", "Captcha commands")]
-    public sealed class CaptchaGroup(IConfigProvider cfg, OsuVerifier verifier, IUnitOfWork uow) : InteractionModule
+    public sealed class CaptchaGroup(IConfigProvider cfg, IOsuVerifier verifier, IUnitOfWork uow) : InteractionModule
     {
         private const string ChooseCaptchaButtonId = "captcha:choose_captcha";
         private const string ChooseOsuButtonId = "captcha:choose_osu";
@@ -63,7 +64,8 @@ partial class ConfigCommandModule
 
         [UsedImplicitly]
         [SlashCommand("setup", "Set up CAPTCHA verification for new members.")]
-        private async Task SetupCaptcha(
+        private async Task SetupCaptcha
+        (
             [Summary("channel", "The channel where the CAPTCHA messages will be sent.")]
             ITextChannel channel,
             [Summary("title", "The title of the CAPTCHA message.")]
@@ -220,20 +222,27 @@ partial class ConfigCommandModule
 
             var dm = await guildUser.CreateDMChannelAsync();
 
-            await dm.SendMessageAsync(
-                embed: CreateEmbed(
-                    "✅ Verification Successful",
-                    $"**Welcome to {Context.Guild.Name}!**\n"
-                    + $"If you want to link your osu! account later, use the `/link` command."
-                ).Build()
-            );
+            try
+            {
+                await dm.SendMessageAsync(
+                    embed: CreateEmbed(
+                        "✅ Verification Successful",
+                        $"**Welcome to {Context.Guild.Name}!**\n"
+                        + $"If you want to link your osu! account later, use the `/link` command."
+                    ).Build()
+                );
+            }
+            catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.CannotSendMessageToUser)
+            {
+                // ignored
+            }
         }
 
         [UsedImplicitly]
         [ComponentInteraction(ChooseOsuButtonId, true)]
         private async Task ChooseOsu()
         {
-            if (await verifier.UserIsVerifiedAsync(Context.User))
+            if (await verifier.UserIsVerifiedAsync(Context.User.Id))
             {
                 await DeferAsync();
 
@@ -257,7 +266,7 @@ partial class ConfigCommandModule
             var guild = await uow.Guilds.GetAsync(Context.Guild.Id);
             var guildUser = (IGuildUser)Context.User;
 
-            return !await verifier.UserIsVerifiedAsync(guildUser)
+            return !await verifier.UserIsVerifiedAsync(guildUser.Id)
                    && (guild.VerifiedRoleId is null || !guildUser.RoleIds.Contains(guild.VerifiedRoleId.Value));
         }
 

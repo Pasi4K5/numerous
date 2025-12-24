@@ -13,7 +13,8 @@ namespace Numerous.Bot.Discord.Interactions.Commands.Competition;
 
 [Group("competition", "Beatmap competition commands.")]
 [CommandContextType(InteractionContextType.Guild)]
-public sealed partial class CompetitionCommandModule(
+public sealed partial class CompetitionCommandModule
+(
     IUnitOfWork uow,
     BeatmapService beatmapService,
     EmbedBuilders eb,

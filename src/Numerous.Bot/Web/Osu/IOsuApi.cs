@@ -26,7 +26,8 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-user-scores
     /// </summary>
     [Get(Api + "/users/{user}/scores/{type}")]
-    Task<ApiScore[]> GetUserScoresAsync(
+    Task<ApiScore[]> GetUserScoresAsync
+    (
         int user,
         string type,
         [Query] uint limit,
@@ -37,7 +38,8 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-user-beatmaps
     /// </summary>
     [Get(Api + "/users/{user}/beatmapsets/{type}")]
-    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync(
+    Task<ApiBeatmapsetExtended[]> GetUserBeatmapsetsAsync
+    (
         int user,
         string type,
         [Query] string limit = "100",
@@ -55,7 +57,8 @@ public interface IOsuApi
     /// The first 50 beatmapsets matching the specified category.
     /// </returns>
     [Get(Api + "/beatmapsets/search")]
-    Task<ApiBeatmapsetSearchResponse> SearchBeatmapsetsAsync(
+    Task<ApiBeatmapsetSearchResponse> SearchBeatmapsetsAsync
+    (
         [Query] [AliasAs("s")] BeatmapsetCategory category,
         [Query] BeatmapsetSort sort = BeatmapsetSort.UpdatedDesc,
         [Query] [AliasAs("q")] string? query = null,
@@ -73,7 +76,8 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-beatmaps
     /// </summary>
     [Get(Api + "/beatmaps")]
-    Task<ApiBeatmapsResponse> GetBeatmapsAsync(
+    Task<ApiBeatmapsResponse> GetBeatmapsAsync
+    (
         [Query(CollectionFormat.Multi)]
         [AliasAs("ids[]")]
         int[] ids,
@@ -84,7 +88,8 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-topic-listing
     /// </summary>
     [Get(Api + "/forums/topics")]
-    Task<ApiForumTopicListing> GetForumTopicsAsync(
+    Task<ApiForumTopicListing> GetForumTopicsAsync
+    (
         [Query] [AliasAs("forum_id")] string? forumId = null,
         CancellationToken ct = default
     );
@@ -93,7 +98,8 @@ public interface IOsuApi
     /// https://osu.ppy.sh/docs/index.html#get-topic-and-posts
     /// </summary>
     [Get(Api + "/forums/topics/{topicId}")]
-    Task<ApiForumTopic> GetForumTopicAsync(
+    Task<ApiForumTopic> GetForumTopicAsync
+    (
         int topicId,
         [Query] int limit = 50,
         [Query] ForumPostSort sort = ForumPostSort.Asc,

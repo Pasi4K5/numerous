@@ -17,7 +17,7 @@ public partial class DiscordEventHandler
     [Init]
     private void AutoPing_Init()
     {
-        client.ThreadCreated += async u => await AutoPing(u);
+        ddnClient.ThreadCreated += async u => await AutoPing(u);
     }
 
     private async Task AutoPing(SocketThreadChannel thread)

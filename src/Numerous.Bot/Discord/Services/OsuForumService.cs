@@ -4,8 +4,6 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Coravel;
-using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Web.Osu;
@@ -13,14 +11,17 @@ using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter;
+using Numerous.DiscordAdapter.Channels;
 
 namespace Numerous.Bot.Discord.Services;
 
-public sealed class OsuForumService(
+public sealed class OsuForumService
+(
     IHost host,
     IUnitOfWorkFactory uowFactory,
     IOsuApiRepository osuApi,
-    DiscordSocketClient discordClient,
+    IDiscordClient discordClient,
     EmbedBuilders eb
 ) : HostedService
 {
@@ -89,24 +90,24 @@ public sealed class OsuForumService(
             topic.Posts
                 .Where(p => p.CreatedAt > _lastChecked)
                 .Select(p => (post: p, meta: topic.Meta))
-                .ToList()
+                .ToArray()
         );
 
         var channels = (await subscriptions.Values
                 .SelectMany(ids => ids)
                 .Distinct()
-                .Select(id => discordClient.GetChannelAsync(id))
-            ).Select(ch => (IMessageChannel)ch)
+                .Select(discordClient.GetChannelAsync)
+            ).Select(ch => (IDiscordMessageChannel)ch)
             .ToArray();
 
         var postEmbeds = (await newPosts.Select(async x => (x.post, embedBuilder: await eb.ForumPostAsync(x.meta, x.post))))
-            .ToDictionary(x => x.post, x => x.embedBuilder.Build());
+            .ToDictionary(x => x.post, x => x.embedBuilder);
 
         foreach (var (post, embed) in postEmbeds.OrderBy(e => e.Key.CreatedAt))
         {
             await channels
                 .Where(c => subscriptions.TryGetValue(post.ForumId, out var ids) && ids.Contains(c.Id))
-                .Select(c => c.SendMessageAsync(embed: embed));
+                .Select(c => c.SendMessageAsync(new() { Embeds = [embed] }));
         }
     }
 
@@ -133,7 +134,7 @@ public sealed class OsuForumService(
                         // so filter out everything that isn't a mod request.
                         && p.Body.Raw.Contains("beatmaps", StringComparison.OrdinalIgnoreCase)
                     )
-                    .Select(async p => (await eb.ForumPostAsync(t.Meta, p)).Build())
+                    .Select(async p => (await eb.ForumPostAsync(t.Meta, p)))
             );
 
         foreach (var (topicId, channelId) in subscriptions)
@@ -143,11 +144,14 @@ public sealed class OsuForumService(
                 continue;
             }
 
-            var channel = (IMessageChannel)await discordClient.GetChannelAsync(channelId);
+            var channel = (IDiscordMessageChannel)await discordClient.GetChannelAsync(channelId);
 
-            foreach (var embedBuilder in await topicEmbeds)
+            foreach (var embed in await topicEmbeds)
             {
-                await channel.SendMessageAsync(embed: embedBuilder);
+                await channel.SendMessageAsync(new()
+                {
+                    Embeds = [embed],
+                });
             }
         }
     }

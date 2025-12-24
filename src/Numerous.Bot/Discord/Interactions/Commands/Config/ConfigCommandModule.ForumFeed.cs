@@ -20,7 +20,8 @@ public partial class ConfigCommandModule
 
         [UsedImplicitly]
         [SlashCommand("subscribe", "Specify which forum to subscribe to.")]
-        public async Task Subscribe(
+        public async Task Subscribe
+        (
             [Summary("forum_ids", "Comma-separated list of forum IDs to subscribe to")]
             string forumIdsStr
         )

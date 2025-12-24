@@ -13,7 +13,7 @@ using Numerous.Database.Context;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, OsuVerifier verifier) : InteractionModule
+public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, IOsuVerifier verifier) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("link", "Links your osu! account to your Discord account.")]
@@ -30,7 +30,7 @@ public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, OsuV
         var rolesExist = new[] { unrankedMapper, rankedMapper, bn }.All(x => x is not null && x.Value != default);
         var verifiedRole = roles.FirstOrDefault(x => x.Group == OsuUserGroup.LinkedAccount)?.RoleId;
 
-        var isVerified = await verifier.UserIsVerifiedAsync(Context.User);
+        var isVerified = await verifier.UserIsVerifiedAsync(Context.User.Id);
 
         await FollowupWithEmbedAsync(
             message:

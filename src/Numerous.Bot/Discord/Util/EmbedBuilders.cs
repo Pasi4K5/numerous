@@ -14,6 +14,10 @@ using Numerous.Common.Config;
 using Numerous.Common.Util;
 using Numerous.Database.Dtos;
 using Numerous.Database.Util;
+using Numerous.DiscordAdapter.Emojis;
+using Numerous.DiscordAdapter.Messages.Components;
+using Numerous.DiscordAdapter.Messages.Components.Buttons;
+using Numerous.DiscordAdapter.Messages.Embeds;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Rulesets.Osu.Difficulty;
@@ -28,16 +32,19 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
 
     private Config Config => cfgProvider.Get();
 
-    public static (EmbedBuilder, ComponentBuilder) BeatmapSetUpdate(
+    public static (DiscordEmbed, DiscordMessageComponent[]) BeatmapSetUpdate
+    (
         ApiBeatmapsetExtended beatmapSet,
         string mapper,
         string[] gdMappers
     )
     {
-        var (eb, cp) = BeatmapSet(beatmapSet, mapper, gdMappers);
+        var (embed, components) = BeatmapSet(beatmapSet, mapper, gdMappers);
 
         return (
-            eb.WithTitle(beatmapSet.Ranked switch
+            embed.With(e =>
+            {
+                e.Title = beatmapSet.Ranked switch
                 {
                     BeatmapOnlineStatus.WIP or BeatmapOnlineStatus.Pending =>
                         "New beatmap has been uploaded.",
@@ -48,13 +55,15 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
                     BeatmapOnlineStatus.Loved =>
                         "Beatmap has been loved.",
                     _ => throw new InvalidOperationException("Invalid beatmap status"),
-                }
-            ).WithTimestamp(beatmapSet.RankedDate ?? beatmapSet.SubmittedDate),
-            cp
+                };
+                e.Timestamp = beatmapSet.RankedDate ?? beatmapSet.SubmittedDate;
+            }),
+            components
         );
     }
 
-    private static (EmbedBuilder, ComponentBuilder) BeatmapSet(
+    private static (DiscordEmbed, DiscordMessageComponent[]) BeatmapSet
+    (
         ApiBeatmapsetExtended beatmapSet,
         string mapper,
         string[] gdMappers
@@ -63,36 +72,38 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         var color = OsuColour.ForBeatmapSetOnlineStatus(beatmapSet.Ranked);
 
         return (
-            new EmbedBuilder()
-                .WithColor(color?.ToRgb() ?? Color.Default)
-                .WithImageUrl(beatmapSet.Covers.Card2X)
-                .WithThumbnailUrl(beatmapSet.User.AvatarUrl)
-                .WithDescription(
+            new DiscordEmbed
+            {
+                Color = System.Drawing.Color.FromArgb(color?.ToArgb() ?? 0),
+                ImageUrl = beatmapSet.Covers.Card2X,
+                ThumbnailUrl = beatmapSet.User.AvatarUrl,
+                Description =
                     $"## {beatmapSet.Title}\n"
                     + $"### by {beatmapSet.Artist}\n"
                     + $"**mapped by** {mapper}\n"
                     + $"**{(gdMappers.Length == 1 ? "GD" : "GDs")} by** {gdMappers.Humanize()}"
-                        .OnlyIf(gdMappers.Length > 0)
-                ),
-            new ComponentBuilder()
-                .WithButton(
-                    "Beatmap page",
-                    style: ButtonStyle.Link,
-                    url: $"https://osu.ppy.sh/s/{beatmapSet.Id}",
-                    emote: new Emoji("🌐")
-                )
-                .WithButton(
-                    "osu!direct",
-                    style: ButtonStyle.Link,
-                    url: $"https://axer-url.vercel.app/api/direct?set={beatmapSet.Id}",
-                    emote: new Emoji("⬇️")
-                )
-                .WithButton(
-                    "Mapper profile",
-                    style: ButtonStyle.Link,
-                    url: $"https://osu.ppy.sh/u/{beatmapSet.UserId}",
-                    emote: new Emoji("👤")
-                )
+                        .OnlyIf(gdMappers.Length > 0),
+            },
+            [
+                new DiscordLinkButtonComponent
+                {
+                    Label = "Beatmap page",
+                    Url = $"https://osu.ppy.sh/s/{beatmapSet.Id}",
+                    Emoji = StandardEmoji.GlobeWithMeridians,
+                },
+                new DiscordLinkButtonComponent
+                {
+                    Label = "osu!direct",
+                    Url = $"https://axer-url.vercel.app/api/direct?set={beatmapSet.Id}",
+                    Emoji = StandardEmoji.ArrowDown,
+                },
+                new DiscordLinkButtonComponent
+                {
+                    Label = "Mapper profile",
+                    Url = $"https://osu.ppy.sh/u/{beatmapSet.UserId}",
+                    Emoji = StandardEmoji.BustInSilhouette,
+                },
+            ]
         );
     }
 
@@ -132,7 +143,8 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
-    private static EmbedBuilder Beatmap(
+    private static EmbedBuilder Beatmap
+    (
         WorkingBeatmap beatmap,
         OnlineBeatmapDto? onlineBeatmap,
         ApiBeatmapsetExtended? apiSet
@@ -176,24 +188,31 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         return eb;
     }
 
-    public async Task<EmbedBuilder> ForumPostAsync(ApiForumTopicMeta meta, ApiForumPost post)
+    public async Task<DiscordEmbed> ForumPostAsync(ApiForumTopicMeta meta, ApiForumPost post)
     {
-        const string newTopicMarker = "✨";
-        const string replyMarker = "↩️";
+        const string newTopicMarker = UnicodeCharacter.Sparkles;
+        const string replyMarker = UnicodeCharacter.RightArrowCurvingLeft;
 
         var author = await osuApi.GetUserByIdAsync(post.UserId);
         var isFirstPost = post.Id == meta.FirstPostId;
 
-        var color = isFirstPost ? 0x99eb47u : 0xff66aau;
+        var color = isFirstPost ? 0x99eb47 : 0xff66aa;
         var marker = isFirstPost ? newTopicMarker : replyMarker;
 
-        return new EmbedBuilder()
-            .WithColor(color)
-            .WithTitle($"{marker} {meta.Title}")
-            .WithAuthor(author.Username, author.AvatarUrl, Link.OsuUser(author.Id))
-            .WithDescription(MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw).LimitLength(CharacterLimit.DiscordEmbedDescription))
-            .WithTimestamp(post.CreatedAt)
-            .WithUrl(Link.OsuForumPost(post.Id));
+        return new()
+        {
+            Color = System.Drawing.Color.FromArgb(color),
+            Title = $"{marker} {meta.Title}",
+            Author = new()
+            {
+                Name = author.Username,
+                IconUrl = author.AvatarUrl,
+                Url = Link.OsuUser(author.Id),
+            },
+            Description = MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw)
+                .LimitLength(CharacterLimit.DiscordEmbedDescription),
+            Timestamp = post.CreatedAt,
+        };
     }
 
     public async Task<EmbedBuilder> ExtendedScoreAsync(WorkingBeatmap beatmap, BeatmapCompetitionScoreDto score, int rank)

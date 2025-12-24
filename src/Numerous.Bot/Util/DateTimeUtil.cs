@@ -13,7 +13,8 @@ public static class DateTimeUtil
 
     /// <exception cref="ArgumentOutOfRangeException">The given date is not in the future.</exception>
     /// <exception cref="ArgumentNullException">All the given parameters are <see langword="null"/>.</exception>
-    public static DateTime ParametersToDateTime(
+    public static DateTime ParametersToDateTime
+    (
         DateTime now,
         ushort? year,
         byte? month,

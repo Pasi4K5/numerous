@@ -16,7 +16,7 @@ public partial class DiscordEventHandler
     [Init]
     private void MessageCommands_Init()
     {
-        client.MessageReceived += MessageCommands_HandleAsync;
+        ddnClient.MessageReceived += MessageCommands_HandleAsync;
     }
 
     private async Task MessageCommands_HandleAsync(IMessage msg)
@@ -48,7 +48,7 @@ public partial class DiscordEventHandler
                 return;
             }
 
-            var user = await client.GetUserAsync(discordId);
+            var user = await ddnClient.GetUserAsync(discordId);
 
             if (user is null)
             {
@@ -57,7 +57,7 @@ public partial class DiscordEventHandler
                 return;
             }
 
-            var isVerified = await verifier.UserIsVerifiedAsync(user);
+            var isVerified = await verifier.UserIsVerifiedAsync(user.Id);
 
             if (isVerified)
             {
@@ -70,7 +70,7 @@ public partial class DiscordEventHandler
             {
                 var osuUser = await osuApi.GetUserAsync(args[1]);
 
-                await verifier.VerifyAsync(user, osuUser.Id);
+                await verifier.VerifyAsync(user.Id, osuUser.Id);
 
                 await msg.ReplyAsync(
                     $"{user.Mention} has been manually verified as *[{osuUser.Username}](https://osu.ppy.sh/users/{osuUser.Id})*."

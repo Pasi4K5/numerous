@@ -17,7 +17,8 @@ public interface IBeatmapCompetitionRepository : IRepository<BeatmapCompetitionD
 {
     Task<bool> HasActiveCompetitionAsync(ulong guildId, CancellationToken ct = default);
 
-    Task<bool> GuildHasCompetitionDuringAsync(
+    Task<bool> GuildHasCompetitionDuringAsync
+    (
         ulong guildId,
         DateTimeOffset startTime,
         DateTimeOffset endTime,
@@ -26,7 +27,8 @@ public interface IBeatmapCompetitionRepository : IRepository<BeatmapCompetitionD
 
     Task<BeatmapCompetitionDto?> FindCurrentWithBeatmapAsync(ulong guildId, CancellationToken ct = default);
 
-    Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
+    Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync
+    (
         ulong guildId,
         ulong discordUserId,
         CancellationToken ct = default
@@ -49,7 +51,8 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
             );
     }
 
-    public async Task<bool> GuildHasCompetitionDuringAsync(
+    public async Task<bool> GuildHasCompetitionDuringAsync
+    (
         ulong guildId,
         DateTimeOffset startTime,
         DateTimeOffset endTime,
@@ -74,7 +77,8 @@ public sealed class BeatmapCompetitionRepository(NumerousDbContext context, IMap
         return Mapper.Map<BeatmapCompetitionDto?>(entity);
     }
 
-    public async Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync(
+    public async Task<BeatmapCompetitionScoreDto?> FindUserTopScoreWithReplayCompBeatmapAsync
+    (
         ulong guildId,
         ulong discordUserId,
         CancellationToken ct = default

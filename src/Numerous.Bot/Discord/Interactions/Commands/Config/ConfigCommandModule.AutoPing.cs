@@ -20,7 +20,8 @@ public partial class ConfigCommandModule
 
         [UsedImplicitly]
         [SlashCommand("add", "Adds a new auto-ping tag.")]
-        public async Task Add(
+        public async Task Add
+        (
             [Summary(ChannelParamName, "The forum channel to listen for new posts in.")]
             IForumChannel channel,
             [Summary("role", "The role to ping when a new post is created.")]
@@ -47,7 +48,8 @@ public partial class ConfigCommandModule
 
         public sealed class ForumTagAutocompleteHandler : AutocompleteHandler
         {
-            public override async Task<AutocompletionResult> GenerateSuggestionsAsync(
+            public override async Task<AutocompletionResult> GenerateSuggestionsAsync
+            (
                 IInteractionContext context,
                 IAutocompleteInteraction autocompleteInteraction,
                 IParameterInfo parameter,

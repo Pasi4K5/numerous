@@ -15,7 +15,8 @@ using Serilog;
 
 namespace Numerous.Bot.Discord.Interactions;
 
-public sealed class InteractionHandler(
+public sealed class InteractionHandler
+(
     ILogger logger,
     DiscordSocketClient client,
     InteractionService interactions,

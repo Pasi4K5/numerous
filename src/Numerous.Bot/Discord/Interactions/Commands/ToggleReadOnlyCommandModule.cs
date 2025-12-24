@@ -16,7 +16,8 @@ public sealed class ToggleReadOnlyCommandModule(IUnitOfWork uow) : InteractionMo
     [UsedImplicitly]
     [DefaultMemberPermissions(GuildPermission.Administrator)]
     [SlashCommand("togglereadonly", "Makes the given channel read-only.")]
-    public async Task ToggleReadOnly(
+    public async Task ToggleReadOnly
+    (
         [Summary("channel", "The channel to make read-only.")] ITextChannel channel
     )
     {

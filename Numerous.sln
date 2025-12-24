@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerous.Web", "src\Numerou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerous.Database", "src\Numerous.Database\Numerous.Database.csproj", "{800C7904-4B0A-499F-96D5-9DC4F74871CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerous.DiscordAdapter", "src\Numerous.DiscordAdapter\Numerous.DiscordAdapter.csproj", "{093F999E-8EF6-4146-BBCE-DC4493507CCB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerous.DiscordAdapter.DiscordDotNet", "src\Numerous.DiscordAdapter.DiscordDotNet\Numerous.DiscordAdapter.DiscordDotNet.csproj", "{EF038E82-0F42-4794-8F87-2BA55D72E2FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{800C7904-4B0A-499F-96D5-9DC4F74871CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{800C7904-4B0A-499F-96D5-9DC4F74871CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{800C7904-4B0A-499F-96D5-9DC4F74871CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{093F999E-8EF6-4146-BBCE-DC4493507CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{093F999E-8EF6-4146-BBCE-DC4493507CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{093F999E-8EF6-4146-BBCE-DC4493507CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{093F999E-8EF6-4146-BBCE-DC4493507CCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF038E82-0F42-4794-8F87-2BA55D72E2FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF038E82-0F42-4794-8F87-2BA55D72E2FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF038E82-0F42-4794-8F87-2BA55D72E2FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF038E82-0F42-4794-8F87-2BA55D72E2FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

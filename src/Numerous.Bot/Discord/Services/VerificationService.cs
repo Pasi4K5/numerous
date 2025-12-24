@@ -3,25 +3,28 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Drawing;
 using Coravel;
-using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter;
+using Numerous.DiscordAdapter.Channels;
+using Numerous.DiscordAdapter.Users;
 
 namespace Numerous.Bot.Discord.Services;
 
 public sealed class VerificationService
 {
-    private readonly OsuVerifier _osuVerifier;
+    private readonly IOsuVerifier _osuVerifier;
     private readonly IUnitOfWork _uow;
 
     private static readonly TimeSpan _verificationTimeout = TimeSpan.FromHours(1);
 
-    public VerificationService(
+    public VerificationService
+    (
         IHost host,
-        DiscordSocketClient discordClient,
-        OsuVerifier osuVerifier,
+        IDiscordClient discordClient,
+        IOsuVerifier osuVerifier,
         IUnitOfWorkFactory uowFactory,
         IUnitOfWork uow)
     {
@@ -40,18 +43,15 @@ public sealed class VerificationService
                     return;
                 }
 
-                var searchResults = await guild.SearchUsersAsyncV2(args: new()
-                {
-                    Sort = MemberSearchV2SortType.MemberSinceNewestFirst,
-                });
+                var members = discordClient.SearchGuildMembersAsync(guild.Id, GuildMemberSortType.MemberSinceNewestFirst);
 
-                foreach (var member in searchResults.Members.Select(result => result.User))
+                await foreach (var member in members)
                 {
                     if (
                         member.JoinedAt is null
                         || member.IsBot
                         || member.RoleIds.Contains(verifiedRoleId.Value)
-                        || await _osuVerifier.UserIsVerifiedAsync(member, ct: ct)
+                        || await _osuVerifier.UserIsVerifiedAsync(member.Id, ct: ct)
                     )
                     {
                         continue;
@@ -64,26 +64,31 @@ public sealed class VerificationService
 
                     await member.KickAsync("Failed to verify within the time limit.");
                     var logChannel = dbGuild.UserLogChannelId is not null
-                        ? guild.GetTextChannel(dbGuild.UserLogChannelId.Value)
+                        ? (IDiscordTextChannel)await discordClient.GetChannelAsync(dbGuild.UserLogChannelId.Value)
                         : null;
 
                     if (logChannel is not null)
                     {
-                        await logChannel.SendMessageAsync(
-                            embed: new EmbedBuilder()
-                                .WithTitle("User Kicked for Failed Verification")
-                                .WithDescription($"{member.Mention} was kicked for failing to verify within the time limit.")
-                                .WithColor(Color.Orange)
-                                .WithTimestamp(DateTimeOffset.UtcNow)
-                                .Build()
-                        );
+                        await logChannel.SendMessageAsync(new()
+                        {
+                            Embeds =
+                            [
+                                new()
+                                {
+                                    Title = "User Kicked for Failed Verification",
+                                    Description = $"{member.Mention} was kicked for failing to verify within the time limit.",
+                                    Color = Color.Orange,
+                                    Timestamp = DateTimeOffset.UtcNow,
+                                },
+                            ],
+                        });
                     }
                 }
             })
         ).HourlyAt(0));
     }
 
-    public async Task HandleUserJoined(SocketGuildUser user)
+    public async Task HandleUserJoined(IDiscordGuildMember user)
     {
         var guild = await _uow.Guilds.GetAsync(user.Guild.Id);
 
@@ -92,7 +97,7 @@ public sealed class VerificationService
             return;
         }
 
-        if (await _osuVerifier.UserIsVerifiedAsync(user))
+        if (await _osuVerifier.UserIsVerifiedAsync(user.Id))
         {
             await AssignMemberRoleAsync();
         }
@@ -105,7 +110,7 @@ public sealed class VerificationService
 
             if (role is not null)
             {
-                await user.AddRoleAsync(role);
+                await user.AddRolesAsync(role);
             }
         }
     }

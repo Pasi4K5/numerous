@@ -11,7 +11,8 @@ namespace Numerous.Bot.Discord.Interactions;
 
 public abstract class InteractionModule : InteractionModuleBase<SocketInteractionContext>
 {
-    protected override async Task RespondAsync(
+    protected override async Task RespondAsync
+    (
         string? text = null,
         Embed[]? embeds = null,
         bool isTts = false,

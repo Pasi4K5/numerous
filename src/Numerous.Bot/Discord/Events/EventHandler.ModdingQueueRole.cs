@@ -20,7 +20,7 @@ public partial class DiscordEventHandler
         var roleId = cfg.ModdingQueue.RoleId;
         var link = cfg.BaseUrl;
 
-        client.MessageReceived += async message =>
+        ddnClient.MessageReceived += async message =>
         {
             if (
                 message.Channel is not IGuildChannel channel
@@ -37,7 +37,7 @@ public partial class DiscordEventHandler
             switch (message.Content.ToLower())
             {
                 case "!im-goated":
-                    if (!await verifier.UserIsVerifiedAsync(user))
+                    if (!await verifier.UserIsVerifiedAsync(user.Id))
                     {
                         await message.ReplyAsync(
                             "You need link your osu! account to join the modding queue. "

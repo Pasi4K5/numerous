@@ -17,7 +17,8 @@ public partial class ConfigCommandModule
     {
         [UsedImplicitly]
         [SlashCommand("set_member_role", "(Un-)Sets the role users will be assigned after verification.")]
-        public async Task SetMemberRole(
+        public async Task SetMemberRole
+        (
             [Summary("role", "The role which's users should be greeted as soon as the role is removed")]
             IRole? role = null
         )

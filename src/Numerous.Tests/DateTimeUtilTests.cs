@@ -82,7 +82,8 @@ public sealed class DateTimeUtilTests
 
     [Theory]
     [MemberData(nameof(ParametersToDateData))]
-    public void ParametersToDateTime_ValidParameters_ReturnsCorrectDateTime(
+    public void ParametersToDateTime_ValidParameters_ReturnsCorrectDateTime
+    (
         DateTime now,
         ushort? year,
         byte? month,

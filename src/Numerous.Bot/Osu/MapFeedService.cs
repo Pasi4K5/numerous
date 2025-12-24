@@ -5,7 +5,6 @@
 
 using Coravel;
 using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Numerous.Bot.Discord.Util;
 using Numerous.Bot.Util;
@@ -13,13 +12,16 @@ using Numerous.Bot.Web.Osu;
 using Numerous.Common.Services;
 using Numerous.Common.Util;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter.Channels;
 using osu.Game.Beatmaps;
+using IDiscordClient = Numerous.DiscordAdapter.IDiscordClient;
 
 namespace Numerous.Bot.Osu;
 
-public sealed class MapFeedService(
+public sealed class MapFeedService
+(
     IHost host,
-    DiscordSocketClient discordClient,
+    IDiscordClient discordClient,
     IOsuApiRepository api,
     IUnitOfWorkFactory uowFactory
 ) : HostedService
@@ -102,10 +104,11 @@ public sealed class MapFeedService(
 
             var sendTasks = channelIds.Select(async id =>
             {
-                var channel = (IMessageChannel)await discordClient.GetChannelAsync(id);
-                var guild = ((IGuildChannel)channel).Guild;
-                await guild.DownloadUsersAsync();
-                var guildUserIds = (await guild.GetUsersAsync()).Select(u => u.Id);
+                var channel = (IDiscordTextChannel)await discordClient.GetChannelAsync(id);
+                var guildUserIds = await discordClient
+                    .GetGuildMembersAsync(channel.GuildId)
+                    .Select(u => u.Id)
+                    .ToArrayAsync(ct);
 
                 if (allMapperDiscordIds.All(discordId => !guildUserIds.Contains(discordId)))
                 {
@@ -118,8 +121,12 @@ public sealed class MapFeedService(
                     .Select(ids => $"{MentionUtils.MentionUser(ids.discordId)} ({Link.OsuUser(ids.osuId, usernames[ids.osuId])})")
                     .ToArray();
 
-                var (eb, cb) = EmbedBuilders.BeatmapSetUpdate(fullSet, mapper, gdMappersInGuild);
-                await channel.SendMessageAsync(embed: eb.Build(), components: cb.Build());
+                var (embed, components) = EmbedBuilders.BeatmapSetUpdate(fullSet, mapper, gdMappersInGuild);
+                await channel.SendMessageAsync(new()
+                {
+                    Embeds = [embed],
+                    Components = components,
+                });
             });
 
             await Task.WhenAll(sendTasks);

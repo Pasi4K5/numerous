@@ -20,7 +20,8 @@ public sealed partial class AdminCommandModule : InteractionModule
 {
     [UsedImplicitly]
     [Group("competition", "Competition admin commands.")]
-    private sealed partial class CompetitionGroup(
+    private sealed partial class CompetitionGroup
+    (
         IUnitOfWork uow,
         IOsuApiRepository osuApi,
         BeatmapService beatmapService

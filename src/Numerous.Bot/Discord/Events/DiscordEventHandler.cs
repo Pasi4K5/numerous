@@ -10,18 +10,21 @@ using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Common.Config;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter;
 using Serilog;
 
 namespace Numerous.Bot.Discord.Events;
 
 // TODO: This whole class fucking sucks.
-public sealed partial class DiscordEventHandler(
+public sealed partial class DiscordEventHandler
+(
     ILogger logger,
     IConfigProvider cfgProvider,
-    DiscordSocketClient client,
+    IDiscordClient client,
+    DiscordSocketClient ddnClient,
     IUnitOfWorkFactory uowFactory,
     AttachmentService attachmentService,
-    OsuVerifier verifier,
+    IOsuVerifier verifier,
     IOsuApiRepository osuApi,
     VerificationService verificationService,
     IConfigProvider configProvider
@@ -31,6 +34,6 @@ public sealed partial class DiscordEventHandler(
     {
         this.Init();
 
-        client.UserJoined += verificationService.HandleUserJoined;
+        client.GuildMemberAdd += verificationService.HandleUserJoined;
     }
 }

@@ -18,7 +18,8 @@ public sealed class SpeechBubbleCommandModule(IHttpClientFactory clientFactory) 
 {
     [UsedImplicitly]
     [SlashCommand("speechbubble", "Generates a speech bubble meme with the given image")]
-    public async Task SpeechBubble(
+    public async Task SpeechBubble
+    (
         [Summary("image", "Source image")]
         IAttachment attachment
     )

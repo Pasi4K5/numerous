@@ -18,7 +18,8 @@ public partial class ConfigCommandModule
     {
         [UsedImplicitly]
         [SlashCommand("set-channel", "Sets the channel in which newly uploaded/qualified/ranked beatmaps should be posted.")]
-        public async Task SetChannel(
+        public async Task SetChannel
+        (
             [Summary("channel", "The channel in which newly uploaded/qualified/ranked beatmaps should be posted.")]
             IMessageChannel? channel
         )
