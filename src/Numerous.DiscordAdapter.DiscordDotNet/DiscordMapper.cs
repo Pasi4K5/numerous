@@ -20,6 +20,7 @@ internal static class DiscordMapper
             Description = embed.Description,
             Color = new(embed.Color.R, embed.Color.G, embed.Color.B),
             Timestamp = embed.Timestamp,
+            Url = embed.Url,
             ImageUrl = embed.ImageUrl,
             ThumbnailUrl = embed.ThumbnailUrl,
             Author = embed.Author?.Let(author => new EmbedAuthorBuilder
