@@ -13,6 +13,7 @@ public sealed class DiscordEmbed
     public string? Description { get; set; }
     public Color Color { get; set; }
     public DateTimeOffset? Timestamp { get; set; }
+    public string? Url { get; set; }
     public string? ImageUrl { get; set; }
     public string? ThumbnailUrl { get; set; }
 

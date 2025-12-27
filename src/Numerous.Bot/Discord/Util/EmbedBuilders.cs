@@ -212,6 +212,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
             Description = MarkupTransformer.BbCodeToDiscordMd(post.Body.Raw)
                 .LimitLength(CharacterLimit.DiscordEmbedDescription),
             Timestamp = post.CreatedAt,
+            Url = Link.OsuForumPost(post.Id),
         };
     }
 
