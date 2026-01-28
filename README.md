@@ -9,4 +9,4 @@
   <a href="https://github.com/Pasi4K5/numerous/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/pasi4k5/numerous/cd.yml?style=for-the-badge&label=Continuous%20Deployment" alt="" /></a>
 </p>
 
-A Discord Bot for the [Numerus](http://discord.gg/vGVWBbQYfD) Discord server.
+A Discord Bot for the [Numerus](https://discord.gg/ptvPHVrada) Discord server.
