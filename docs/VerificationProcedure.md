@@ -1,3 +1,5 @@
+# User Verification
+
 ## Join Verification Procedure
 
 ```mermaid
