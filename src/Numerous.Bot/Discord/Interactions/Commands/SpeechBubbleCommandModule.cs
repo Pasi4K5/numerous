@@ -69,8 +69,15 @@ public sealed class SpeechBubbleCommandModule(IHttpClientFactory clientFactory) 
                     {
                         var imgPixel = customImage[x, y];
                         var maskPixel = speechBubble[x, y];
-                        var alpha = (double)maskPixel.R / 255;
-                        result[x, y] = new Rgba32(imgPixel.R, imgPixel.G, imgPixel.B, (byte)Math.Round(alpha * imgPixel.A));
+                        var maskValue = (double)maskPixel.R / 255;
+                        var inverseMaskValue = 1 - maskValue;
+
+                        result[x, y] = new Rgba32(
+                            (byte)(maskValue * imgPixel.R + inverseMaskValue * 26),
+                            (byte)(maskValue * imgPixel.G + inverseMaskValue * 26),
+                            (byte)(maskValue * imgPixel.B + inverseMaskValue * 30),
+                            255
+                        );
                     }
                     else
                     {
@@ -80,8 +87,8 @@ public sealed class SpeechBubbleCommandModule(IHttpClientFactory clientFactory) 
             }
 
             using var resultStream = new MemoryStream();
-            await result.SaveAsPngAsync(resultStream);
-            await FollowupWithFileAsync(resultStream, "speech_bubble.png");
+            await result.SaveAsGifAsync(resultStream);
+            await FollowupWithFileAsync(resultStream, "speech_bubble.gif");
         }
         catch (UnknownImageFormatException)
         {
