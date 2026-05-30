@@ -18,6 +18,7 @@ internal sealed class DiscordTextChannelAdapter(SocketTextChannel channel)
     public async Task<IDiscordUserMessage> SendMessageAsync(DiscordMessage message) =>
         new DiscordUserMessageAdapter(await channel.SendMessageAsync(
             text: message.Content,
-            embeds: message.Embeds.Select(DiscordMapper.ToDiscordEmbed).ToArray()
+            embeds: message.Embeds.Select(DiscordMapper.ToDiscordEmbed).ToArray(),
+            components: DiscordMapper.ToDiscordMessageComponent(message.Components)
         ));
 }
