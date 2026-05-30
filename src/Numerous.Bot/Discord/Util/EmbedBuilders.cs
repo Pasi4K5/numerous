@@ -168,7 +168,7 @@ public sealed class EmbedBuilders(IConfigProvider cfgProvider, IOsuApiRepository
         {
             var setMapper = onlineBeatmap?.OnlineBeatmapset.Creator.DiscordUserId.HasValue == true
                 ? MentionUtils.MentionUser(onlineBeatmap.OnlineBeatmapset.Creator.DiscordUserId.Value)
-                : beatmap.Metadata.Author.Username.WithLink($"https://osu.ppy.sh/u/{apiSet.UserId}");
+                : beatmap.Metadata.Author.Username.AsMdLink($"https://osu.ppy.sh/u/{apiSet.UserId}");
             // TODO: Implement this in a different way since beatmap owners are not being stored in the database anymore.
             // var diffMappers = onlineBeatmap?.Creators.Select(creator =>
             //     creator.DiscordUserId.HasValue

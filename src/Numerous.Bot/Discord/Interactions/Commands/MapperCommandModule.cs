@@ -7,6 +7,7 @@ using System.Net;
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using Numerous.Bot.Util;
 using Numerous.Bot.Web.Osu;
 using Numerous.Bot.Web.Osu.Models;
 using Numerous.Database.Context;
@@ -170,7 +171,7 @@ public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuAp
                 fields.Add(new()
                 {
                     Name = "Latest Ranked Map",
-                    Value = $"[{map.Artist} - {map.Title}](https://osu.ppy.sh/s/{map.Id})",
+                    Value = $"{map.Artist} - {map.Title}".AsMdLink($"https://osu.ppy.sh/s/{map.Id}"),
                 });
             }
 
@@ -181,7 +182,7 @@ public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuAp
                 fields.Add(new()
                 {
                     Name = "Latest Pending Map",
-                    Value = $"[{map.Artist} - {map.Title}](https://osu.ppy.sh/s/{map.Id})",
+                    Value = $"{map.Artist} - {map.Title}".AsMdLink($"https://osu.ppy.sh/s/{map.Id}"),
                 });
             }
 
@@ -189,8 +190,9 @@ public sealed class MapperCommandModule(IUnitOfWork uow, IOsuApiRepository osuAp
                 embed: new EmbedBuilder()
                     .WithTitle("Mapper Info")
                     .WithDescription(
-                        $"# [:flag_{osuUser.CountryCode.ToLower()}:](https://osu.ppy.sh/rankings/osu/performance?country={osuUser.CountryCode}) "
-                        + $"[{osuUser.Username}](https://osu.ppy.sh/u/{osuUser.Id})")
+                        $"# {$":flag_{osuUser.CountryCode.ToLower()}:".AsMdLink($"https://osu.ppy.sh/rankings/osu/performance?country={osuUser.CountryCode}")}"
+                        + osuUser.Username.AsMdLink($"https://osu.ppy.sh/u/{osuUser.Id}")
+                    )
                     .WithFields(fields)
                     .WithThumbnailUrl(osuUser.AvatarUrl)
                     .WithImageUrl(osuUser.Cover.Url)
