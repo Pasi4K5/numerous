@@ -7,13 +7,17 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using Numerous.Bot.Discord.Services;
+using Numerous.Bot.Discord.Util;
+using Numerous.Bot.Web.Osu.Models;
 using Numerous.Common.Config;
 using Numerous.Common.Enums;
 using Numerous.Database.Context;
+using Numerous.DiscordAdapter.Channels;
+using IDiscordClient = Numerous.DiscordAdapter.IDiscordClient;
 
 namespace Numerous.Bot.Discord.Interactions.Commands;
 
-public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, IOsuVerifier verifier) : InteractionModule
+public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, IOsuVerifier verifier, IDiscordClient client) : InteractionModule
 {
     [UsedImplicitly]
     [SlashCommand("link", "Links your osu! account to your Discord account.")]
@@ -44,5 +48,37 @@ public sealed class LinkCommandModule(IConfigProvider cfg, IUnitOfWork uow, IOsu
             + (isVerified ? $"\n*Note: {Context.User.Mention}, you are already verified. Doing this again will not change anything for you.*" : ""),
             type: ResponseType.Info
         );
+
+        var (embed, components) = EmbedBuilders.BeatmapSetUpdate(new ApiBeatmapsetExtended
+        {
+            User = new()
+            {
+                Username = "Pasi_",
+                CountryCode = "at",
+                AvatarUrl = "https://a.ppy.sh/17808959",
+                Cover = new()
+                {
+                    Url = "https://a.ppy.sh/17808959",
+                },
+                Kudosu = new(),
+            },
+            RelatedUsers = null,
+            Id = 2097757,
+            Artist = "月詠み",
+            Title = "夢と知りせば (Cut Ver.)",
+            Creator = "Pasi_",
+            Covers = new()
+            {
+                Card2X = "https://a.ppy.sh/17808959",
+            },
+            Beatmaps = [],
+        }, "Pasi_", []);
+
+        var ch = await client.GetChannelAsync(Context.Channel.Id) as IDiscordTextChannel;
+        await ch!.SendMessageAsync(new()
+        {
+            Embeds = [embed],
+            Components = components,
+        });
     }
 }
