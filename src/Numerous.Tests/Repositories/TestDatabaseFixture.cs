@@ -14,7 +14,7 @@ namespace Numerous.Tests.Repositories;
 
 public sealed class TestDatabaseFixture
 {
-    private static readonly Lock Lock = new();
+    private static readonly Lock _lock = new();
     private static bool _databaseInitialized;
 
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17-alpine")
@@ -24,7 +24,7 @@ public sealed class TestDatabaseFixture
 
     public TestDatabaseFixture()
     {
-        lock (Lock)
+        lock (_lock)
         {
             if (_databaseInitialized)
             {

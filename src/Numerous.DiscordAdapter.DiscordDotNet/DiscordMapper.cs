@@ -44,6 +44,7 @@ internal static class DiscordMapper
     public static MessageComponent ToDiscordMessageComponent(IEnumerable<DiscordMessageComponent> components)
     {
         var builder = new ComponentBuilder();
+
         foreach (var component in components)
         {
             switch (component)
@@ -55,11 +56,13 @@ internal static class DiscordMapper
                         url: linkButton.Url,
                         emote: linkButton.Emoji != null ? ToDiscordEmote(linkButton.Emoji) : null
                     );
+
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported message component type: {component.GetType().FullName}");
             }
         }
+
         return builder.Build();
     }
 }
