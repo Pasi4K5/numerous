@@ -6,6 +6,8 @@
 using Discord;
 using Numerous.Common.Util;
 using Numerous.DiscordAdapter.Emojis;
+using Numerous.DiscordAdapter.Messages.Components;
+using Numerous.DiscordAdapter.Messages.Components.Buttons;
 using Numerous.DiscordAdapter.Messages.Embeds;
 
 namespace Numerous.DiscordAdapter.DiscordDotNet;
@@ -38,4 +40,29 @@ internal static class DiscordMapper
             CustomEmoji e => new Emote(e.Id, ""),
             _ => throw new NotSupportedException($"Unsupported emoji type: {emoji.GetType().FullName}"),
         };
+
+    public static MessageComponent ToDiscordMessageComponent(IEnumerable<DiscordMessageComponent> components)
+    {
+        var builder = new ComponentBuilder();
+
+        foreach (var component in components)
+        {
+            switch (component)
+            {
+                case DiscordLinkButtonComponent linkButton:
+                    builder.WithButton(
+                        label: linkButton.Label,
+                        style: ButtonStyle.Link,
+                        url: linkButton.Url,
+                        emote: linkButton.Emoji != null ? ToDiscordEmote(linkButton.Emoji) : null
+                    );
+
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported message component type: {component.GetType().FullName}");
+            }
+        }
+
+        return builder.Build();
+    }
 }

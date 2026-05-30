@@ -41,7 +41,7 @@ public partial class DiscordEventHandler
                     {
                         await message.ReplyAsync(
                             "You need link your osu! account to join the modding queue. "
-                            + $"Click {"here".ToMdLink(link)} to do that."
+                            + $"Click {"here".AsMdLink(link)} to do that."
                         );
 
                         break;
